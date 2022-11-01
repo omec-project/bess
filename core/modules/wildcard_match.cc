@@ -37,15 +37,31 @@
 #include "../utils/format.h"
 
 using bess::metadata::Attribute;
+enum { FieldType = 0, ValueType };
 
 // dst = src & mask. len must be a multiple of sizeof(uint64_t)
-static inline void mask(wm_hkey_t *dst, const wm_hkey_t &src,
+static inline void mask(wm_hkey_t &dst, const wm_hkey_t &src,
                         const wm_hkey_t &mask, size_t len) {
   promise(len >= sizeof(uint64_t));
   promise(len <= sizeof(wm_hkey_t));
 
   for (size_t i = 0; i < len / 8; i++) {
-    dst->u64_arr[i] = src.u64_arr[i] & mask.u64_arr[i];
+    dst.u64_arr[i] = src.u64_arr[i] & mask.u64_arr[i];
+  }
+}
+static inline void mask_bulk(const wm_hkey_t *src, void *dst, void **dsptr,
+                             const wm_hkey_t &mask, int keys, size_t len) {
+  promise(len >= sizeof(uint64_t));
+  promise(len <= sizeof(wm_hkey_t));
+  size_t i = 0;
+  wm_hkey_t *dst1 = (wm_hkey_t *)dst;
+  wm_hkey_t **dstptr = (wm_hkey_t **)dsptr;
+
+  for (int j = 0; j < keys; j++) {
+    for (i = 0; i < len / 8; i++) {
+      dst1[j].u64_arr[i] = src[j].u64_arr[i] & mask.u64_arr[i];
+    }
+    dstptr[j] = &dst1[j];
   }
 }
 
@@ -63,17 +79,17 @@ const Commands WildcardMatch::cmds = {
     {"set_runtime_config", "WildcardMatchConfig",
      MODULE_CMD_FUNC(&WildcardMatch::SetRuntimeConfig), Command::THREAD_UNSAFE},
     {"add", "WildcardMatchCommandAddArg",
-     MODULE_CMD_FUNC(&WildcardMatch::CommandAdd), Command::THREAD_UNSAFE},
+     MODULE_CMD_FUNC(&WildcardMatch::CommandAdd), Command::THREAD_SAFE},
     {"delete", "WildcardMatchCommandDeleteArg",
-     MODULE_CMD_FUNC(&WildcardMatch::CommandDelete), Command::THREAD_UNSAFE},
+     MODULE_CMD_FUNC(&WildcardMatch::CommandDelete), Command::THREAD_SAFE},
     {"clear", "EmptyArg", MODULE_CMD_FUNC(&WildcardMatch::CommandClear),
-     Command::THREAD_UNSAFE},
+     Command::THREAD_SAFE},
     {"set_default_gate", "WildcardMatchCommandSetDefaultGateArg",
      MODULE_CMD_FUNC(&WildcardMatch::CommandSetDefaultGate),
      Command::THREAD_SAFE}};
 
 CommandResponse WildcardMatch::AddFieldOne(const bess::pb::Field &field,
-                                           struct WmField *f) {
+                                           struct WmField *f, uint8_t type) {
   f->size = field.num_bytes();
 
   if (f->size < 1 || f->size > MAX_FIELD_SIZE) {
@@ -88,7 +104,10 @@ CommandResponse WildcardMatch::AddFieldOne(const bess::pb::Field &field,
     }
   } else if (field.position_case() == bess::pb::Field::kAttrName) {
     const char *attr = field.attr_name().c_str();
-    f->attr_id = AddMetadataAttr(attr, f->size, Attribute::AccessMode::kRead);
+    f->attr_id =
+        (type == FieldType)
+            ? AddMetadataAttr(attr, f->size, Attribute::AccessMode::kRead)
+            : AddMetadataAttr(attr, f->size, Attribute::AccessMode::kWrite);
     if (f->attr_id < 0) {
       return CommandFailure(-f->attr_id, "add_metadata_attr() failed");
     }
@@ -119,57 +138,221 @@ CommandResponse WildcardMatch::Init(const bess::pb::WildcardMatchArg &arg) {
 
     f.pos = size_acc;
 
-    err = AddFieldOne(field, &f);
+    err = AddFieldOne(field, &f, FieldType);
     if (err.error().code() != 0) {
       return err;
     }
 
     size_acc += f.size;
   }
-
   default_gate_ = DROP_GATE;
   total_key_size_ = align_ceil(size_acc, sizeof(uint64_t));
+  entries_ = arg.entries();
+  // reset size_acc
+  size_acc = 0;
+  for (int i = 0; i < arg.values_size(); i++) {
+    const auto &value = arg.values(i);
+    CommandResponse err;
+    values_.emplace_back();
+    struct WmField &v = values_.back();
+
+    v.pos = size_acc;
+
+    err = AddFieldOne(value, &v, ValueType);
+    if (err.error().code() != 0) {
+      return err;
+    }
+
+    size_acc += v.size;
+  }
+
+  total_value_size_ = align_ceil(size_acc, sizeof(uint64_t));
 
   return CommandSuccess();
 }
 
 inline gate_idx_t WildcardMatch::LookupEntry(const wm_hkey_t &key,
-                                             gate_idx_t def_gate) {
+                                             gate_idx_t def_gate,
+                                             bess::Packet *pkt) {
   struct WmData result = {
-      .priority = INT_MIN, .ogate = def_gate,
-  };
-
+      .priority = INT_MIN, .ogate = def_gate, .keyv = {{0}}};
   for (auto &tuple : tuples_) {
+    if (tuple.occupied == 0)
+      continue;
     const auto &ht = tuple.ht;
     wm_hkey_t key_masked;
-
-    mask(&key_masked, key, tuple.mask, total_key_size_);
-
-    const auto *entry =
-        ht.Find(key_masked, wm_hash(total_key_size_), wm_eq(total_key_size_));
-
-    if (entry && entry->second.priority >= result.priority) {
-      result = entry->second;
+    mask(key_masked, key, tuple.mask, total_key_size_);
+    WmData *entry = nullptr;
+    ht->find_dpdk(&key_masked, ((void **)&entry));
+    if (entry && entry->priority >= result.priority) {
+      result = *entry;
     }
   }
 
+  /* if lookup was successful, then set values (if possible) */
+  if (result.ogate != default_gate_) {
+    size_t num_values_ = values_.size();
+    for (size_t i = 0; i < num_values_; i++) {
+      int value_size = values_[i].size;
+      int value_pos = values_[i].pos;
+      int value_off = values_[i].offset;
+      int value_attr_id = values_[i].attr_id;
+      uint8_t *data = pkt->head_data<uint8_t *>() + value_off;
+
+      DLOG(INFO) << "off: " << (int)value_off << ", sz: " << value_size;
+
+      if (value_attr_id < 0) { /* if it is offset-based */
+        memcpy(data, reinterpret_cast<uint8_t *>(&result.keyv) + value_pos,
+               value_size);
+      } else { /* if it is attribute-based */
+        typedef struct {
+          uint8_t bytes[bess::metadata::kMetadataAttrMaxSize];
+        } value_t;
+        uint8_t *buf = (uint8_t *)&result.keyv + value_pos;
+
+        DLOG(INFO) << "Setting value " << std::hex
+                   << *(reinterpret_cast<uint64_t *>(buf))
+                   << " for attr_id: " << value_attr_id
+                   << " of size: " << value_size
+                   << " at value_pos: " << value_pos;
+
+        switch (value_size) {
+          case 1:
+            set_attr<uint8_t>(this, value_attr_id, pkt, *((uint8_t *)buf));
+            break;
+          case 2:
+            set_attr<uint16_t>(this, value_attr_id, pkt,
+                               *((uint16_t *)((uint8_t *)buf)));
+            break;
+          case 4:
+            set_attr<uint32_t>(this, value_attr_id, pkt,
+                               *((uint32_t *)((uint8_t *)buf)));
+            break;
+          case 8:
+            set_attr<uint64_t>(this, value_attr_id, pkt,
+                               *((uint64_t *)((uint8_t *)buf)));
+            break;
+          default: {
+            void *mt_ptr =
+                _ptr_attr_with_offset<value_t>(attr_offset(value_attr_id), pkt);
+            bess::utils::CopySmall(mt_ptr, buf, value_size);
+          } break;
+        }
+      }
+    }
+  }
   return result.ogate;
+}
+
+inline bool WildcardMatch::LookupBulkEntry(wm_hkey_t *key, gate_idx_t def_gate,
+                                           int packeti, gate_idx_t *Outgate,
+                                           int cnt, bess::PacketBatch *batch) {
+  bess::Packet *pkt = nullptr;
+  struct WmData *result[cnt];
+  uint64_t prev_hitmask = 0;
+  uint64_t hitmask = 0;
+  wm_hkey_t key_masked[cnt];
+  WmData *entry[cnt];
+  wm_hkey_t **key_ptr[cnt];
+
+  for (auto tuple = tuples_.begin(); tuple != tuples_.end(); ++tuple) {
+    if (tuple->occupied == 0)
+      continue;
+    const auto &ht = tuple->ht;
+    mask_bulk(key, key_masked, (void **)key_ptr, tuple->mask, cnt,
+              total_key_size_);
+    int num = ht->lookup_bulk_data((const void **)key_ptr, cnt, &hitmask,
+                                   (void **)entry);
+    if (num == 0)
+      continue;
+
+   for (int init = 0; (init < cnt) && (num); init++) {
+     if ((hitmask & ((uint64_t)1 << init))) {
+       if ((prev_hitmask & ((uint64_t)1 << init)) == 0)
+          result[init] = entry[init];
+        else if ((prev_hitmask & ((uint64_t)1 << init)) &&
+                 (entry[init]->priority >= result[init]->priority)) {
+          result[init] = entry[init];
+        }
+
+        num--;
+      }
+    }
+   prev_hitmask = prev_hitmask | hitmask;
+  }
+
+  for (int init = 0; init < cnt; init++) {
+    /* if lookup was successful, then set values (if possible) */
+    if (prev_hitmask && (prev_hitmask & ((uint64_t)1 << init))) {
+      pkt = batch->pkts()[packeti + init];
+      size_t num_values_ = values_.size();
+      for (size_t i = 0; i < num_values_; i++) {
+        int value_size = values_[i].size;
+        int value_pos = values_[i].pos;
+        int value_off = values_[i].offset;
+        int value_attr_id = values_[i].attr_id;
+        uint8_t *data = pkt->head_data<uint8_t *>() + value_off;
+
+        DLOG(INFO) << "off: " << (int)value_off << ", sz: " << value_size
+                   << std::endl;
+        if (value_attr_id < 0) { /* if it is offset-based */
+          memcpy(data,
+                 reinterpret_cast<uint8_t *>(&result[init]->keyv) + value_pos,
+                 value_size);
+        } else { /* if it is attribute-based */
+          typedef struct {
+            uint8_t bytes[bess::metadata::kMetadataAttrMaxSize];
+          } value_t;
+          uint8_t *buf = (uint8_t *)&result[init]->keyv + value_pos;
+
+          DLOG(INFO) << "Setting value " << std::hex
+                     << *(reinterpret_cast<uint64_t *>(buf))
+                     << " for attr_id: " << value_attr_id
+                     << " of size: " << value_size
+                     << " at value_pos: " << value_pos << std::endl;
+
+          switch (value_size) {
+            case 1:
+              set_attr<uint8_t>(this, value_attr_id, pkt, *((uint8_t *)buf));
+              break;
+            case 2:
+              set_attr<uint16_t>(this, value_attr_id, pkt,
+                                 *((uint16_t *)((uint8_t *)buf)));
+              break;
+            case 4:
+              set_attr<uint32_t>(this, value_attr_id, pkt,
+                                 *((uint32_t *)((uint8_t *)buf)));
+              break;
+            case 8:
+              set_attr<uint64_t>(this, value_attr_id, pkt,
+                                 *((uint64_t *)((uint8_t *)buf)));
+              break;
+            default: {
+              void *mt_ptr = _ptr_attr_with_offset<value_t>(
+                  attr_offset(value_attr_id), pkt);
+              bess::utils::CopySmall(mt_ptr, buf, value_size);
+            } break;
+          }
+        }
+      }
+      Outgate[init] = result[init]->ogate;
+    } else
+      Outgate[init] = def_gate;
+  }
+  return 1;
 }
 
 void WildcardMatch::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
   gate_idx_t default_gate;
-
   wm_hkey_t keys[bess::PacketBatch::kMaxBurst] __ymm_aligned;
-
   int cnt = batch->cnt();
+  gate_idx_t Outgate[cnt];
 
   // Initialize the padding with zero
   for (int i = 0; i < cnt; i++) {
     keys[i].u64_arr[(total_key_size_ - 1) / 8] = 0;
   }
-
   default_gate = ACCESS_ONCE(default_gate_);
-
   for (const auto &field : fields_) {
     int offset;
     int pos = field.pos;
@@ -196,9 +379,25 @@ void WildcardMatch::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
     }
   }
 
-  for (int i = 0; i < cnt; i++) {
-    bess::Packet *pkt = batch->pkts()[i];
-    EmitPacket(ctx, pkt, LookupEntry(keys[i], default_gate));
+  if(cnt>64)
+   {
+     int icnt=0;
+     for(int lcnt=0; lcnt<cnt ;lcnt=lcnt+icnt )
+      {
+        icnt = ((cnt-lcnt)>=64) ? 64 : cnt-lcnt  ;
+        LookupBulkEntry(&keys[lcnt], default_gate, lcnt, Outgate, icnt, batch);
+        for (int j = 0; j < icnt; j++)
+          {
+            EmitPacket(ctx, batch->pkts()[j+lcnt], Outgate[j]);
+          }
+      }
+   }
+  else
+  {
+   LookupBulkEntry(keys, default_gate, 0, Outgate, cnt, batch);
+   for (int j = 0; j < cnt; j++) {
+    EmitPacket(ctx, batch->pkts()[j], Outgate[j]);
+    }
   }
 }
 
@@ -206,7 +405,9 @@ std::string WildcardMatch::GetDesc() const {
   int num_rules = 0;
 
   for (const auto &tuple : tuples_) {
-    num_rules += tuple.ht.Count();
+    if (tuple.occupied == 0)
+      continue;
+    num_rules += tuple.ht->Count();
   }
 
   return bess::utils::Format("%zu fields, %d rules", fields_.size(), num_rules);
@@ -275,55 +476,99 @@ CommandResponse WildcardMatch::ExtractKeyMask(const T &arg, wm_hkey_t *key,
   return CommandSuccess();
 }
 
-int WildcardMatch::FindTuple(wm_hkey_t *mask) {
-  int i = 0;
+template <typename T>
+CommandResponse WildcardMatch::ExtractValue(const T &arg, wm_hkey_t *keyv) {
+  if ((size_t)arg.valuesv_size() != values_.size()) {
+    return CommandFailure(EINVAL, "must specify %zu values", values_.size());
+  }
 
-  for (const auto &tuple : tuples_) {
-    if (memcmp(&tuple.mask, mask, total_key_size_) == 0) {
+  memset(keyv, 0, sizeof(*keyv));
+
+  for (size_t i = 0; i < values_.size(); i++) {
+    int value_size = values_[i].size;
+    int value_pos = values_[i].pos;
+
+    uint64_t v = 0;
+
+    bess::pb::FieldData valuedata = arg.valuesv(i);
+    if (valuedata.encoding_case() == bess::pb::FieldData::kValueInt) {
+      if (!bess::utils::uint64_to_bin(&v, valuedata.value_int(), value_size,
+                                      false)) {
+        return CommandFailure(EINVAL, "idx %zu: not a correct %d-byte value", i,
+                              value_size);
+      }
+    } else if (valuedata.encoding_case() == bess::pb::FieldData::kValueBin) {
+      bess::utils::Copy(reinterpret_cast<uint8_t *>(&v),
+                        valuedata.value_bin().c_str(),
+                        valuedata.value_bin().size());
+    }
+
+    // Use memcpy, not utils::Copy, to workaround the false positive warning
+    // in g++-8
+    memcpy(reinterpret_cast<uint8_t *>(keyv) + value_pos, &v, value_size);
+  }
+
+  return CommandSuccess();
+}
+
+int WildcardMatch::FindTuple(wm_hkey_t *mask) {
+  for (auto i = 0; i < MAX_TUPLES; i++) {
+    if ((tuples_[i].occupied) &&
+        (memcmp(&tuples_[i].mask, mask, total_key_size_) == 0)) {
       return i;
     }
-    i++;
   }
   return -ENOENT;
 }
 
 int WildcardMatch::AddTuple(wm_hkey_t *mask) {
-  if (tuples_.size() >= MAX_TUPLES) {
-    return -ENOSPC;
+  CuckooMap<wm_hkey_t, struct WmData, wm_hash, wm_eq> *temp = nullptr;
+  for (int i = 0; i < MAX_TUPLES; i++) {
+    if (tuples_[i].occupied == 0) {
+      bess::utils::Copy(&tuples_[i].mask, mask, sizeof(*mask));
+      tuples_[i].params.key_len = total_key_size_;
+      if (entries_) {
+        tuples_[i].params.entries = entries_;
+      }
+      temp = new CuckooMap<wm_hkey_t, struct WmData, wm_hash, wm_eq>(
+          0, 0, &tuples_[i].params);
+      if (temp == nullptr)
+        return -ENOSPC;
+      if (temp->hash == 0) {
+        delete temp;
+        return -ENOSPC;
+      }
+      void *temp1 = tuples_[i].ht;
+      tuples_[i].ht = temp;
+      if (temp1)
+        delete (
+            static_cast<CuckooMap<wm_hkey_t, struct WmData, wm_hash, wm_eq> *>(
+                temp1));
+      tuples_[i].occupied = 1;
+      return i;
+    }
   }
-
-  tuples_.emplace_back();
-  struct WmTuple &tuple = tuples_.back();
-  bess::utils::Copy(&tuple.mask, mask, sizeof(*mask));
-
-  return int(tuples_.size() - 1);
+  return -ENOSPC;
 }
 
-int WildcardMatch::DelEntry(int idx, wm_hkey_t *key) {
-  struct WmTuple &tuple = tuples_[idx];
-  int ret =
-      tuple.ht.Remove(*key, wm_hash(total_key_size_), wm_eq(total_key_size_));
-  if (ret) {
-    return ret;
+bool WildcardMatch::DelEntry(int idx, wm_hkey_t *key) {
+  int ret = tuples_[idx].ht->Remove(*key, wm_hash(total_key_size_),
+                                    wm_eq(total_key_size_));
+  if (ret >= 0) {
+    return true;
   }
-
-  if (tuple.ht.Count() == 0) {
-    tuples_.erase(tuples_.begin() + idx);
+  if (tuples_[idx].ht->Count() == 0) {
   }
-
-  return 0;
+  return false;
 }
 
 CommandResponse WildcardMatch::CommandAdd(
     const bess::pb::WildcardMatchCommandAddArg &arg) {
   gate_idx_t gate = arg.gate();
   int priority = arg.priority();
-
   wm_hkey_t key = {{0}};
   wm_hkey_t mask = {{0}};
-
   struct WmData data;
-
   CommandResponse err = ExtractKeyMask(arg, &key, &mask);
   if (err.error().code() != 0) {
     return err;
@@ -333,9 +578,13 @@ CommandResponse WildcardMatch::CommandAdd(
     return CommandFailure(EINVAL, "Invalid gate: %hu", gate);
   }
 
+  err = ExtractValue(arg, &(data.keyv));
+  if (err.error().code() != 0) {
+    return err;
+  }
+
   data.priority = priority;
   data.ogate = gate;
-
   int idx = FindTuple(&mask);
   if (idx < 0) {
     idx = AddTuple(&mask);
@@ -343,13 +592,10 @@ CommandResponse WildcardMatch::CommandAdd(
       return CommandFailure(-idx, "failed to add a new wildcard pattern");
     }
   }
-
-  auto *ret = tuples_[idx].ht.Insert(key, data, wm_hash(total_key_size_),
-                                     wm_eq(total_key_size_));
-  if (ret == nullptr) {
+  struct WmData *data_t = new WmData(data);
+  int ret = tuples_[idx].ht->insert_dpdk(&key, data_t);
+  if (ret < 0)
     return CommandFailure(EINVAL, "failed to add a rule");
-  }
-
   return CommandSuccess();
 }
 
@@ -383,7 +629,10 @@ CommandResponse WildcardMatch::CommandClear(const bess::pb::EmptyArg &) {
 
 void WildcardMatch::Clear() {
   for (auto &tuple : tuples_) {
-    tuple.ht.Clear();
+    if (tuple.occupied) {
+      tuple.occupied = 0;
+      tuple.ht->Clear();
+    }
   }
 }
 
@@ -405,17 +654,26 @@ CommandResponse WildcardMatch::GetInitialArg(const bess::pb::EmptyArg &) {
 // Retrieves a WildcardMatchConfig that would restore this module's
 // runtime configuration.
 CommandResponse WildcardMatch::GetRuntimeConfig(const bess::pb::EmptyArg &) {
+  std::pair<wm_hkey_t, WmData> entry;
   bess::pb::WildcardMatchConfig resp;
   using rule_t = bess::pb::WildcardMatchCommandAddArg;
-
+  const wm_hkey_t *key = 0;
+  WmData *data;
+  uint32_t *next = 0;
   resp.set_default_gate(default_gate_);
 
   // Each tuple provides a single mask, which may have many data-matches.
   for (auto &tuple : tuples_) {
+    if (tuple.occupied == 0)
+      continue;
     wm_hkey_t mask = tuple.mask;
     // Each entry in the hash table has priority, ogate, and the data
     // (one datum per field, under the mask for this field).
-    for (auto &entry : tuple.ht) {
+    //  using rte method
+    while ((tuple.ht->Iterate((const void **)&key, (void **)&data, next)) >=
+           (int)0) {
+      entry.first = *key;
+      entry.second = *data;
       // Create the rule instance
       rule_t *rule = resp.add_rules();
       rule->set_priority(entry.second.priority);
@@ -478,6 +736,15 @@ CommandResponse WildcardMatch::SetRuntimeConfig(
     }
   }
   return CommandSuccess();
+}
+
+void WildcardMatch::DeInit() {
+    for (auto &tuple : tuples_) {
+        if (!tuple.ht)
+            continue;
+        tuple.ht->DeInit();
+        tuple.ht = NULL;
+    }
 }
 
 ADD_MODULE(WildcardMatch, "wm",

@@ -31,6 +31,8 @@ syntax = "proto3";
 
 package bess.pb;
 
+option go_package = "github.com/omec-project/upf-epc/pfcpiface/bess_pb";
+
 message PCAPPortArg {
   string dev = 1;
 }
@@ -47,6 +49,15 @@ message PMDPortArg {
   bool vlan_offload_rx_strip = 5;
   bool vlan_offload_rx_filter = 6;
   bool vlan_offload_rx_qinq = 7;
+  oneof socket {
+    int32 socket_id = 8;
+  }
+  bool promiscuous_mode = 9;
+  bool hwcksum = 10;
+
+  // N3 -> 3; N6 -> 6; N9 -> 9
+  // [3] or [6, 9]
+  repeated uint32 flow_profiles = 11;
 }
 
 message UnixSocketPortArg {

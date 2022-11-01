@@ -32,9 +32,17 @@
 
 #include <rte_bus_pci.h>
 #include <rte_ethdev.h>
+#include <rte_flow.h>
 
 #include "../utils/ether.h"
 #include "../utils/format.h"
+
+// TODO: Replace with one time initialized key during InitDriver?
+static uint8_t rss_key[40] = {0xD8, 0x2A, 0x6C, 0x5A, 0xDD, 0x3B, 0x9D, 0x1E,
+                              0x14, 0xCE, 0x2F, 0x37, 0x86, 0xB2, 0x69, 0xF0,
+                              0x44, 0x31, 0x7E, 0xA2, 0x07, 0xA5, 0x0A, 0x99,
+                              0x49, 0xC6, 0xA4, 0xFE, 0x0C, 0x4F, 0x59, 0x02,
+                              0xD4, 0x44, 0xE2, 0x4A, 0xDB, 0xE1, 0x05, 0x82};
 
 static const rte_eth_conf default_eth_conf(const rte_eth_dev_info &dev_info,
                                            int nb_rxq) {
@@ -45,8 +53,8 @@ static const rte_eth_conf default_eth_conf(const rte_eth_dev_info &dev_info,
   ret.rxmode.offloads = 0;
 
   ret.rx_adv_conf.rss_conf = {
-      .rss_key = nullptr,
-      .rss_key_len = 0,
+      .rss_key = rss_key,
+      .rss_key_len = sizeof(rss_key),
       .rss_hf = (ETH_RSS_IP | ETH_RSS_UDP | ETH_RSS_TCP | ETH_RSS_SCTP) &
                 dev_info.flow_type_rss_offloads,
   };
@@ -199,6 +207,122 @@ static CommandResponse find_dpdk_vdev(const std::string &vdev,
   return CommandSuccess();
 }
 
+CommandResponse flow_create_one(dpdk_port_t port_id,
+                                const uint32_t &flow_profile, int size,
+                                uint64_t rss_types,
+                                rte_flow_item_type *pattern) {
+  struct rte_flow_item items[size];
+  memset(items, 0, sizeof(items));
+
+  for (int i = 0; i < size; i++) {
+    items[i].type = pattern[i];
+    items[i].spec = nullptr;
+    items[i].mask = nullptr;
+  }
+
+  struct rte_flow *handle;
+  struct rte_flow_error err;
+  memset(&err, 0, sizeof(err));
+
+  struct rte_flow_action actions[2];
+  memset(actions, 0, sizeof(actions));
+
+  struct rte_flow_attr attributes;
+  memset(&attributes, 0, sizeof(attributes));
+  attributes.ingress = 1;
+
+  struct rte_flow_action_rss action_rss;
+  memset(&action_rss, 0, sizeof(action_rss));
+  action_rss.func = RTE_ETH_HASH_FUNCTION_DEFAULT;
+  action_rss.key_len = 0;
+  action_rss.types = rss_types;
+
+  actions[0].type = RTE_FLOW_ACTION_TYPE_RSS;
+  actions[0].conf = &action_rss;
+  actions[1].type = RTE_FLOW_ACTION_TYPE_END;
+
+  int ret = rte_flow_validate(port_id, &attributes, items, actions, &err);
+  if (ret)
+    return CommandFailure(EINVAL,
+                          "Port %u: Failed to validate flow profile %u %s",
+                          port_id, flow_profile, err.message);
+
+  handle = rte_flow_create(port_id, &attributes, items, actions, &err);
+  if (handle == nullptr)
+    return CommandFailure(EINVAL, "Port %u: Failed to create flow %s", port_id,
+                          err.message);
+
+  return CommandSuccess();
+}
+
+#define NUM_ELEMENTS(x) (sizeof(x) / sizeof((x)[0]))
+
+enum FlowProfile : uint32_t
+{
+  profileN3 = 3,
+  profileN6 = 6,
+  profileN9 = 9,
+};
+
+CommandResponse flow_create(dpdk_port_t port_id, const uint32_t &flow_profile) {
+  CommandResponse err;
+
+  rte_flow_item_type N39_NSA[] = {
+      RTE_FLOW_ITEM_TYPE_ETH, RTE_FLOW_ITEM_TYPE_IPV4, RTE_FLOW_ITEM_TYPE_UDP,
+      RTE_FLOW_ITEM_TYPE_GTPU, RTE_FLOW_ITEM_TYPE_IPV4,
+      RTE_FLOW_ITEM_TYPE_END};
+
+  rte_flow_item_type N39_SA[] = {
+      RTE_FLOW_ITEM_TYPE_ETH, RTE_FLOW_ITEM_TYPE_IPV4, RTE_FLOW_ITEM_TYPE_UDP,
+      RTE_FLOW_ITEM_TYPE_GTPU, RTE_FLOW_ITEM_TYPE_GTP_PSC,
+      RTE_FLOW_ITEM_TYPE_IPV4,
+      RTE_FLOW_ITEM_TYPE_END};
+
+  rte_flow_item_type N6[] = {
+      RTE_FLOW_ITEM_TYPE_ETH, RTE_FLOW_ITEM_TYPE_IPV4,
+      RTE_FLOW_ITEM_TYPE_END};
+
+  switch (flow_profile) {
+    uint64_t rss_types;
+    // N3 traffic with and without PDU Session container
+    case profileN3:
+      rss_types = ETH_RSS_IPV4 | ETH_RSS_L3_SRC_ONLY;
+      err = flow_create_one(port_id, flow_profile, NUM_ELEMENTS(N39_NSA),
+                            rss_types, N39_NSA);
+      if (err.error().code() != 0) {
+        return err;
+      }
+
+      err = flow_create_one(port_id, flow_profile, NUM_ELEMENTS(N39_SA),
+                            rss_types, N39_SA);
+      break;
+
+    // N6 traffic
+    case profileN6:
+      rss_types = ETH_RSS_IPV4 | ETH_RSS_L3_DST_ONLY;
+      err = flow_create_one(port_id, flow_profile, NUM_ELEMENTS(N6),
+                            rss_types, N6);
+      break;
+
+    // N9 traffic with and without PDU Session container
+    case profileN9:
+      rss_types = ETH_RSS_IPV4 | ETH_RSS_L3_DST_ONLY;
+      err = flow_create_one(port_id, flow_profile, NUM_ELEMENTS(N39_NSA),
+                            rss_types, N39_NSA);
+      if (err.error().code() != 0) {
+        return err;
+      }
+
+      err = flow_create_one(port_id, flow_profile, NUM_ELEMENTS(N39_SA),
+                            rss_types, N39_SA);
+      break;
+
+    default:
+      return CommandFailure(EINVAL, "Unknown flow profile %u", flow_profile);
+  }
+  return err;
+}
+
 CommandResponse PMDPort::Init(const bess::pb::PMDPortArg &arg) {
   dpdk_port_t ret_port_id = DPDK_PORT_UNKNOWN;
 
@@ -245,16 +369,28 @@ CommandResponse PMDPort::Init(const bess::pb::PMDPortArg &arg) {
   if (arg.loopback()) {
     eth_conf.lpbk_mode = 1;
   }
+  if (arg.hwcksum()) {
+    eth_conf.rxmode.offloads = DEV_RX_OFFLOAD_IPV4_CKSUM |
+                               DEV_RX_OFFLOAD_UDP_CKSUM |
+                               DEV_RX_OFFLOAD_TCP_CKSUM;
+  }
 
   ret = rte_eth_dev_configure(ret_port_id, num_rxq, num_txq, &eth_conf);
   if (ret != 0) {
+    VLOG(1) << "Failed to configure with hardware checksum offload. "
+            << "Create PMDPort without hardware offload";
     return CommandFailure(-ret, "rte_eth_dev_configure() failed");
   }
 
-  int sid = rte_eth_dev_socket_id(ret_port_id);
+  int sid = arg.socket_case() == bess::pb::PMDPortArg::kSocketId ?
+	  arg.socket_id() : rte_eth_dev_socket_id(ret_port_id);
+  /* if socket_id is invalid, set to 0 */
   if (sid < 0 || sid > RTE_MAX_NUMA_NODES) {
-    sid = 0;  // if socket_id is invalid, set to 0
+    LOG(WARNING) << "Invalid socket, falling back... ";
+    sid = 0;
   }
+  LOG(INFO) << "Initializing Port:" << ret_port_id
+	    << " with memory from socket " << sid;
 
   eth_rxconf = dev_info.default_rxconf;
   eth_rxconf.rx_drop_en = 1;
@@ -308,7 +444,12 @@ CommandResponse PMDPort::Init(const bess::pb::PMDPortArg &arg) {
     }
   }
 
-  rte_eth_promiscuous_enable(ret_port_id);
+  if (arg.promiscuous_mode()) {
+    ret = rte_eth_promiscuous_enable(ret_port_id);
+    if (ret != 0) {
+      return CommandFailure(-ret, "rte_eth_promiscuous_enable() failed");
+    }
+  }
 
   int offload_mask = 0;
   offload_mask |= arg.vlan_offload_rx_strip() ? ETH_VLAN_STRIP_OFFLOAD : 0;
@@ -327,7 +468,8 @@ CommandResponse PMDPort::Init(const bess::pb::PMDPortArg &arg) {
   }
   dpdk_port_id_ = ret_port_id;
 
-  int numa_node = rte_eth_dev_socket_id(static_cast<int>(ret_port_id));
+  int numa_node = arg.socket_case() == bess::pb::PMDPortArg::kSocketId ?
+              sid : rte_eth_dev_socket_id(ret_port_id);
   node_placement_ =
       numa_node == -1 ? UNCONSTRAINED_SOCKET : (1ull << numa_node);
 
@@ -338,6 +480,15 @@ CommandResponse PMDPort::Init(const bess::pb::PMDPortArg &arg) {
   CollectStats(true);
 
   driver_ = dev_info.driver_name ?: "unknown";
+
+  if (arg.flow_profiles_size() > 0){
+    for (int i = 0; i < arg.flow_profiles_size(); ++i) {
+      err = flow_create(ret_port_id, arg.flow_profiles(i));
+      if (err.error().code() != 0) {
+        return err;
+      }
+    }
+  }
 
   return CommandSuccess();
 }
@@ -448,9 +599,10 @@ void PMDPort::CollectStats(bool reset) {
 
   port_stats_.inc.dropped = stats.imissed;
 
-  // i40e/net_e1000_igb PMD drivers, ixgbevf and net_bonding vdevs don't support
-  // per-queue stats
-  if (driver_ == "net_i40e" || driver_ == "net_i40e_vf" ||
+  // ice/i40e/net_e1000_igb PMD drivers, ixgbevf and net_bonding vdevs don't
+  // support per-queue stats
+  if (driver_ == "net_ice" || driver_ == "net_iavf" ||
+      driver_ == "net_i40e" || driver_ == "net_i40e_vf" ||
       driver_ == "net_ixgbe_vf" || driver_ == "net_bonding" ||
       driver_ == "net_e1000_igb") {
     // NOTE:
