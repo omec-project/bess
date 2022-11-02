@@ -49,15 +49,15 @@ CommandResponse MetadataTest::AddAttributes(
     switch (mode) {
       case Attribute::AccessMode::kRead:
         LOG(INFO) << "module " << name() << ": " << attr_name << ", "
-                  << attr_size << " bytes, read" << std::endl;
+                  << attr_size << " bytes, read";
         break;
       case Attribute::AccessMode::kWrite:
         LOG(INFO) << "module " << name() << ": " << attr_name << ", "
-                  << attr_size << " bytes, write" << std::endl;
+                  << attr_size << " bytes, write";
         break;
       case Attribute::AccessMode::kUpdate:
         LOG(INFO) << "module " << name() << ": " << attr_name << ", "
-                  << attr_size << " bytes, update" << std::endl;
+                  << attr_size << " bytes, update";
         break;
     }
   }

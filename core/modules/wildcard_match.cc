@@ -199,7 +199,7 @@ inline gate_idx_t WildcardMatch::LookupEntry(const wm_hkey_t &key,
       int value_attr_id = values_[i].attr_id;
       uint8_t *data = pkt->head_data<uint8_t *>() + value_off;
 
-      DLOG(INFO) << "off: " << (int)value_off << ", sz: " << value_size;
+      DLOG(INFO) << "off: " << value_off << ", sz: " << value_size;
 
       if (value_attr_id < 0) { /* if it is offset-based */
         memcpy(data, reinterpret_cast<uint8_t *>(&result.keyv) + value_pos,
@@ -293,8 +293,7 @@ inline bool WildcardMatch::LookupBulkEntry(wm_hkey_t *key, gate_idx_t def_gate,
         int value_attr_id = values_[i].attr_id;
         uint8_t *data = pkt->head_data<uint8_t *>() + value_off;
 
-        DLOG(INFO) << "off: " << (int)value_off << ", sz: " << value_size
-                   << std::endl;
+        DLOG(INFO) << "off: " << value_off << ", sz: " << value_size;
         if (value_attr_id < 0) { /* if it is offset-based */
           memcpy(data,
                  reinterpret_cast<uint8_t *>(&result[init]->keyv) + value_pos,
@@ -309,7 +308,7 @@ inline bool WildcardMatch::LookupBulkEntry(wm_hkey_t *key, gate_idx_t def_gate,
                      << *(reinterpret_cast<uint64_t *>(buf))
                      << " for attr_id: " << value_attr_id
                      << " of size: " << value_size
-                     << " at value_pos: " << value_pos << std::endl;
+                     << " at value_pos: " << value_pos;
 
           switch (value_size) {
             case 1:
