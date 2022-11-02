@@ -139,9 +139,9 @@ TEST_P(HugepageTest, LeakFree) {
   } while (get_cpu_time() - start < 0.5);  // 0.5 second for each page size
 }
 
-INSTANTIATE_TEST_CASE_P(PageSize, HugepageTest,
-                        ::testing::Values(HugepageSize::k2MB,
-                                          HugepageSize::k1GB));
+INSTANTIATE_TEST_SUITE_P(PageSize, HugepageTest,
+                         ::testing::Values(HugepageSize::k2MB,
+                                           HugepageSize::k1GB));
 
 TEST(DmaMemoryPoolTest, PoolSetup) {
   if (geteuid() != 0) {
