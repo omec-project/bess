@@ -112,7 +112,7 @@ class CmdLineOpts {
 void init_eal(int dpdk_mb_per_socket, std::string nonworker_corelist) {
   CmdLineOpts rte_args{
       "bessd",
-      "--master-lcore",
+      "--main-lcore",
       std::to_string(RTE_MAX_LCORE - 1),
       "--lcore",
       std::to_string(RTE_MAX_LCORE - 1) + "@" + nonworker_corelist,
