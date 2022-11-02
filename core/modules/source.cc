@@ -45,7 +45,6 @@ CommandResponse Source::Init(const bess::pb::SourceArg &arg) {
     return CommandFailure(ENOMEM, "Task creation failed");
 
   pkt_size_ = 60;
-  burst_ = bess::PacketBatch::kMaxBurst;
 
   if (arg.pkt_size() > 0) {
     if (arg.pkt_size() > SNBUF_DATA) {
