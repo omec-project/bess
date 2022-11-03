@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2020-2022 Intel Corporation
+
+# Example BESS script to receive packet from CNDP port.
+# Port index corresponds to the ports defined in lports section in fwd.jsonc file.
+# It also sets core affinity for worker thread. Before running the script,
+# edit the script to update core in line `bess.add_worker(wid=0, core=28)`
+# to a core id in CPU socket where the network device is attached to get better performance.
+
+myport = CndpPort(jsonc_file="/build/bess/bessctl/conf/cndp/fwd.jsonc", lport_index=0)
+input0 = PortInc(port=myport)
+
+input0 -> Sink()
+
+bess.add_worker(wid=0, core=28)
+input0.attach_task(wid=0)

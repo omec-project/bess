@@ -1,5 +1,6 @@
 # Copyright (c) 2014-2017, The Regents of the University of California.
 # Copyright (c) 2016-2017, Nefeli Networks, Inc.
+# Copyright (c) 2020-2022 Intel Corporation.
 # All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -29,6 +30,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+
 
 # Disable all implicit Makefile rules
 MAKEFLAGS += --no-builtin-rules
@@ -69,7 +71,7 @@ ALWAYS_DYN_LIBS := -lpthread -ldl
 # These libraries are not supported by pkg-config.
 ALWAYS_LIBS := -lpcap -lgflags -lnuma
 # If pkg-config is available, we just need a list of the dependecies.
-PKG_CONFIG_DEPS := libdpdk libglog protobuf grpc++ libunwind zlib
+PKG_CONFIG_DEPS := libdpdk libglog protobuf grpc++ libunwind zlib libcndp
 # If pkg-config is not available, we need to list the libs we depend on.
 NO_PKG_CONFIG_LIBS := -lglog -lgflags -lprotobuf -lgrpc++ -lunwind -lz
 # If pkg-config is not available and we're static linking, we also need
