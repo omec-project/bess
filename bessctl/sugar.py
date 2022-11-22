@@ -71,7 +71,7 @@ a:x->b               Connect output gate x of a    a*i + b
 
 a->y:b               Connect a to input gate y     a + y*b
                      of b                          a.connect(next_mod=b,
-                     (x should be an integer)        igate=y)
+                     (y should be an integer)        igate=y)
 
 a:3->4:b             Connect output gate 3 of a    a*3 + 4*b
                      and input gate of 4           a.connect(next_mod=b,
@@ -95,7 +95,7 @@ Ringo:
 Python:
     __bess_module__('a','Foo') + __bess_module__('b', 'Bar')
 
-3. Create anonymous modules and connection them
+3. Create anonymous modules and connect them
 Ringo:
     Foo() -> Bar()
 Python:
