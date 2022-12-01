@@ -110,7 +110,7 @@ void Qos::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
   MeteringKey keys[bess::PacketBatch::kMaxBurst] __ymm_aligned;
   bess::Packet *pkt = nullptr;
   default_gate = ACCESS_ONCE(default_gate_);
-  int cnt = batch->cnt();  
+  int cnt = batch->cnt();
   for (const auto &field : fields_) {
     int offset;
     int pos = field.pos;
@@ -144,93 +144,91 @@ void Qos::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
     }
   }
 
-  int icnt=0;
-  for(int lcnt=0; lcnt<cnt ;lcnt=lcnt+icnt )
-   {
-    icnt = ((cnt-lcnt)>=64) ? 64 : cnt-lcnt  ;
+  int icnt = 0;
+  for (int lcnt = 0; lcnt < cnt; lcnt = lcnt + icnt) {
+    icnt = ((cnt - lcnt) >= 64) ? 64 : cnt - lcnt;
     value *val[icnt];
-    uint64_t hit_mask = table_.Find(keys+lcnt, val, icnt);
+    uint64_t hit_mask = table_.Find(keys + lcnt, val, icnt);
 
     for (int j = 0; j < icnt; j++) {
-      pkt = batch->pkts()[j+lcnt];
+      pkt = batch->pkts()[j + lcnt];
       if ((hit_mask & ((uint64_t)1ULL << j)) == 0) {
         EmitPacket(ctx, pkt, default_gate);
         continue;
       }
 
-    uint16_t ogate = val[j]->ogate;
-    DLOG(INFO) << "ogate : " << ogate;
+      uint16_t ogate = val[j]->ogate;
+      DLOG(INFO) << "ogate : " << ogate;
 
-    // meter if ogate is 0
-    if (ogate == METER_GATE) {
-      uint64_t time = rte_rdtsc();
-      uint32_t pkt_len = pkt->total_len() - val[j]->deduct_len;
-      uint8_t color = rte_meter_trtcm_color_blind_check(&val[j]->m, &val[j]->p,
-                                                        time, pkt_len);
+      // meter if ogate is 0
+      if (ogate == METER_GATE) {
+        uint64_t time = rte_rdtsc();
+        uint32_t pkt_len = pkt->total_len() - val[j]->deduct_len;
+        uint8_t color = rte_meter_trtcm_color_blind_check(
+            &val[j]->m, &val[j]->p, time, pkt_len);
 
-      DLOG(INFO) << "color : " << color;
-      // update ogate to color specific gate
-      if (color == RTE_COLOR_GREEN) {
-        ogate = METER_GREEN_GATE;
-      } else if (color == RTE_COLOR_YELLOW) {
-        ogate = METER_YELLOW_GATE;
-      } else if (color == RTE_COLOR_RED) {
-       ogate = METER_RED_GATE;
-       }
+        DLOG(INFO) << "color : " << color;
+        // update ogate to color specific gate
+        if (color == RTE_COLOR_GREEN) {
+          ogate = METER_GREEN_GATE;
+        } else if (color == RTE_COLOR_YELLOW) {
+          ogate = METER_YELLOW_GATE;
+        } else if (color == RTE_COLOR_RED) {
+          ogate = METER_RED_GATE;
+        }
       }
 
       // update values
-     size_t num_values_ = values_.size();
-     for (size_t i = 0; i < num_values_; i++) {
-      int value_size = values_[i].size;
-      int value_pos = values_[i].pos;
-      int value_off = values_[i].offset;
-      int value_attr_id = values_[i].attr_id;
-      uint8_t *data = pkt->head_data<uint8_t *>() + value_off;
+      size_t num_values_ = values_.size();
+      for (size_t i = 0; i < num_values_; i++) {
+        int value_size = values_[i].size;
+        int value_pos = values_[i].pos;
+        int value_off = values_[i].offset;
+        int value_attr_id = values_[i].attr_id;
+        uint8_t *data = pkt->head_data<uint8_t *>() + value_off;
 
-      if (value_attr_id < 0) { /* if it is offset-based */
-        memcpy(data, reinterpret_cast<uint8_t *>(&(val[j]->Data)) + value_pos,
-               value_size);
-       } else { /* if it is attribute-based */
-        typedef struct {
-          uint8_t bytes[bess::metadata::kMetadataAttrMaxSize];
-       } value_t;
-       uint8_t *buf = (uint8_t *)(&(val[j]->Data)) + value_pos;
+        if (value_attr_id < 0) { /* if it is offset-based */
+          memcpy(data, reinterpret_cast<uint8_t *>(&(val[j]->Data)) + value_pos,
+                 value_size);
+        } else { /* if it is attribute-based */
+          typedef struct {
+            uint8_t bytes[bess::metadata::kMetadataAttrMaxSize];
+          } value_t;
+          uint8_t *buf = (uint8_t *)(&(val[j]->Data)) + value_pos;
 
-        DLOG(INFO) << "Setting value " << std::hex
-                   << *(reinterpret_cast<uint64_t *>(buf))
-                   << " for attr_id: " << value_attr_id
-                   << " of size: " << value_size
-                   << " at value_pos: " << value_pos;
+          DLOG(INFO) << "Setting value " << std::hex
+                     << *(reinterpret_cast<uint64_t *>(buf))
+                     << " for attr_id: " << value_attr_id
+                     << " of size: " << value_size
+                     << " at value_pos: " << value_pos;
 
-        switch (value_size) {
-          case 1:
-            set_attr<uint8_t>(this, value_attr_id, pkt, *((uint8_t *)buf));
-            break;
-          case 2:
-            set_attr<uint16_t>(this, value_attr_id, pkt,
-                               *((uint16_t *)((uint8_t *)buf)));
-            break;
-          case 4:
-            set_attr<uint32_t>(this, value_attr_id, pkt,
-                               *((uint32_t *)((uint8_t *)buf)));
-            break;
-          case 8:
-            set_attr<uint64_t>(this, value_attr_id, pkt,
-                               *((uint64_t *)((uint8_t *)buf)));
-            break;
-          default: {
-            void *mt_ptr =
-                _ptr_attr_with_offset<value_t>(attr_offset(value_attr_id), pkt);
-            bess::utils::CopySmall(mt_ptr, buf, value_size);
-          } break;
+          switch (value_size) {
+            case 1:
+              set_attr<uint8_t>(this, value_attr_id, pkt, *((uint8_t *)buf));
+              break;
+            case 2:
+              set_attr<uint16_t>(this, value_attr_id, pkt,
+                                 *((uint16_t *)((uint8_t *)buf)));
+              break;
+            case 4:
+              set_attr<uint32_t>(this, value_attr_id, pkt,
+                                 *((uint32_t *)((uint8_t *)buf)));
+              break;
+            case 8:
+              set_attr<uint64_t>(this, value_attr_id, pkt,
+                                 *((uint64_t *)((uint8_t *)buf)));
+              break;
+            default: {
+              void *mt_ptr = _ptr_attr_with_offset<value_t>(
+                  attr_offset(value_attr_id), pkt);
+              bess::utils::CopySmall(mt_ptr, buf, value_size);
+            } break;
+          }
         }
       }
+      EmitPacket(ctx, pkt, ogate);
     }
-    EmitPacket(ctx, pkt, ogate);
   }
-}
-
 }
 
 template <typename T>
