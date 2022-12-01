@@ -402,8 +402,7 @@ CommandResponse Qos::CommandDelete(const bess::pb::QosCommandDeleteArg &arg) {
   return CommandSuccess();
 }
 
-CommandResponse Qos::CommandClear(__attribute__((unused))
-                                  const bess::pb::EmptyArg &) {
+CommandResponse Qos::CommandClear(const bess::pb::EmptyArg &) {
   Qos::Clear();
   return CommandSuccess();
 }
