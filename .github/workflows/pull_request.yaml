@@ -1,0 +1,31 @@
+name: Build and Test process
+on:
+  - pull_request
+jobs:
+  build:
+    runs-on: '${{ matrix.os }}'
+    strategy:
+      matrix:
+        os:
+          - ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: sudo sysctl -w vm.nr_hugepages=512
+      - run: sudo apt-get update
+      - run: sudo apt-get install -y python3-pip python3-setuptools python3-coverage python3-pyelftools ccache
+      - run: pip3 install --user -r requirements.txt
+      - run: '[[ ${COVERAGE:-0} == 0 ]] || sudo apt-get install -y gcc-7'
+      - run: '[[ ${SANITIZE:-0} == 0 ]] || sudo apt-get install -y llvm-3.9'
+      - run: 'docker pull ghcr.io/omec-project/upf-epc/bess_build | cat'
+      - run: sudo mkdir -p /mnt/huge
+      - run: sudo mount -t hugetlbfs nodev /mnt/huge
+      - run: export CXX="ccache $VER_CXX"
+      - run: ccache -s
+      - run: sudo ./container_build.py bess
+      - run: sudo ./container_build.py kmod_buildtest
+      - run: (cd core && ./all_test --gtest_shuffle)
+      - run: python3-coverage run -m unittest discover -v
+      - run: python3 bessctl/run_module_tests.py
+      - run: ccache -s
+      - run: bessctl/bessctl daemon stop
+      - run: '[[ ${COVERAGE:-0} == 0 ]] || { sleep 3; codecov --gcov-exec gcov-7; }'
