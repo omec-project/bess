@@ -32,7 +32,7 @@
 
 bess.add_worker(wid=0, core=0)
 bess.add_worker(wid=1, core=1)
-dummy_pkt = '0' * 100
+dummy_pkt = bytes('\x00' * 100, 'utf-8')
 
 # Worker 0: no burstiness causes inaccurate scheduling
 w0_src0::Source() -> w0_rewrite::Rewrite(templates=[dummy_pkt]) -> Sink()
