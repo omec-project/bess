@@ -17,7 +17,7 @@ you can simply run:
 $ vagrant up
 ```
 
-to launch a VM. The current BESS directory is mapped to `/opt/bess` in the VM. 
+to launch a VM. The current BESS directory is mapped to `/opt/bess` in the VM.
 You can connect to the VM with `vagrant ssh`. All compilers and libraries are
 readiliy available.
 
@@ -34,7 +34,7 @@ $ ./container_build.py
 ```
 
 then the script will automatically fetch the container image
-(nefelinetworks/bess_build at hub.docker.com) and build BESS inside the
+(ghcr.io/omec-project/upf-epc/bess_build) and build BESS inside the
 container. Since the BESS binary is mostly static-linked to external libraries,
 the binary built in the container should be readily runnable in the host as
 well.
@@ -54,7 +54,7 @@ Replace `<YAML script>` with one of the following with different flavors:
 * `env/runtime.yml`: In case you already have a compiled binary of BESS, this
     file includes software packages for the runtime. It also configures
     hugepages.
-* `env/build-dep.yml`: This file contains minimum software requirements for 
+* `env/build-dep.yml`: This file contains minimum software requirements for
     building BESS.
 * `env/dev.yml`: This script has all packages included in the both files above,
     also with some optional yet recommended packages for developers.
