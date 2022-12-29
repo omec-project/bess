@@ -21,4 +21,4 @@ To install BESS on Linux quickly, you can download the binary from [Release](htt
     make -C core/kmod # Build the kernel module (optional)
     bessctl/bessctl
 
-Documentation can be found [here](https://github.com/omec-project/bess/wiki/). Please consider [contributing](https://github.com/omec-project/bess/wiki/How-to-Contribute) to the project!
+Documentation can be found [here](https://github.com/omec-project/bess/wiki/). Please consider [contributing](https://github.com/omec-project/bess/wiki/How-to-Contribute) to the project!!
