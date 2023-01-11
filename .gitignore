@@ -51,3 +51,6 @@ compile_commands.json
 
 # virtualenv
 venv/
+
+# Keep GitHub Actions
+!.github
