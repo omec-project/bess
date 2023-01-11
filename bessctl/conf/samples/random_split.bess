@@ -38,7 +38,7 @@ pkt = eth/ip/udp/payload
 
 # RandomSplit randomly split/drops packets.
 Source() -> \
-        Rewrite(templates=[str(pkt)]) \
+        Rewrite(templates=[bytes(pkt)]) \
         -> rs::RandomSplit(drop_rate=0.75, gates=[0,1,2])
 
 sink::Sink()
