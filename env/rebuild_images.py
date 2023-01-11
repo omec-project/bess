@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (c) 2014-2016, The Regents of the University of California.
 # Copyright (c) 2016-2017, Nefeli Networks, Inc.
@@ -37,7 +37,7 @@ import subprocess
 import sys
 import time
 
-TARGET_REPO = 'nefelinetworks/bess_build'
+TARGET_REPO = 'ghcr.io/omec-project/upf-epc/bess_build'
 
 imgs = {
     'focal64': {'base': 'ubuntu:focal', 'tag_suffix': ''},
