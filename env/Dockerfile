@@ -25,7 +25,7 @@ RUN mkdir -p /build/bess
 # Build DPDK testpmd (used in bessctl samples)
 ARG BESS_DPDK_BRANCH=master
 RUN cd /build/bess && \
-	curl -s -L https://github.com/NetSys/bess/archive/${BESS_DPDK_BRANCH}.tar.gz | tar zx --strip-components=1 && \
+	curl -s -L https://github.com/omec-project/bess/archive/${BESS_DPDK_BRANCH}.tar.gz | tar zx --strip-components=1 && \
 	./build.py dpdk && \
 	cp /build/bess/deps/dpdk-20.11.3/build/app/dpdk-testpmd /usr/local/bin/ && \
 	rm -rf /build/bess
