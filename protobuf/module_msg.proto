@@ -409,7 +409,7 @@ message WildcardMatchCommandSetDefaultGateArg {
 
 /**
  * The module ACL creates an access control module which by default blocks all traffic, unless it contains a rule which specifies otherwise.
- * Examples of ACL can be found in [acl.bess](https://github.com/NetSys/bess/blob/master/bessctl/conf/samples/acl.bess)
+ * Examples of ACL can be found in [acl.bess](https://github.com/omec-project/bess/blob/master/bessctl/conf/samples/acl.bess)
  *
  * __Input Gates__: 1
  * __Output Gates__: 1
@@ -498,7 +498,7 @@ message EtherEncapArg {
  * To instantiate an ExactMatch module, you must specify which fields in the packet to match over. You can add rules using the function `ExactMatch.add(...)`
  * Fields may be stored either in the packet data or its metadata attributes.
  * An example script using the ExactMatch code is found
- * in [`bess/bessctl/conf/samples/exactmatch.bess`](https://github.com/NetSys/bess/blob/master/bessctl/conf/samples/exactmatch.bess).
+ * in [`bess/bessctl/conf/samples/exactmatch.bess`](https://github.com/omec-project/bess/blob/master/bessctl/conf/samples/exactmatch.bess).
  *
  * __Input Gates__: 1
  * __Output Gates__: many (configurable)
@@ -567,7 +567,7 @@ message GenericDecapArg {
  *    `de ad be ef <xx> <xx> 12 34`
  * where the 2-byte `<xx> <xx>` comes from the value of metadata attribute `'foo'`
  * for each packet.
- * An example script using GenericEncap is in [`bess/bessctl/conf/samples/generic_encap.bess`](https://github.com/NetSys/bess/blob/master/bessctl/conf/samples/generic_encap.bess).
+ * An example script using GenericEncap is in [`bess/bessctl/conf/samples/generic_encap.bess`](https://github.com/omec-project/bess/blob/master/bessctl/conf/samples/generic_encap.bess).
  *
  * __Input Gates__: 1
  * __Output Gates__: 1
@@ -653,7 +653,7 @@ message MACSwapArg {
  * It should be paired with a Timestamp module, which attaches a timestamp to packets.
  * The measure module will log how long (in nanoseconds) it has been for each packet it received since it was timestamped.
  * This module is somewhat experimental and undergoing various changes.
- * There is a test for the the Measure module in [`bessctl/module_tests/timestamp.py`](https://github.com/NetSys/bess/blob/master/bessctl/module_tests/timestamp.py).
+ * There is a test for the the Measure module in [`bessctl/module_tests/timestamp.py`](https://github.com/omec-project/bess/blob/master/bessctl/module_tests/timestamp.py).
  *
  * __Input Gates__: 1
  * __Output Gates__: 1
@@ -694,7 +694,7 @@ message MetadataTestArg {
  * and destination addresses for packets on the reverse direction.
  * L3/L4 checksums are updated correspondingly.
  * To see an example of NAT in use, see:
- * [`bess/bessctl/conf/samples/nat.bess`](https://github.com/NetSys/bess/blob/master/bessctl/conf/samples/nat.bess)
+ * [`bess/bessctl/conf/samples/nat.bess`](https://github.com/omec-project/bess/blob/master/bessctl/conf/samples/nat.bess)
  *
  * Currently only supports TCP/UDP/ICMP.
  * Note that address/port in packet payload (e.g., FTP) are NOT translated.
@@ -720,7 +720,7 @@ message NATArg {
  * IPv4 addresses. No port number is translated.
  * L3/L4 checksums are updated correspondingly.
  * To see an example of NAT in use, see:
- * [`bess/bessctl/conf/samples/nat.bess`](https://github.com/NetSys/bess/blob/master/bessctl/conf/samples/nat.bess)
+ * [`bess/bessctl/conf/samples/nat.bess`](https://github.com/omec-project/bess/blob/master/bessctl/conf/samples/nat.bess)
  *
  * Forward direction (from input gate 0 to output gate 0):
  *  - Source IP address is updated, from internal to external address.
@@ -931,7 +931,7 @@ message ReplicateCommandSetGatesArg {
 /**
  * The SetMetadata module adds metadata attributes to packets, which are not stored
  * or sent out with packet data. For examples of SetMetadata use, see
- * [`bess/bessctl/conf/attr_match.bess`](https://github.com/NetSys/bess/blob/master/bessctl/conf/metadata/attr_match.bess)
+ * [`bess/bessctl/conf/attr_match.bess`](https://github.com/omec-project/bess/blob/master/bessctl/conf/metadata/attr_match.bess)
  *
  * __Input Gates__: 1
  * __Output Gates__: 1
@@ -1232,7 +1232,7 @@ message VXLANEncapArg {
  * pushes packets that do match out a specified gate, and those that don't out a default
  * gate. WildcardMatch is initialized with the fields it should inspect over,
  * rules are added via the `add(...)` function.
- * An example of WildcardMatch is in [`bess/bessctl/conf/samples/wildcardmatch.bess`](https://github.com/NetSys/bess/blob/master/bessctl/conf/samples/wildcardmatch.bess)
+ * An example of WildcardMatch is in [`bess/bessctl/conf/samples/wildcardmatch.bess`](https://github.com/omec-project/bess/blob/master/bessctl/conf/samples/wildcardmatch.bess)
  *
  * __Input Gates__: 1
  * __Output Gates__: many (configurable)
