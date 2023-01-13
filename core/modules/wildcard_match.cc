@@ -266,9 +266,9 @@ inline bool WildcardMatch::LookupBulkEntry(wm_hkey_t *key, gate_idx_t def_gate,
     if (num == 0)
       continue;
 
-   for (int init = 0; (init < cnt) && (num); init++) {
-     if ((hitmask & ((uint64_t)1 << init))) {
-       if ((prev_hitmask & ((uint64_t)1 << init)) == 0)
+    for (int init = 0; (init < cnt) && (num); init++) {
+      if ((hitmask & ((uint64_t)1 << init))) {
+        if ((prev_hitmask & ((uint64_t)1 << init)) == 0)
           result[init] = entry[init];
         else if ((prev_hitmask & ((uint64_t)1 << init)) &&
                  (entry[init]->priority >= result[init]->priority)) {
@@ -278,7 +278,7 @@ inline bool WildcardMatch::LookupBulkEntry(wm_hkey_t *key, gate_idx_t def_gate,
         num--;
       }
     }
-   prev_hitmask = prev_hitmask | hitmask;
+    prev_hitmask = prev_hitmask | hitmask;
   }
 
   for (int init = 0; init < cnt; init++) {
@@ -378,24 +378,19 @@ void WildcardMatch::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
     }
   }
 
-  if(cnt>64)
-   {
-     int icnt=0;
-     for(int lcnt=0; lcnt<cnt ;lcnt=lcnt+icnt )
-      {
-        icnt = ((cnt-lcnt)>=64) ? 64 : cnt-lcnt  ;
-        LookupBulkEntry(&keys[lcnt], default_gate, lcnt, Outgate, icnt, batch);
-        for (int j = 0; j < icnt; j++)
-          {
-            EmitPacket(ctx, batch->pkts()[j+lcnt], Outgate[j]);
-          }
+  if (cnt > 64) {
+    int icnt = 0;
+    for (int lcnt = 0; lcnt < cnt; lcnt = lcnt + icnt) {
+      icnt = ((cnt - lcnt) >= 64) ? 64 : cnt - lcnt;
+      LookupBulkEntry(&keys[lcnt], default_gate, lcnt, Outgate, icnt, batch);
+      for (int j = 0; j < icnt; j++) {
+        EmitPacket(ctx, batch->pkts()[j + lcnt], Outgate[j]);
       }
-   }
-  else
-  {
-   LookupBulkEntry(keys, default_gate, 0, Outgate, cnt, batch);
-   for (int j = 0; j < cnt; j++) {
-    EmitPacket(ctx, batch->pkts()[j], Outgate[j]);
+    }
+  } else {
+    LookupBulkEntry(keys, default_gate, 0, Outgate, cnt, batch);
+    for (int j = 0; j < cnt; j++) {
+      EmitPacket(ctx, batch->pkts()[j], Outgate[j]);
     }
   }
 }
@@ -738,12 +733,12 @@ CommandResponse WildcardMatch::SetRuntimeConfig(
 }
 
 void WildcardMatch::DeInit() {
-    for (auto &tuple : tuples_) {
-        if (!tuple.ht)
-            continue;
-        tuple.ht->DeInit();
-        tuple.ht = NULL;
-    }
+  for (auto &tuple : tuples_) {
+    if (!tuple.ht)
+      continue;
+    tuple.ht->DeInit();
+    tuple.ht = NULL;
+  }
 }
 
 ADD_MODULE(WildcardMatch, "wm",

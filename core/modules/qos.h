@@ -76,7 +76,7 @@ class Qos final : public Module {
   CommandResponse AddFieldOne(const bess::pb::Field &field,
                               struct MeteringField *f, uint8_t type);
   gate_idx_t LookupEntry(const MeteringKey &key, gate_idx_t def_gate);
-  void DeInit();
+  void DeInit() override;
   std::string GetDesc() const override;
 
  private:
