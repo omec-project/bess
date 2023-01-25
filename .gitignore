@@ -52,5 +52,6 @@ compile_commands.json
 # virtualenv
 venv/
 
-# Keep GitHub Actions
+# Keep GitHub Actions and Reuse
 !.github
+!.reuse
