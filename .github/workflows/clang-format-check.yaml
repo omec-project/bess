@@ -1,9 +1,8 @@
-name: clang-format Check
+name: C++/C/Protobuf Format Check
 on:
   - pull_request
 jobs:
-  formatting-check:
-    name: Formatting Check
+  format-check:
     runs-on: '${{ matrix.os }}'
     strategy:
       matrix:
