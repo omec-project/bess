@@ -68,9 +68,9 @@ message BPFCommandClearArg {}
  * `add(fields=[aton('12.3.4.5'), aton('5.4.3.2')], gate=2)`
  */
 message ExactMatchCommandAddArg {
-  uint64 gate = 1; /// The gate to forward out packets that mach this rule.
-  repeated FieldData fields = 2; /// The exact match values to check for
-  repeated FieldData values = 3; /// The exact match values to check for
+  uint64 gate = 1;  /// The gate to forward out packets that mach this rule.
+  repeated FieldData fields = 2;  /// The exact match values to check for
+  repeated FieldData values = 3;  /// The exact match values to check for
 }
 
 /**
@@ -79,7 +79,7 @@ message ExactMatchCommandAddArg {
  */
 message ExactMatchCommandDeleteArg {
   repeated FieldData fields =
-      2; /// The field values for the rule to be deleted.
+      2;  /// The field values for the rule to be deleted.
 }
 
 /**
@@ -94,7 +94,7 @@ message ExactMatchCommandClearArg {}
  * specified gate. Example use in bessctl: `setDefaultGate(gate=2)`
  */
 message ExactMatchCommandSetDefaultGateArg {
-  uint64 gate = 1; /// The gate number to send the default traffic out.
+  uint64 gate = 1;  /// The gate number to send the default traffic out.
 }
 
 /**
@@ -102,7 +102,9 @@ message ExactMatchCommandSetDefaultGateArg {
  * the maximum number of packets to be stored in a single PacketBatch released
  * by the module.
  */
-message FlowGenCommandSetBurstArg { uint64 burst = 1; }
+message FlowGenCommandSetBurstArg {
+  uint64 burst = 1;
+}
 
 /**
  * The HashLB module has a command `set_mode(...)` which takes two parameters.
@@ -113,9 +115,9 @@ message FlowGenCommandSetBurstArg { uint64 burst = 1; }
  * offsets and sizes. Example use in bessctl: `lb.set_mode('l2')`
  */
 message HashLBCommandSetModeArg {
-  string mode = 1; /// What fields to hash over, `'l2'`, `'l3'`, and `'l4'` are
-                   /// only valid values.
-  repeated Field fields = 2; /// A list of fields that define a custom tuple.
+  string mode = 1;  /// What fields to hash over, `'l2'`, `'l3'`, and `'l4'` are
+                    /// only valid values.
+  repeated Field fields = 2;  /// A list of fields that define a custom tuple.
 }
 
 /**
@@ -125,7 +127,7 @@ message HashLBCommandSetModeArg {
  */
 message HashLBCommandSetGatesArg {
   repeated int64 gates =
-      1; /// A list of gate numbers to load balance traffic over
+      1;  /// A list of gate numbers to load balance traffic over
 }
 
 /**
@@ -135,9 +137,9 @@ message HashLBCommandSetGatesArg {
  * Example use in bessctl: `table.add(prefix='10.0.0.0', prefix_len=8, gate=2)`
  */
 message IPLookupCommandAddArg {
-  string prefix = 1;     /// The CIDR IP part of the prefix to match
-  uint64 prefix_len = 2; /// The prefix length
-  uint64 gate = 3; /// The number of the gate to forward matching traffic on.
+  string prefix = 1;      /// The CIDR IP part of the prefix to match
+  uint64 prefix_len = 2;  /// The prefix length
+  uint64 gate = 3;  /// The number of the gate to forward matching traffic on.
 }
 
 /**
@@ -146,8 +148,8 @@ message IPLookupCommandAddArg {
  * Example use in bessctl: `table.delete(prefix='10.0.0.0', prefix_len=8)`
  */
 message IPLookupCommandDeleteArg {
-  string prefix = 1;     /// The CIDR IP part of the prefix to match
-  uint64 prefix_len = 2; /// The prefix length
+  string prefix = 1;      /// The CIDR IP part of the prefix to match
+  uint64 prefix_len = 2;  /// The prefix length
 }
 
 /**
@@ -164,10 +166,10 @@ message IPLookupCommandClearArg {}
  */
 message L2ForwardCommandAddArg {
   message Entry {
-    string addr = 1; /// The MAC address to match
-    int64 gate = 2;  /// Which gate to send out traffic matching this address.
+    string addr = 1;  /// The MAC address to match
+    int64 gate = 2;   /// Which gate to send out traffic matching this address.
   }
-  repeated Entry entries = 1; /// A list of L2Forward entries.
+  repeated Entry entries = 1;  /// A list of L2Forward entries.
 }
 
 /**
@@ -175,7 +177,8 @@ message L2ForwardCommandAddArg {
  * from the MAC forwarding table.
  */
 message L2ForwardCommandDeleteArg {
-  repeated string addrs = 1; /// The address to remove from the forwarding table
+  repeated string addrs =
+      1;  /// The address to remove from the forwarding table
 }
 
 /**
@@ -185,7 +188,7 @@ message L2ForwardCommandDeleteArg {
  */
 message L2ForwardCommandSetDefaultGateArg {
   int64 gate =
-      1; /// The default gate to forward traffic which matches no entry to.
+      1;  /// The default gate to forward traffic which matches no entry to.
 }
 
 /**
@@ -193,7 +196,7 @@ message L2ForwardCommandSetDefaultGateArg {
  * a given MAC address will be forwared to; it returns the gate ID number.
  */
 message L2ForwardCommandLookupArg {
-  repeated string addrs = 1; /// The MAC address to query for
+  repeated string addrs = 1;  /// The MAC address to query for
 }
 
 /**
@@ -203,7 +206,7 @@ message L2ForwardCommandLookupArg {
  */
 message L2ForwardCommandLookupResponse {
   repeated uint64 gates =
-      1; /// The gate ID that the requested MAC address maps to
+      1;  /// The gate ID that the requested MAC address maps to
 }
 
 /**
@@ -217,10 +220,10 @@ message L2ForwardCommandLookupResponse {
  * the odd-suffixed addresses out gate 1.
  */
 message L2ForwardCommandPopulateArg {
-  string base = 1; /// The base MAC address
+  string base = 1;  /// The base MAC address
   int64 count =
-      2; /// How many addresses beyond base to populate into the routing table
-  int64 gate_count = 3; /// How many gates to create in the L2Forward module.
+      2;  /// How many addresses beyond base to populate into the routing table
+  int64 gate_count = 3;  /// How many gates to create in the L2Forward module.
 }
 
 /**
@@ -233,11 +236,11 @@ message L2ForwardCommandPopulateArg {
  * in "percentile_values_ns" in the response.
  */
 message MeasureCommandGetSummaryArg {
-  bool clear = 1; /// if true, the data will be all cleared after read
+  bool clear = 1;  /// if true, the data will be all cleared after read
   repeated double latency_percentiles =
-      2; /// ascending list of real numbers in [0.0, 100.0]
+      2;  /// ascending list of real numbers in [0.0, 100.0]
   repeated double jitter_percentiles =
-      3; /// ascending list of real numbers in [0.0, 100.0]
+      3;  /// ascending list of real numbers in [0.0, 100.0]
 }
 
 /**
@@ -250,10 +253,11 @@ message MeasureCommandGetSummaryArg {
  */
 message MeasureCommandGetSummaryResponse {
   message Histogram {
-    uint64 count = 1; /// Total # of measured data points, including above_range
+    uint64 count =
+        1;  /// Total # of measured data points, including above_range
     uint64 above_range =
-        2; /// # of data points for the "too large value" bucket
-    uint64 resolution_ns = 8; /// resolution of measured data
+        2;  /// # of data points for the "too large value" bucket
+    uint64 resolution_ns = 8;  /// resolution of measured data
     uint64 min_ns = 3;
     uint64 avg_ns = 4;
     uint64 max_ns = 5;
@@ -261,9 +265,9 @@ message MeasureCommandGetSummaryResponse {
     repeated uint64 percentile_values_ns = 7;
   }
 
-  double timestamp = 1; /// Seconds since boot.
-  uint64 packets = 2;   /// Total # of packets seen by this module.
-  uint64 bits = 3;      /// Total # of bits seen by this module.
+  double timestamp = 1;  /// Seconds since boot.
+  uint64 packets = 2;    /// Total # of packets seen by this module.
+  uint64 bits = 3;       /// Total # of bits seen by this module.
   Histogram latency = 4;
   Histogram jitter = 5;
 }
@@ -277,16 +281,18 @@ message MeasureCommandGetSummaryResponse {
  * __Output_Gates__:  1
  */
 message DRRArg {
-  uint32 num_flows = 1; /// Number of flows to handle in module
-  uint64 quantum = 2; /// the number of bytes to allocate to each on every round
-  uint32 max_flow_queue_size = 3; /// the max size that any Flows queue can get
+  uint32 num_flows = 1;  /// Number of flows to handle in module
+  uint64 quantum =
+      2;  /// the number of bytes to allocate to each on every round
+  uint32 max_flow_queue_size = 3;  /// the max size that any Flows queue can get
 }
 
 /**
  * the SetQuantumSize function sets a new quantum for DRR module to operate on.
  */
 message DRRQuantumArg {
-  uint32 quantum = 1; /// the number of bytes to allocate to each on every round
+  uint32 quantum =
+      1;  /// the number of bytes to allocate to each on every round
 }
 
 /**
@@ -295,7 +301,7 @@ message DRRQuantumArg {
  * packets to that flow until the queue is below this size.
  */
 message DRRMaxFlowQueueSizeArg {
-  uint32 max_queue_size = 1; /// the max size that any Flows queue can get
+  uint32 max_queue_size = 1;  /// the max size that any Flows queue can get
 }
 
 /**
@@ -305,7 +311,7 @@ message DRRMaxFlowQueueSizeArg {
  */
 message PortIncCommandSetBurstArg {
   uint64 burst =
-      1; /// The maximum "burst" of packets (ie, the maximum batch size)
+      1;  /// The maximum "burst" of packets (ie, the maximum batch size)
 }
 
 /**
@@ -315,7 +321,7 @@ message PortIncCommandSetBurstArg {
  */
 message QueueIncCommandSetBurstArg {
   uint64 burst =
-      1; /// The maximum "burst" of packets (ie, the maximum batch size)
+      1;  /// The maximum "burst" of packets (ie, the maximum batch size)
 }
 
 /**
@@ -325,7 +331,7 @@ message QueueIncCommandSetBurstArg {
  */
 message QueueCommandSetBurstArg {
   uint64 burst =
-      1; /// The maximum "burst" of packets (ie, the maximum batch size)
+      1;  /// The maximum "burst" of packets (ie, the maximum batch size)
 }
 
 /**
@@ -333,7 +339,7 @@ message QueueCommandSetBurstArg {
  * size of the queue in total number of packets.
  */
 message QueueCommandSetSizeArg {
-  uint64 size = 1; /// The maximum number of packets to store in the queue.
+  uint64 size = 1;  /// The maximum number of packets to store in the queue.
 }
 
 /**
@@ -348,11 +354,11 @@ message QueueCommandGetStatusArg {}
  * size.
  */
 message QueueCommandGetStatusResponse {
-  uint64 count = 1;    /// The number of packets currently in the queue.
-  uint64 size = 2;     /// The maximum number of packets the queue can contain.
-  uint64 enqueued = 3; /// total enqueued
-  uint64 dequeued = 4; /// total dequeued
-  uint64 dropped = 5;  /// total dropped
+  uint64 count = 1;     /// The number of packets currently in the queue.
+  uint64 size = 2;      /// The maximum number of packets the queue can contain.
+  uint64 enqueued = 3;  /// total enqueued
+  uint64 dequeued = 4;  /// total dequeued
+  uint64 dropped = 5;   /// total dropped
 }
 
 /**
@@ -379,14 +385,15 @@ message UpdateCommandClearArg {}
  * `bess/bessctl/conf/samples/wildcardmatch.bess`.
  */
 message WildcardMatchCommandAddArg {
-  uint64 gate = 1; /// Traffic matching this new rule will be sent to this gate.
+  uint64 gate =
+      1;  /// Traffic matching this new rule will be sent to this gate.
   int64 priority =
-      2; /// If a packet matches multiple rules, the rule with higher priority
-         /// will be applied. If priorities are equal behavior is undefined.
+      2;  /// If a packet matches multiple rules, the rule with higher priority
+          /// will be applied. If priorities are equal behavior is undefined.
   repeated FieldData values = 3;  /// The values to check for in each field.
   repeated FieldData masks = 4;   /// The bitmask for each field -- set `0x0` to
                                   /// ignore the field altogether.
-  repeated FieldData valuesv = 5; /// The values to check for in each fieldv.
+  repeated FieldData valuesv = 5;  /// The values to check for in each fieldv.
 }
 
 /**
@@ -395,8 +402,8 @@ message WildcardMatchCommandAddArg {
  * remove them.
  */
 message WildcardMatchCommandDeleteArg {
-  repeated FieldData values = 1; /// The values being checked for in the rule
-  repeated FieldData masks = 2;  /// The bitmask from the rule.
+  repeated FieldData values = 1;  /// The values being checked for in the rule
+  repeated FieldData masks = 2;   /// The bitmask from the rule.
 }
 
 /**
@@ -411,7 +418,9 @@ message WildcardMatchCommandClearArg {}
  * the `set_default_gate(...)` function specifies which gate to send this extra
  * traffic to.
  */
-message WildcardMatchCommandSetDefaultGateArg { uint64 gate = 1; }
+message WildcardMatchCommandSetDefaultGateArg {
+  uint64 gate = 1;
+}
 
 /**
  * The module ACL creates an access control module which by default blocks all
@@ -427,15 +436,15 @@ message ACLArg {
    * One ACL rule is represented by the following 6-tuple.
    */
   message Rule {
-    string src_ip = 1;    /// Source IP block in CIDR. Wildcard if "".
-    string dst_ip = 2;    /// Destination IP block in CIDR. Wildcard if "".
-    uint32 src_port = 3;  /// TCP/UDP source port. Wildcard if 0.
-    uint32 dst_port = 4;  /// TCP/UDP Destination port. Wildcard if 0.
-    bool established = 5; /// Not implemented
-    bool drop = 6;        /// Drop matched packets if true, forward if false. By
-                          /// default ACL drops all traffic.
+    string src_ip = 1;     /// Source IP block in CIDR. Wildcard if "".
+    string dst_ip = 2;     /// Destination IP block in CIDR. Wildcard if "".
+    uint32 src_port = 3;   /// TCP/UDP source port. Wildcard if 0.
+    uint32 dst_port = 4;   /// TCP/UDP Destination port. Wildcard if 0.
+    bool established = 5;  /// Not implemented
+    bool drop = 6;  /// Drop matched packets if true, forward if false. By
+                    /// default ACL drops all traffic.
   }
-  repeated Rule rules = 1; /// A list of ACL rules.
+  repeated Rule rules = 1;  /// A list of ACL rules.
 }
 
 /**
@@ -451,15 +460,15 @@ message BPFArg {
    */
   message Filter {
     int64 priority =
-        1; /// The priority level for this rule. If a packet matches multiple
-           /// rules, it will be forwarded out the gate with the highest
-           /// priority. If a packet matches multiple rules with the same
-           /// priority, the behavior is undefined.
-    string filter = 2; /// The actual BPF string.
-    int64 gate = 3;    /// What gate to forward packets that match this BPF to.
+        1;  /// The priority level for this rule. If a packet matches multiple
+            /// rules, it will be forwarded out the gate with the highest
+            /// priority. If a packet matches multiple rules with the same
+            /// priority, the behavior is undefined.
+    string filter = 2;  /// The actual BPF string.
+    int64 gate = 3;     /// What gate to forward packets that match this BPF to.
   }
   repeated Filter filters =
-      1; /// The BPF initialized function takes a list of BPF filters.
+      1;  /// The BPF initialized function takes a list of BPF filters.
 }
 
 /**
@@ -497,7 +506,7 @@ message BypassArg {
  */
 message DumpArg {
   double interval =
-      1; /// How frequently to sample and print a packet, in seconds.
+      1;  /// How frequently to sample and print a packet, in seconds.
 }
 
 /**
@@ -525,11 +534,12 @@ message EtherEncapArg {}
  * __Output Gates__: many (configurable)
  */
 message ExactMatchArg {
-  repeated Field fields = 1;    /// A list of ExactMatch Fields
-  repeated FieldData masks = 2; /// mask(i) corresponds to the mask for field(i)
-  repeated Field values = 3;    /// A list of ExactMatch Values
+  repeated Field fields = 1;  /// A list of ExactMatch Fields
+  repeated FieldData masks =
+      2;                      /// mask(i) corresponds to the mask for field(i)
+  repeated Field values = 3;  /// A list of ExactMatch Values
   repeated FieldData masksv =
-      4; /// mask(i) corresponds to the mask for value(i)
+      4;  /// mask(i) corresponds to the mask for value(i)
   uint64 entries = 5;
 }
 
@@ -555,35 +565,35 @@ message ExactMatchConfig {
  * __Output Gates__: 1
  */
 message FlowGenArg {
-  bytes template = 1;   /// The packet "template". All data packets are derived
-                        /// from this template and contain the same payload.
-  double pps = 2;       /// The total number of packets per second to generate.
-  double flow_rate = 3; /// The number of new flows to create every second.
-                        /// flow_rate must be <= pps.
-  double flow_duration = 4; /// The lifetime of a flow in seconds.
-  string arrival = 5;  /// The packet arrival distribution -- must be either
-                       /// "uniform" or "exponential"
-  string duration = 6; /// The flow duration distribution -- must be either
-                       /// "uniform" or "pareto"
+  bytes template = 1;    /// The packet "template". All data packets are derived
+                         /// from this template and contain the same payload.
+  double pps = 2;        /// The total number of packets per second to generate.
+  double flow_rate = 3;  /// The number of new flows to create every second.
+                         /// flow_rate must be <= pps.
+  double flow_duration = 4;  /// The lifetime of a flow in seconds.
+  string arrival = 5;   /// The packet arrival distribution -- must be either
+                        /// "uniform" or "exponential"
+  string duration = 6;  /// The flow duration distribution -- must be either
+                        /// "uniform" or "pareto"
   bool quick_rampup =
-      7; /// Whether or not to populate the flowgenerator with initial flows
-         /// (start generating full pps rate immediately) or to wait for new
-         /// flows to be generated naturally (all flows have a SYN packet).
+      7;  /// Whether or not to populate the flowgenerator with initial flows
+          /// (start generating full pps rate immediately) or to wait for new
+          /// flows to be generated naturally (all flows have a SYN packet).
   uint32 ip_src_range =
-      8; /// When generating new flows, FlowGen modifies the template packet by
-         /// changing the IP src, incrementing it by at most ip_src_range (e.g.,
-         /// if the base packet is 10.0.0.1 and range is 5, it will generate
-         /// packets with IPs 10.0.0.1-10.0.0.6).
+      8;  /// When generating new flows, FlowGen modifies the template packet by
+          /// changing the IP src, incrementing it by at most ip_src_range
+          /// (e.g., if the base packet is 10.0.0.1 and range is 5, it will
+          /// generate packets with IPs 10.0.0.1-10.0.0.6).
   uint32 ip_dst_range =
-      9; /// When generating new flows, FlowGen modifies the template packet by
-         /// changing the IP dst, incrementing it by at most ip_dst_range.
-  uint32 port_src_range =
-      10; /// When generating new flows, FlowGen modifies the template packet by
-          /// changing the TCP port, incrementing it by at most port_src_range.
+      9;  /// When generating new flows, FlowGen modifies the template packet by
+          /// changing the IP dst, incrementing it by at most ip_dst_range.
+  uint32 port_src_range = 10;  /// When generating new flows, FlowGen modifies
+                               /// the template packet by changing the TCP port,
+                               /// incrementing it by at most port_src_range.
   uint32 port_dst_range =
-      11; /// When generating new flows, FlowGen modifies the template packet by
-          /// changing the TCP dst port, incrementing it by at most
-          /// port_dst_range.
+      11;  /// When generating new flows, FlowGen modifies the template packet
+           /// by changing the TCP dst port, incrementing it by at most
+           /// port_dst_range.
 }
 
 /**
@@ -593,7 +603,7 @@ message FlowGenArg {
  * __Ouptut Gates__: 1
  */
 message GenericDecapArg {
-  uint64 bytes = 1; /// The number of bytes to strip off.
+  uint64 bytes = 1;  /// The number of bytes to strip off.
 }
 
 /**
@@ -620,11 +630,11 @@ message GenericEncapArg {
    * An EncapField represents one field in the new packet header.
    */
   message EncapField {
-    uint64 size = 1; /// The length of the field.
+    uint64 size = 1;  /// The length of the field.
     oneof insertion {
       string attribute =
-          2; /// The metadata attribute name to pull the field value from
-      FieldData value = 3; /// Or, the fixed value to insert into the packet.
+          2;  /// The metadata attribute name to pull the field value from
+      FieldData value = 3;  /// Or, the fixed value to insert into the packet.
     }
   }
   repeated EncapField fields = 1;
@@ -640,10 +650,10 @@ message GenericEncapArg {
  */
 message HashLBArg {
   repeated int64 gates =
-      1; /// A list of gate numbers over which to partition packets
+      1;  /// A list of gate numbers over which to partition packets
   string mode =
-      2; /// The mode (`'l2'`, `'l3'`, or `'l4'`) for the hash function.
-  repeated Field fields = 3; /// A list of fields that define a custom tuple.
+      2;  /// The mode (`'l2'`, `'l3'`, or `'l4'`) for the hash function.
+  repeated Field fields = 3;  /// A list of fields that define a custom tuple.
 }
 
 /**
@@ -665,9 +675,9 @@ message IPEncapArg {}
  * __Output Gates__: many (configurable, depending on rule values)
  */
 message IPLookupArg {
-  uint32 max_rules = 1; /// Maximum number of rules (default: 1024)
+  uint32 max_rules = 1;  /// Maximum number of rules (default: 1024)
   uint32 max_tbl8s =
-      2; /// Maximum number of IP prefixes with smaller than /24 (default: 128)
+      2;  /// Maximum number of IP prefixes with smaller than /24 (default: 128)
 }
 
 /**
@@ -679,10 +689,10 @@ message IPLookupArg {
  * __Ouput Gates__: many (configurable, depending on rules)
  */
 message L2ForwardArg {
-  int64 size = 1;   /// Configures the forwarding hash table -- total number of
-                    /// hash table entries.
-  int64 bucket = 2; /// Configures the forwarding hash table -- total number of
-                    /// slots per hash value.
+  int64 size = 1;    /// Configures the forwarding hash table -- total number of
+                     /// hash table entries.
+  int64 bucket = 2;  /// Configures the forwarding hash table -- total number of
+                     /// slots per hash value.
 }
 
 /**
@@ -709,15 +719,16 @@ message MACSwapArg {}
 message MeasureArg {
   // int64 warmup = 1; /// removed: instead of warmup delay, user should Clear()
   oneof type {
-    uint64 offset = 2;    /// Where to store the current time within the packet,
-                          /// offset in bytes.
-    string attr_name = 6; /// Where to store the current time as attribute
+    uint64 offset = 2;  /// Where to store the current time within the packet,
+                        /// offset in bytes.
+    string attr_name = 6;  /// Where to store the current time as attribute
   }
   double jitter_sample_prob =
-      3; /// How often the module should sample packets for inter-packet arrival
-         /// measurements (to measure jitter).
-  uint64 latency_ns_max = 4; /// maximum latency expected, in ns (default 0.1 s)
-  uint32 latency_ns_resolution = 5; /// resolution, in ns (default 100)
+      3;  /// How often the module should sample packets for inter-packet
+          /// arrival measurements (to measure jitter).
+  uint64 latency_ns_max =
+      4;  /// maximum latency expected, in ns (default 0.1 s)
+  uint32 latency_ns_resolution = 5;  /// resolution, in ns (default 100)
 }
 
 /**
@@ -763,7 +774,7 @@ message NATArg {
     string ext_addr = 1;
     repeated PortRange port_ranges = 2;
   }
-  repeated ExternalAddress ext_addrs = 1; /// list of external IP addresses
+  repeated ExternalAddress ext_addrs = 1;  /// list of external IP addresses
 }
 
 /**
@@ -788,13 +799,13 @@ message NATArg {
  */
 message StaticNATArg {
   message AddressRange {
-    string start = 1; /// first IP address to use
-    string end = 2;   /// last IP address to use
+    string start = 1;  /// first IP address to use
+    string end = 2;    /// last IP address to use
   }
 
   message AddressRangePair {
     AddressRange int_range = 1;
-    AddressRange ext_range = 2; /// should be the same size as int_range
+    AddressRange ext_range = 2;  /// should be the same size as int_range
   }
 
   repeated AddressRangePair pairs = 1;
@@ -815,8 +826,8 @@ message NoOpArg {}
  * __Output Gates__: 1
  */
 message PortIncArg {
-  string port = 1;   /// The portname to connect to.
-  bool prefetch = 2; /// Whether or not to prefetch packets from the port.
+  string port = 1;    /// The portname to connect to.
+  bool prefetch = 2;  /// Whether or not to prefetch packets from the port.
 }
 
 /**
@@ -828,7 +839,7 @@ message PortIncArg {
  * __Output Gates__: 0
  */
 message PortOutArg {
-  string port = 1; /// The portname to connect to.
+  string port = 1;  /// The portname to connect to.
 }
 
 /**
@@ -841,11 +852,11 @@ message PortOutArg {
  * __Output Gates__: 1
  */
 message QueueIncArg {
-  string port = 1;   /// The portname to connect to (read from).
-  uint64 qid = 2;    /// The queue on that port to read from. qid starts from 0.
-  bool prefetch = 3; /// When prefetch is enabled, the module will perform CPU
-                     /// prefetch on the first 64B of each packet onto CPU L1
-                     /// cache. Default value is false.
+  string port = 1;  /// The portname to connect to (read from).
+  uint64 qid = 2;   /// The queue on that port to read from. qid starts from 0.
+  bool prefetch = 3;  /// When prefetch is enabled, the module will perform CPU
+                      /// prefetch on the first 64B of each packet onto CPU L1
+                      /// cache. Default value is false.
 }
 
 /**
@@ -858,8 +869,8 @@ message QueueIncArg {
  * __Output Gates__: 0
  */
 message QueueOutArg {
-  string port = 1; /// The portname to connect to.
-  uint64 qid = 2;  /// The queue on that port to write out to.
+  string port = 1;  /// The portname to connect to.
+  uint64 qid = 2;   /// The queue on that port to write out to.
 }
 
 /**
@@ -869,12 +880,12 @@ message QueueOutArg {
  * __Output Gates__: 1
  */
 message QueueArg {
-  uint64 size = 1;   /// The maximum number of packets to store in the queue.
-  bool prefetch = 2; /// When prefetch is enabled, the module will perform CPU
-                     /// prefetch on the first 64B of each packet onto CPU L1
-                     /// cache. Default value is false.
-  bool backpressure = 3; // When backpressure is enabled, the module will notify
-                         // upstream if it is overloaded.
+  uint64 size = 1;    /// The maximum number of packets to store in the queue.
+  bool prefetch = 2;  /// When prefetch is enabled, the module will perform CPU
+                      /// prefetch on the first 64B of each packet onto CPU L1
+                      /// cache. Default value is false.
+  bool backpressure = 3;  // When backpressure is enabled, the module will
+                          // notify upstream if it is overloaded.
 }
 
 /**
@@ -884,8 +895,8 @@ message QueueArg {
  * __Output Gates__: many (configurable)
  */
 message RandomSplitArg {
-  double drop_rate = 1;     /// Probability of dropping packet.
-  repeated int64 gates = 2; /// A list of gate numbers to split the traffic.
+  double drop_rate = 1;      /// Probability of dropping packet.
+  repeated int64 gates = 2;  /// A list of gate numbers to split the traffic.
 }
 
 /**
@@ -893,7 +904,7 @@ message RandomSplitArg {
  * the probability of dropping packets
  */
 message RandomSplitCommandSetDroprateArg {
-  double drop_rate = 1; /// Probability of dropping packet.
+  double drop_rate = 1;  /// Probability of dropping packet.
 }
 
 /**
@@ -901,7 +912,7 @@ message RandomSplitCommandSetDroprateArg {
  * the total number of output gates in the module.
  */
 message RandomSplitCommandSetGatesArg {
-  repeated int64 gates = 1; /// A list of gate numbers to split the traffic.
+  repeated int64 gates = 1;  /// A list of gate numbers to split the traffic.
 }
 
 /**
@@ -917,12 +928,12 @@ message RandomUpdateArg {
    * in each packet processed.
    */
   message Field {
-    int64 offset = 1; /// Offset in bytes of where to rewrite.
-    uint64 size = 2;  /// The number of bytes to write.
-    uint64 min = 3;   /// The minimum value to insert into the packet.
-    uint64 max = 4;   /// The maximum value to insert into the packet.
+    int64 offset = 1;  /// Offset in bytes of where to rewrite.
+    uint64 size = 2;   /// The number of bytes to write.
+    uint64 min = 3;    /// The minimum value to insert into the packet.
+    uint64 max = 4;    /// The maximum value to insert into the packet.
   }
-  repeated Field fields = 1; /// A list of Random Update Fields.
+  repeated Field fields = 1;  /// A list of Random Update Fields.
 }
 
 /**
@@ -935,7 +946,7 @@ message RandomUpdateArg {
  */
 message RewriteArg {
   repeated bytes templates =
-      1; /// A list of bytestrings representing packet templates.
+      1;  /// A list of bytestrings representing packet templates.
 }
 
 /**
@@ -944,7 +955,7 @@ message RewriteArg {
  */
 message RoundRobinCommandSetGatesArg {
   repeated int64 gates =
-      1; /// A list of gate numbers to round-robin the traffic over.
+      1;  /// A list of gate numbers to round-robin the traffic over.
 }
 
 /**
@@ -952,8 +963,8 @@ message RoundRobinCommandSetGatesArg {
  * to balance traffic across gates per-packet or per-batch.
  */
 message RoundRobinCommandSetModeArg {
-  string mode = 1; /// whether to perform `'packet'` or `'batch'` round robin
-                   /// partitioning.
+  string mode = 1;  /// whether to perform `'packet'` or `'batch'` round robin
+                    /// partitioning.
 }
 
 /**
@@ -964,9 +975,9 @@ message RoundRobinCommandSetModeArg {
  * __Output Gates__: many (configurable)
  */
 message RoundRobinArg {
-  repeated int64 gates = 1; /// A list of gate numbers to split packets across.
-  string mode = 2; /// Whether to split across gate with every `'packet'` or
-                   /// every `'batch'`.
+  repeated int64 gates = 1;  /// A list of gate numbers to split packets across.
+  string mode = 2;  /// Whether to split across gate with every `'packet'` or
+                    /// every `'batch'`.
 }
 
 /**
@@ -977,7 +988,8 @@ message RoundRobinArg {
  * __Output Gates__: many (configurable)
  */
 message ReplicateArg {
-  repeated int64 gates = 1; /// A list of gate numbers to send packet copies to.
+  repeated int64 gates =
+      1;  /// A list of gate numbers to send packet copies to.
 }
 
 /**
@@ -986,7 +998,7 @@ message ReplicateArg {
  */
 message ReplicateCommandSetGatesArg {
   repeated int64 gates =
-      1; /// A list of gate numbers to replicate the traffic over.
+      1;  /// A list of gate numbers to replicate the traffic over.
 }
 
 /**
@@ -1005,26 +1017,26 @@ message SetMetadataArg {
    * metadata_value = (packet_value >> `rshift_bits`) & `mask`.
    */
   message Attribute {
-    string name = 1; /// The metadata attribute name.
-    uint64 size = 2; /// The size of values stored in this attribute in bytes.
+    string name = 1;  /// The metadata attribute name.
+    uint64 size = 2;  /// The size of values stored in this attribute in bytes.
     oneof value {
       uint64 value_int =
-          3; /// An integer value to store in the packet (host-order).
+          3;  /// An integer value to store in the packet (host-order).
       bytes value_bin =
-          4; /// A binary value to store in the packet (host-order).
+          4;  /// A binary value to store in the packet (host-order).
     }
-    int32 offset = 5; /// An index in the packet data to store copy into the
-                      /// metadata attribute.
-    bytes mask = 6;   /// An array of bit masks to apply to each of the bytes
-                      /// copied starting from `offset`. If empty, the mask
-                      /// `[0xFF,....,0xFF]` will be used.
+    int32 offset = 5;  /// An index in the packet data to store copy into the
+                       /// metadata attribute.
+    bytes mask = 6;    /// An array of bit masks to apply to each of the bytes
+                       /// copied starting from `offset`. If empty, the mask
+                       /// `[0xFF,....,0xFF]` will be used.
     int32 rshift_bits =
-        7; /// The number of bits to shift the value at `offset` by before
-           /// masking. Must be a multiple of 8. Positive and negative values
-           /// represent right and left shifts respectively.
+        7;  /// The number of bits to shift the value at `offset` by before
+            /// masking. Must be a multiple of 8. Positive and negative values
+            /// represent right and left shifts respectively.
   }
   repeated Attribute attrs =
-      1; /// A list of attributes to attach to the packet.
+      1;  /// A list of attributes to attach to the packet.
 }
 
 /**
@@ -1041,8 +1053,8 @@ message SinkArg {}
  * from the module.
  */
 message SourceCommandSetBurstArg {
-  uint64 burst = 1; /// The maximum number of packets to release in a
-                    /// packetbatch from the module.
+  uint64 burst = 1;  /// The maximum number of packets to release in a
+                     /// packetbatch from the module.
 }
 
 /**
@@ -1051,7 +1063,7 @@ message SourceCommandSetBurstArg {
  */
 message SourceCommandSetPktSizeArg {
   uint64 pkt_size =
-      1; /// The size (in bytes) of the packets for Source to create.
+      1;  /// The size (in bytes) of the packets for Source to create.
 }
 
 /**
@@ -1061,7 +1073,7 @@ message SourceCommandSetPktSizeArg {
  * __Output Gates__: 1
  */
 message SourceArg {
-  uint64 pkt_size = 1; /// The size (in bytes) of packet data to produce.
+  uint64 pkt_size = 1;  /// The size (in bytes) of packet data to produce.
 }
 
 /**
@@ -1074,8 +1086,8 @@ message SourceArg {
  * __Output Gates__: 2
  */
 message IPChecksumArg {
-  bool verify = 1; /// check checksum
-  bool hw = 2;     /// enable hardware offload
+  bool verify = 1;  /// check checksum
+  bool hw = 2;      /// enable hardware offload
 }
 
 /**
@@ -1088,8 +1100,8 @@ message IPChecksumArg {
  * __Output Gates__: 2
  */
 message L4ChecksumArg {
-  bool verify = 1; /// check checksum
-  bool hw = 2;     /// enable hardware offload
+  bool verify = 1;  /// check checksum
+  bool hw = 2;      /// enable hardware offload
 }
 
 /**
@@ -1101,7 +1113,7 @@ message L4ChecksumArg {
  * __Output Gates__: 1
  */
 message GtpuEchoArg {
-  uint32 s1u_sgw_ip = 1; /// IP address of S1U interface
+  uint32 s1u_sgw_ip = 1;  /// IP address of S1U interface
 }
 
 /**
@@ -1113,8 +1125,8 @@ message GtpuEchoArg {
  * __Output Gates__: 1
  */
 message IPDefragArg {
-  uint32 num_flows = 1; /// max number of flows the module can handle
-  int32 numa = 2;       /// numa placement for ip frags memory management
+  uint32 num_flows = 1;  /// max number of flows the module can handle
+  int32 numa = 2;        /// numa placement for ip frags memory management
 }
 
 /**
@@ -1125,8 +1137,8 @@ message IPDefragArg {
  * __Output Gates__: 1
  */
 message IPFragArg {
-  int32 mtu = 1; /// full Ethernet frame size (including CRC) for encapsulated
-                 /// ipv4 frag datagrams
+  int32 mtu = 1;  /// full Ethernet frame size (including CRC) for encapsulated
+                  /// ipv4 frag datagrams
 }
 
 /**
@@ -1136,7 +1148,7 @@ message IPFragArg {
  * Example use in bessctl: `counter.add(ctr_id=0x1)`
  */
 message CounterAddArg {
-  uint32 ctr_id = 1; /// counter id
+  uint32 ctr_id = 1;  /// counter id
 }
 
 /**
@@ -1146,7 +1158,7 @@ message CounterAddArg {
  * Example use in bessctl: `counter.remove(ctr_id=0x1)`
  */
 message CounterRemoveArg {
-  uint32 ctr_id = 1; /// counter id
+  uint32 ctr_id = 1;  /// counter id
 }
 
 /**
@@ -1156,10 +1168,10 @@ message CounterRemoveArg {
  * __Output Gates__: 1
  */
 message CounterArg {
-  string name_id = 1;   /// Name of the counter_id
-  bool check_exist = 2; /// verify each counter pre-exists before any operation
-                        /// (default = False)
-  uint32 total = 3;     /// Total number of entries it can support
+  string name_id = 1;    /// Name of the counter_id
+  bool check_exist = 2;  /// verify each counter pre-exists before any operation
+                         /// (default = False)
+  uint32 total = 3;      /// Total number of entries it can support
 }
 
 /**
@@ -1169,7 +1181,7 @@ message CounterArg {
  * __Output Gates__: 1
  */
 message GtpuEncapArg {
-  bool add_psc = 1; /// Add PDU session container in encap (default = False)
+  bool add_psc = 1;  /// Add PDU session container in encap (default = False)
 }
 
 /**
@@ -1181,10 +1193,10 @@ message GtpuEncapArg {
  * __Output Gates__: many (up to 2^(size * 8))
  */
 message SplitArg {
-  uint64 size = 1; /// The size of the value to read in bytes
+  uint64 size = 1;  /// The size of the value to read in bytes
   oneof type {
-    string attribute = 2; /// The name of the metadata field to read.
-    int64 offset = 3;     /// The offset (in bytes) of the data field to read.
+    string attribute = 2;  /// The name of the metadata field to read.
+    int64 offset = 3;      /// The offset (in bytes) of the data field to read.
   }
 }
 
@@ -1216,11 +1228,11 @@ message UpdateArg {
    * value.
    */
   message Field {
-    int64 offset = 1; /// The offset in the packet in bytes to rewrite at.
-    uint64 size = 2;  /// The number of bytes to rewrite (max 8 bytes).
-    uint64 value = 3; /// The value to write into the packet, max 8 bytes.
+    int64 offset = 1;  /// The offset in the packet in bytes to rewrite at.
+    uint64 size = 2;   /// The number of bytes to rewrite (max 8 bytes).
+    uint64 value = 3;  /// The value to write into the packet, max 8 bytes.
   }
-  repeated Field fields = 1; /// A list of Update Fields.
+  repeated Field fields = 1;  /// A list of Update Fields.
 }
 
 /**
@@ -1238,10 +1250,10 @@ message UrlFilterArg {
    * A URL consists of a host and a path.
    */
   message Url {
-    string host = 1; /// Host field, e.g. "www.google.com"
-    string path = 2; /// Path prefix, e.g. "/"
+    string host = 1;  /// Host field, e.g. "www.google.com"
+    string path = 2;  /// Path prefix, e.g. "/"
   }
-  repeated Url blacklist = 1; /// A list of Urls to block.
+  repeated Url blacklist = 1;  /// A list of Urls to block.
 }
 
 /**
@@ -1250,7 +1262,9 @@ message UrlFilterArg {
  * list: we assume anyone using get_initial_arg is also using
  * get_runtime_config.
  */
-message UrlFilterConfig { repeated UrlFilterArg.Url blacklist = 1; }
+message UrlFilterConfig {
+  repeated UrlFilterArg.Url blacklist = 1;
+}
 
 /**
  * VLANPop removes the VLAN tag.
@@ -1267,7 +1281,7 @@ message VLANPopArg {}
  * __Output Gates__: 1
  */
 message VLANPushArg {
-  uint64 tci = 1; /// The TCI value to insert in the VLAN tag.
+  uint64 tci = 1;  /// The TCI value to insert in the VLAN tag.
 }
 
 /**
@@ -1295,7 +1309,7 @@ message VXLANDecapArg {}
  * __Output Gates__: 1
  */
 message VXLANEncapArg {
-  uint64 dstport = 1; /// The destination UDP port
+  uint64 dstport = 1;  /// The destination UDP port
 }
 
 /**
@@ -1310,8 +1324,8 @@ message VXLANEncapArg {
  * __Output Gates__: many (configurable)
  */
 message WildcardMatchArg {
-  repeated Field fields = 1; /// A list of WildcardMatch fields.
-  repeated Field values = 2; /// A list of WildcardMatch values.
+  repeated Field fields = 1;  /// A list of WildcardMatch fields.
+  repeated Field values = 2;  /// A list of WildcardMatch values.
   uint64 entries = 3;
 }
 
@@ -1335,8 +1349,8 @@ message WildcardMatchConfig {
  * __Output Gates__: 1
  */
 message ArpResponderArg {
-  string ip = 1;       /// The IP
-  string mac_addr = 2; /// The MAC address
+  string ip = 1;        /// The IP
+  string mac_addr = 2;  /// The MAC address
 }
 
 /**
@@ -1346,8 +1360,8 @@ message ArpResponderArg {
  * __Output Gates__: 2
  */
 message MplsPopArg {
-  bool remove_eth_header = 1; /// Remove ETH header with the pop
-  uint32 next_eth_type = 2;   /// The next ETH type to set
+  bool remove_eth_header = 1;  /// Remove ETH header with the pop
+  uint32 next_eth_type = 2;    /// The next ETH type to set
 }
 
 /**
@@ -1366,7 +1380,7 @@ message MplsPopArg {
  * __Output Gates__: many
  */
 message WorkerSplitArg {
-  map<uint32, uint32> worker_gates = 1; // ogate -> worker mask
+  map<uint32, uint32> worker_gates = 1;  // ogate -> worker mask
 }
 
 message QosArg {
@@ -1387,7 +1401,9 @@ message QosCommandAddArg {
   repeated FieldData values = 8;
 }
 
-message QosCommandDeleteArg { repeated FieldData fields = 2; }
+message QosCommandDeleteArg {
+  repeated FieldData fields = 2;
+}
 
 /**
  * The function `clear()` for WildcardMatch takes no parameters, it clears
@@ -1401,29 +1417,31 @@ message QosCommandClearArg {}
  * the `set_default_gate(...)` function specifies which gate to send this extra
  * traffic to.
  */
-message QosCommandSetDefaultGateArg { uint64 gate = 1; }
+message QosCommandSetDefaultGateArg {
+  uint64 gate = 1;
+}
 
 message FlowMeasureArg {
   string flag_attr_name = 1;
   uint64 entries = 2;
-  bool leader = 3; // If true, this module will decide the buffer side
+  bool leader = 3;  // If true, this module will decide the buffer side
 }
 message FlowMeasureCommandReadArg {
-  bool clear = 1; // If true, the data will be all cleared after read
+  bool clear = 1;  // If true, the data will be all cleared after read
   repeated double latency_percentiles =
-      2; /// ascending list of real numbers in [0.0, 100.0]
+      2;  /// ascending list of real numbers in [0.0, 100.0]
   repeated double jitter_percentiles =
-      3;                   /// ascending list of real numbers in [0.0, 100.0]
-  uint64 flag_to_read = 4; /// Which buffer to read from
+      3;                    /// ascending list of real numbers in [0.0, 100.0]
+  uint64 flag_to_read = 4;  /// Which buffer to read from
 }
 message FlowMeasureReadResponse {
   message Statistic {
     message Histogram {
       uint64 count =
-          1; /// Total # of measured data points, including above_range
+          1;  /// Total # of measured data points, including above_range
       uint64 above_range =
-          2; /// # of data points for the "too large value" bucket
-      uint64 resolution_ns = 8; /// resolution of measured data
+          2;  /// # of data points for the "too large value" bucket
+      uint64 resolution_ns = 8;  /// resolution of measured data
       uint64 min_ns = 3;
       uint64 avg_ns = 4;
       uint64 max_ns = 5;
@@ -1440,4 +1458,6 @@ message FlowMeasureReadResponse {
   repeated Statistic statistics = 1;
 }
 message FlowMeasureCommandFlipArg {}
-message FlowMeasureFlipResponse { uint64 old_flag = 1; }
+message FlowMeasureFlipResponse {
+  uint64 old_flag = 1;
+}

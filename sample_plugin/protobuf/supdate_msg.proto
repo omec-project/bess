@@ -51,10 +51,10 @@ message SequentialUpdateArg {
    * rewrite in each packet processed.
    */
   message Field {
-    int64 offset = 1; /// Offset in bytes for where to rewrite.
-    uint64 size = 2;  /// The number of bytes to write.
-    uint64 min = 3;   /// The minimum value to insert into the packet.
-    uint64 max = 4;   /// The maximum value to insert into the packet.
+    int64 offset = 1;  /// Offset in bytes for where to rewrite.
+    uint64 size = 2;   /// The number of bytes to write.
+    uint64 min = 3;    /// The minimum value to insert into the packet.
+    uint64 max = 4;    /// The maximum value to insert into the packet.
   }
-  repeated Field fields = 1; /// A list of SequentialUpdate Fields.
+  repeated Field fields = 1;  /// A list of SequentialUpdate Fields.
 }

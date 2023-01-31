@@ -33,7 +33,9 @@ package bess.pb;
 
 option go_package = "github.com/omec-project/upf-epc/pfcpiface/bess_pb";
 
-message PCAPPortArg { string dev = 1; }
+message PCAPPortArg {
+  string dev = 1;
+}
 
 message PMDPortArg {
   bool loopback = 1;
