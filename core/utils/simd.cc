@@ -51,8 +51,8 @@ std::string m256i_to_str(__m256i a) {
   };
 
   vec = a;
-  return bess::utils::Format("[%08x %08x %08x %08x %08x %08x %08x %08x]",
-                             b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]);
+  return bess::utils::Format("[%08x %08x %08x %08x %08x %08x %08x %08x]", b[0],
+                             b[1], b[2], b[3], b[4], b[5], b[6], b[7]);
 }
 
 #endif

@@ -305,4 +305,4 @@ TEST(Mask, ExtraLongUnAligned) {
   }
 }
 
-}  // namespace (unnamed)
+}  // namespace

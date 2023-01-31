@@ -152,7 +152,9 @@ struct task_result DRR::RunTask(Context *ctx, bess::PacketBatch *batch,
                                 void *) {
   if (children_overload_ > 0) {
     return {
-        .block = true, .packets = 0, .bits = 0,
+        .block = true,
+        .packets = 0,
+        .bits = 0,
     };
   }
 

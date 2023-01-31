@@ -39,15 +39,15 @@
 #include "../utils/ip.h"
 #include "../utils/simd.h"
 #include "../utils/tcp.h"
-#include "../utils/udp.h"
 #include "../utils/time.h"
+#include "../utils/udp.h"
 
+using bess::utils::be16_t;
+using bess::utils::be32_t;
 using bess::utils::Ethernet;
 using bess::utils::Ipv4;
 using bess::utils::Tcp;
 using bess::utils::Udp;
-using bess::utils::be16_t;
-using bess::utils::be32_t;
 
 /* we ignore the last 1% tail to make the variance finite */
 const double PARETO_TAIL_LIMIT = 0.99;
@@ -181,10 +181,11 @@ void FlowGen::PopulateInitialFlows() {
   }
 }
 
-CommandResponse FlowGen::ProcessUpdatableArguments(const bess::pb::FlowGenArg &arg) {
-
+CommandResponse FlowGen::ProcessUpdatableArguments(
+    const bess::pb::FlowGenArg &arg) {
   if (arg.template_().length() == 0) {
-    if (strnlen(reinterpret_cast<const char*>(tmpl_), MAX_TEMPLATE_SIZE) == 0) {
+    if (strnlen(reinterpret_cast<const char *>(tmpl_), MAX_TEMPLATE_SIZE) ==
+        0) {
       return CommandFailure(EINVAL, "must specify 'template'");
     }
   } else {
@@ -434,7 +435,6 @@ bess::Packet *FlowGen::FillUdpPacket(struct flow *f) {
   return pkt;
 }
 
-
 bess::Packet *FlowGen::FillTcpPacket(struct flow *f) {
   bess::Packet *pkt;
 
@@ -532,7 +532,9 @@ struct task_result FlowGen::RunTask(Context *ctx, bess::PacketBatch *batch,
                                     void *) {
   if (children_overload_ > 0) {
     return {
-        .block = true, .packets = 0, .bits = 0,
+        .block = true,
+        .packets = 0,
+        .bits = 0,
     };
   }
 

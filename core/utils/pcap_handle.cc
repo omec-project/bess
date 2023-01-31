@@ -37,7 +37,7 @@ PcapHandle::PcapHandle(const std::string& dev) : handle_() {
   handle_ = pcap_open_live(dev.c_str(), PCAP_SNAPLEN, 1, -1, errbuf);
 }
 
-PcapHandle::PcapHandle(pcap_t *handle) : handle_(handle) {}
+PcapHandle::PcapHandle(pcap_t* handle) : handle_(handle) {}
 
 PcapHandle::PcapHandle(PcapHandle&& other) : handle_(other.handle_) {
   other.handle_ = nullptr;

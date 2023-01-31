@@ -45,10 +45,10 @@
 #include "../utils/tcp_flow_reconstruct.h"
 #include "../utils/trie.h"
 
-using bess::utils::TcpFlowReconstruct;
-using bess::utils::Trie;
 using bess::utils::be16_t;
 using bess::utils::be32_t;
+using bess::utils::TcpFlowReconstruct;
+using bess::utils::Trie;
 
 // A helper class that defines a TCP flow
 class alignas(16) Flow {

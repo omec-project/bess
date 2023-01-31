@@ -62,7 +62,7 @@ static bool ValidateIovaMode(const char *, const std::string &value) {
   return (value == "") || (value == "pa") || (value == "va");
 }
 DEFINE_string(iova, "", "DPDK IOVA mode: pa or va. Set auto if not specified");
-static bool _iova_dummy[[maybe_unused]] =
+static bool _iova_dummy [[maybe_unused]] =
     google::RegisterFlagValidator(&FLAGS_iova, &ValidateIovaMode);
 
 static bool ValidateCoreID(const char *, int32_t value) {
@@ -74,7 +74,7 @@ static bool ValidateCoreID(const char *, int32_t value) {
   return true;
 }
 DEFINE_int32(c, 0, "Core ID for the default worker thread");
-static const bool _c_dummy[[maybe_unused]] =
+static const bool _c_dummy [[maybe_unused]] =
     google::RegisterFlagValidator(&FLAGS_c, &ValidateCoreID);
 
 static bool ValidateTCPPort(const char *, int32_t value) {
@@ -96,7 +96,7 @@ DEFINE_int32(
     p, kDefaultPort,
     "Specifies the TCP port on which BESS listens for controller connections, "
     "if --grpc_url is empty. Deprecated, please use --grpc_url instead");
-static const bool _p_dummy[[maybe_unused]] =
+static const bool _p_dummy [[maybe_unused]] =
     google::RegisterFlagValidator(&FLAGS_p, &ValidateTCPPort);
 
 static bool ValidateMegabytesPerSocket(const char *, int32_t value) {
@@ -110,7 +110,7 @@ static bool ValidateMegabytesPerSocket(const char *, int32_t value) {
 DEFINE_int32(m, 1024,
              "Specifies per-socket hugepages to allocate (in MBs). "
              "If set to 0, no hugepage is used");
-static const bool _m_dummy[[maybe_unused]] =
+static const bool _m_dummy [[maybe_unused]] =
     google::RegisterFlagValidator(&FLAGS_m, &ValidateMegabytesPerSocket);
 
 static bool ValidateBuffersPerSocket(const char *, int32_t value) {
@@ -127,5 +127,5 @@ static bool ValidateBuffersPerSocket(const char *, int32_t value) {
 DEFINE_int32(buffers, 262144,
              "Specifies how many packet buffers to allocate per socket,"
              " must be a power of 2.");
-static const bool _buffers_dummy[[maybe_unused]] =
+static const bool _buffers_dummy [[maybe_unused]] =
     google::RegisterFlagValidator(&FLAGS_buffers, &ValidateBuffersPerSocket);

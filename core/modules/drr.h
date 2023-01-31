@@ -42,8 +42,8 @@
 #include "../utils/cuckoo_map.h"
 #include "../utils/ip.h"
 
-using bess::utils::Ipv4Prefix;
 using bess::utils::CuckooMap;
+using bess::utils::Ipv4Prefix;
 
 //
 // This module implements Deficit Round Robin, a fair queueing algorithm, for

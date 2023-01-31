@@ -53,10 +53,10 @@
 #include <string>
 
 #include "module.h"
+#include "opts.h"
 #include "packet.h"
 #include "scheduler.h"
 #include "traffic_class.h"
-#include "opts.h"
 #include "utils/format.h"
 
 namespace bess {
@@ -376,7 +376,7 @@ static bool SkipSymbol(char *symbol) {
   abort();
 }
 
-[[ gnu::noinline, noreturn ]] void GoPanic() {
+[[gnu::noinline, noreturn]] void GoPanic() {
   if (oops_msg == "")
     oops_msg = DumpStack();
 
@@ -450,7 +450,11 @@ static void TrapHandler(int sig_num, siginfo_t *info, void *ucontext) {
 
 void SetTrapHandler() {
   const int signals[] = {
-      SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGABRT,
+      SIGSEGV,
+      SIGBUS,
+      SIGILL,
+      SIGFPE,
+      SIGABRT,
       // SIGUSR1 is special in that it is triggered by user and does not abort
       SIGUSR1,
   };

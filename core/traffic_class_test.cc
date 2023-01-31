@@ -407,8 +407,9 @@ TEST(DefaultScheduleOnce, TwoLeavesWeightedFair) {
 // (lowest) priority leaf that is unblocked at that time.
 TEST(DefaultScheduleOnce, TwoLeavesPriority) {
   DummyModule dm;
-  DefaultScheduler s(CT("root", {PRIORITY}, {{0, CT("rr_1", {ROUND_ROBIN})},
-                                             {1, CT("rr_2", {ROUND_ROBIN})}}));
+  DefaultScheduler s(
+      CT("root", {PRIORITY},
+         {{0, CT("rr_1", {ROUND_ROBIN})}, {1, CT("rr_2", {ROUND_ROBIN})}}));
   ASSERT_EQ(3, TrafficClassBuilder::Find("root")->Size());
 
   RoundRobinTrafficClass *rr_1 =

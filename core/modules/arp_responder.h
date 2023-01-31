@@ -39,8 +39,8 @@
 #include "../utils/ether.h"
 #include "../utils/ip.h"
 
-using bess::utils::Ethernet;
 using bess::utils::be32_t;
+using bess::utils::Ethernet;
 
 // ARP cache entry struct which keeps mapping between IP and MAC
 struct arp_entry {

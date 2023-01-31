@@ -239,4 +239,4 @@ TEST(TrieTest, Dump) {
   EXPECT_EQ(expected_results, trie.Dump());
 }
 
-}  // namespace (unnamed)
+}  // namespace

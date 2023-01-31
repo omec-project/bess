@@ -43,7 +43,9 @@ namespace utils {
 // template argument T which is the type to be enqueued and dequeued.
 template <typename T>
 class LockLessQueue final : public Queue<T> {
- static_assert(std::is_pointer<T>::value, "LockLessQueue only supports pointer types");
+  static_assert(std::is_pointer<T>::value,
+                "LockLessQueue only supports pointer types");
+
  public:
   static const size_t kDefaultRingSize = 256;
 
@@ -78,13 +80,13 @@ class LockLessQueue final : public Queue<T> {
   }
 
   int Push(T* objs, size_t count) override {
-    if(!llring_enqueue_bulk(ring_, reinterpret_cast<void**>(objs), count)) {
+    if (!llring_enqueue_bulk(ring_, reinterpret_cast<void**>(objs), count)) {
       return count;
     }
     return 0;
   }
 
-  int Pop(T &obj) override {
+  int Pop(T& obj) override {
     return llring_dequeue(ring_, reinterpret_cast<void**>(&obj));
   }
 

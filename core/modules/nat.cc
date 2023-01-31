@@ -45,13 +45,13 @@
 using bess::utils::Ethernet;
 using bess::utils::Ipv4;
 using IpProto = bess::utils::Ipv4::Proto;
-using bess::utils::Udp;
-using bess::utils::Tcp;
-using bess::utils::Icmp;
 using bess::utils::ChecksumIncrement16;
 using bess::utils::ChecksumIncrement32;
-using bess::utils::UpdateChecksumWithIncrement;
+using bess::utils::Icmp;
+using bess::utils::Tcp;
+using bess::utils::Udp;
 using bess::utils::UpdateChecksum16;
+using bess::utils::UpdateChecksumWithIncrement;
 
 const Commands NAT::cmds = {
     {"get_initial_arg", "EmptyArg", MODULE_CMD_FUNC(&NAT::GetInitialArg),
@@ -88,7 +88,9 @@ CommandResponse NAT::Init(const bess::pb::NATArg &arg) {
     std::vector<PortRange> port_list;
     if (address_range.port_ranges().size() == 0) {
       port_list.emplace_back(PortRange{
-          .begin = 0u, .end = 65535u, .suspended = false,
+          .begin = 0u,
+          .end = 65535u,
+          .suspended = false,
       });
     }
     for (const auto &range : address_range.port_ranges()) {

@@ -38,7 +38,7 @@
 #if RTE_VERSION < RTE_VERSION_NUM(19, 11, 0, 0)
 #include <rte_lpm.h>
 #else
-#define USED(x)		(void)(x)
+#define USED(x) (void)(x)
 extern "C" {
 #include <rte_fib.h>
 }

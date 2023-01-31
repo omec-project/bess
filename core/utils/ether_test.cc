@@ -89,4 +89,4 @@ TEST(EthernetTest, RandomAddr) {
   EXPECT_NE(c, d);
 }
 
-}  // namespace (unnamed)
+}  // namespace

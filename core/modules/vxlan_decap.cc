@@ -44,8 +44,8 @@ enum {
   ATTR_W_TUN_ID,
 };
 
-CommandResponse VXLANDecap::Init(
-    const bess::pb::VXLANDecapArg &arg[[maybe_unused]]) {
+CommandResponse VXLANDecap::Init(const bess::pb::VXLANDecapArg &arg
+                                 [[maybe_unused]]) {
   using AccessMode = bess::metadata::Attribute::AccessMode;
 
   AddMetadataAttr("tun_ip_src", 4, AccessMode::kWrite);

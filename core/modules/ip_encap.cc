@@ -34,10 +34,10 @@
 #include "../utils/ether.h"
 #include "../utils/ip.h"
 
-using bess::utils::Ethernet;
-using bess::utils::Ipv4;
 using bess::utils::be16_t;
 using bess::utils::be32_t;
+using bess::utils::Ethernet;
+using bess::utils::Ipv4;
 
 enum {
   ATTR_R_IP_SRC,
@@ -47,7 +47,8 @@ enum {
   ATTR_W_ETHER_TYPE,
 };
 
-CommandResponse IPEncap::Init(const bess::pb::IPEncapArg &arg[[maybe_unused]]) {
+CommandResponse IPEncap::Init(const bess::pb::IPEncapArg &arg
+                              [[maybe_unused]]) {
   using AccessMode = bess::metadata::Attribute::AccessMode;
 
   AddMetadataAttr("ip_src", 4, AccessMode::kRead);

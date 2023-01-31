@@ -84,4 +84,4 @@ TEST(ExtendedPriorityQueueTest, Delete) {
   EXPECT_EQ(queue.top(), 1000);
 }
 
-}  // namespace (unnamed)
+}  // namespace

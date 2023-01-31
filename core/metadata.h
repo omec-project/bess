@@ -209,7 +209,7 @@ class Pipeline {
   // count(=int) represents how many modules registered the attribute, and the
   // attribute is deregistered once it reaches back to 0.
   // Those modules should agree on the same size(=size_t).
-  std::map<std::string, std::tuple<size_t, int> > registered_attrs_;
+  std::map<std::string, std::tuple<size_t, int>> registered_attrs_;
 };
 
 extern bess::metadata::Pipeline default_pipeline;

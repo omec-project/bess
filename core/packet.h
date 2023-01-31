@@ -267,7 +267,7 @@ class alignas(64) Packet {
       Packet *next_;  // Next segment. nullptr if not scattered.
 
       // offset 88:
-      uint64_t _dummy8;   // rte_mbuf.tx_offload
+      uint64_t _dummy8;  // rte_mbuf.tx_offload
       // TODO: Add struct rte_mbuf_ext_shared_info *shinfo;
       uint16_t _dummy9;   // rte_mbuf.priv_size
       uint16_t _dummy10;  // rte_mbuf.timesync
