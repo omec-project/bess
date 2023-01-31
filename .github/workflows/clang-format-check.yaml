@@ -4,11 +4,9 @@ on:
 jobs:
   formatting-check:
     name: Formatting Check
-    runs-on: '${{ matrix.os }}'
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
-        os:
-          - ubuntu-20.04
         path:
           - check: 'core'
             exclude: '(kmod)' # Exclude "kmod" dir because of different format
