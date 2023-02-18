@@ -1,3 +1,6 @@
+SPDX-License-Identifier: Apache-2.0
+Copyright 2019 Intel Corporation
+
 From e1bc63488d346cb84ae7e76f2bc480247f577abb Mon Sep 17 00:00:00 2001
 From: Saikrishna Edupuganti <saikrishna.edupuganti@intel.com>
 Date: Fri, 12 Jun 2020 21:36:53 +0000
