@@ -52,6 +52,7 @@ compile_commands.json
 # virtualenv
 venv/
 
-# Keep GitHub Actions and clang-format file
+# Keep GitHub Actions, reuse, and clang-format file
 !.github
+!.reuse
 !.clang-format

@@ -2,6 +2,8 @@
  * Copyright (c) 2009-2014 Kazuho Oku, Tokuhiro Matsuno, Daisuke Murase,
  *                         Shigeo Mitsunari
  *
+ * SPDX-License-Identifier: MIT or Artistic-1.0-Perl
+ *
  * The software is licensed under either the MIT License (below) or the Perl
  * license.
  *
