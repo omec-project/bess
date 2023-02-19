@@ -46,8 +46,7 @@ package bess.pb;
 
 option go_package = "github.com/omec-project/upf-epc/pfcpiface/bess_pb";
 
-message EmptyRequest {
-}
+message EmptyRequest {}
 
 message EmptyResponse {
   /// Contains a non-zero error code and a non-empty message if and only if
@@ -70,14 +69,14 @@ message UnloadPluginRequest {
 
 message ListPluginsResponse {
   Error error = 1;
-  repeated string paths = 2; /// Paths to the module library (*.so file)
+  repeated string paths = 2;  /// Paths to the module library (*.so file)
 }
 
 message ListWorkersResponse {
   message WorkerStatus {
-    int64 wid = 1;      /// Worker ID, starting from 0
-    int64 core = 2;     /// CPU core ID on which the worker is pinned
-    bool running = 3;   /// True if running, otherwise False.
+    int64 wid = 1;     /// Worker ID, starting from 0
+    int64 core = 2;    /// CPU core ID on which the worker is pinned
+    bool running = 3;  /// True if running, otherwise False.
 
     /// Number of traffic classes running on the worker
     int64 num_tcs = 4;
@@ -103,9 +102,9 @@ message DestroyWorkerRequest {
 }
 
 message TrafficClass {
-  string parent = 1;    /// Name of parent TC
-  string name = 2;      /// Name of TC
-  bool blocked = 3;     /// Is it running or ready to run at the moment?
+  string parent = 1;  /// Name of parent TC
+  string name = 2;    /// Name of TC
+  bool blocked = 3;   /// Is it running or ready to run at the moment?
 
   /// One of "priority", "weighted_fair", "round_robin", "rate_limit", "leaf"
   string policy = 4;
@@ -214,8 +213,8 @@ message GetDriverInfoRequest {
 
 message GetDriverInfoResponse {
   Error error = 1;
-  string name = 2;  /// Name of port driver
-  string help = 3;  /// 1-line description of the driver
+  string name = 2;               /// Name of port driver
+  string help = 3;               /// 1-line description of the driver
   repeated string commands = 4;  /// List of supported commands (TODO)
 }
 
@@ -232,7 +231,8 @@ message ListPortsResponse {
     uint64 size_inc_q = 6;
     /// Size of each incoming queue (# of packets).
     uint64 size_out_q = 7;
-    /// Driver specific argument that was used for port initialization. See port_msg.proto
+    /// Driver specific argument that was used for port initialization. See
+    /// port_msg.proto
     google.protobuf.Any driver_arg = 8;
   }
 
@@ -342,7 +342,7 @@ message GetPortStatsResponse {
 }
 
 message GetLinkStatusRequest {
-  string name = 1;       /// name of the port to query
+  string name = 1;  /// name of the port to query
 }
 
 message GetLinkStatusResponse {
@@ -352,10 +352,6 @@ message GetLinkStatusResponse {
   bool autoneg = 4;      /// auto-negotiated speed and duplex?
   bool link_up = 5;      /// link up?
 }
-
-
-
-
 
 message ListMclassResponse {
   Error error = 1;
@@ -415,21 +411,21 @@ message GetModuleInfoRequest {
 
 message GetModuleInfoResponse {
   message GateHook {
-    string class_name = 1;         /// gate hook class_name and
-    string hook_name = 2;          /// gate hook name
+    string class_name = 1;  /// gate hook class_name and
+    string hook_name = 2;   /// gate hook name
   }
   message IGate {
     message OGate {
       uint64 ogate = 1;  /// Output gate of "previous" module
       string name = 2;   /// Name of "previous" module
     }
-    uint64 igate = 1;                /// Input gate ID
-    repeated OGate ogates = 2;       /// The list of upstream output gates
-    uint64 cnt = 3;                  /// # of packet batches seen
-    uint64 pkts = 4;                 /// # of packets seen
-    uint64 bytes = 5;                /// # of bytes seen
-    double timestamp = 6;            /// The time that cnt/pkts counters were read
-    reserved 7; // repeated string hook_name = 7;
+    uint64 igate = 1;           /// Input gate ID
+    repeated OGate ogates = 2;  /// The list of upstream output gates
+    uint64 cnt = 3;             /// # of packet batches seen
+    uint64 pkts = 4;            /// # of packets seen
+    uint64 bytes = 5;           /// # of bytes seen
+    double timestamp = 6;       /// The time that cnt/pkts counters were read
+    reserved 7;                 // repeated string hook_name = 7;
     repeated GateHook gatehooks = 8;  /// List of gate hook
   }
   message OGate {
@@ -440,8 +436,8 @@ message GetModuleInfoResponse {
     double timestamp = 5;  /// The time thatcnt/pkts counters were read
     string name = 6;       /// Name of the "next" module it connects to
     uint64 igate = 7;      /// Input gate ID of the "next" module
-    reserved 8; // repeated string hook_name = 7;
-    repeated GateHook gatehooks = 9; /// List of gate hook
+    reserved 8;            // repeated string hook_name = 7;
+    repeated GateHook gatehooks = 9;  /// List of gate hook
   }
   message Attribute {
     string name = 1;   /// Name of per-packet metadata attribute
@@ -456,14 +452,15 @@ message GetModuleInfoResponse {
   repeated IGate igates = 6;        /// List of connected input gates
   repeated OGate ogates = 7;        /// List of connected output gates
   repeated Attribute metadata = 8;  /// List of metadata used by the module
-  uint64 deadends = 9;  /// Number of packets deadended or explicitly dropped by this module
+  uint64 deadends =
+      9;  /// Number of packets deadended or explicitly dropped by this module
 }
 
 message ConnectModulesRequest {
-  string m1 = 1;      /// Name of "previous" module name
-  string m2 = 2;      /// name of "next" module name
-  uint64 ogate = 3;   /// m1's output gate ID
-  uint64 igate = 4;   /// m2's input gate ID
+  string m1 = 1;     /// Name of "previous" module name
+  string m2 = 2;     /// name of "next" module name
+  uint64 ogate = 3;  /// m1's output gate ID
+  uint64 igate = 4;  /// m2's input gate ID
   /// If true do not attach default hooks at the input/output gate.
   /// (Currently, the only default hook is the "Track" hook at the ogate)
   bool skip_default_hooks = 5;
@@ -475,26 +472,28 @@ message DisconnectModulesRequest {
 }
 
 message MempoolDump {
-    int32 socket = 1;               /// The socket this mempool belongs to
-    bool initialized = 2;           /// True when this mempool has been initialized
-    uint32 mp_size = 3;             /// The maximum size of this mempool
-    uint32 mp_cache_size = 4;       /// Size of per-lcore default local cache.
-    uint32 mp_element_size = 5;     /// Size of one element
-    uint32 mp_populated_size = 6;   /// Number of populated objects
-    uint32 mp_available_count = 7;  /// Number of entries in this mempool
-    uint32 mp_in_use_count = 8;     /// Number of elements which have been allocated from this mempool
-    uint32 ring_count = 9;          /// Number of entries in the backing ring
-    uint32 ring_free_count = 10;    /// Number of free entries in the backing ring
-    uint64 ring_bytes = 11;         /// Size of the backing ring in bytes 
+  int32 socket = 1;              /// The socket this mempool belongs to
+  bool initialized = 2;          /// True when this mempool has been initialized
+  uint32 mp_size = 3;            /// The maximum size of this mempool
+  uint32 mp_cache_size = 4;      /// Size of per-lcore default local cache.
+  uint32 mp_element_size = 5;    /// Size of one element
+  uint32 mp_populated_size = 6;  /// Number of populated objects
+  uint32 mp_available_count = 7;  /// Number of entries in this mempool
+  uint32 mp_in_use_count =
+      8;  /// Number of elements which have been allocated from this mempool
+  uint32 ring_count = 9;        /// Number of entries in the backing ring
+  uint32 ring_free_count = 10;  /// Number of free entries in the backing ring
+  uint64 ring_bytes = 11;       /// Size of the backing ring in bytes
 }
 
 message DumpMempoolRequest {
-    int32 socket = 1; // ID of the socket whose mempool should be dumped. -1 for all sockets
+  int32 socket =
+      1;  // ID of the socket whose mempool should be dumped. -1 for all sockets
 }
 
 message DumpMempoolResponse {
-    Error error = 1;
-    repeated MempoolDump dumps = 2; /// The list of requested mempool dumps
+  Error error = 1;
+  repeated MempoolDump dumps = 2;  /// The list of requested mempool dumps
 }
 
 message CommandRequest {
@@ -507,7 +506,6 @@ message CommandResponse {
   Error error = 1;
   google.protobuf.Any data = 2;  /// Command response (see *_msg.proto)
 }
-
 
 //  -------------------------------------------------------------------------
 //  Gate hooks
@@ -550,9 +548,9 @@ message TrackArg {
 ///
 /// NOTE: There should be no running worker to run this command.
 message TcpdumpArg {
-  string fifo = 5;    /// Path to the FIFO file.
-  bool defer = 6;     /// If set, we'll defer opening the FIFO.
-  bool reconnect = 7; /// If set, we'll reconnect after failure.
+  string fifo = 5;     /// Path to the FIFO file.
+  bool defer = 6;      /// If set, we'll defer opening the FIFO.
+  bool reconnect = 7;  /// If set, we'll reconnect after failure.
 }
 
 /// Enable/Disable pcapng tapping at an input/output gate.
@@ -566,19 +564,18 @@ message TcpdumpArg {
 ///
 /// NOTE: There should be no running worker to run this command.
 message PcapngArg {
-  string fifo = 5;    /// Path to the FIFO file.
-  bool defer = 6;     /// If set, we'll defer opening the FIFO.
-  bool reconnect = 7; /// If set, we'll reconnect after failure.
+  string fifo = 5;     /// Path to the FIFO file.
+  bool defer = 6;      /// If set, we'll defer opening the FIFO.
+  bool reconnect = 7;  /// If set, we'll reconnect after failure.
 }
 
-
 message GateHookInfo {
-  string class_name = 1;        /// Name of the hook class
-  string hook_name = 2;         /// Name of the hook
-  string module_name = 3;       /// Name of module
+  string class_name = 1;   /// Name of the hook class
+  string hook_name = 2;    /// Name of the hook
+  string module_name = 3;  /// Name of module
   oneof gate {
-    int64 igate = 4;            /// Input gate index. All input gates if -1
-    int64 ogate = 5;            /// Output gate index. All output gates if -1
+    int64 igate = 4;  /// Input gate index. All input gates if -1
+    int64 ogate = 5;  /// Output gate index. All output gates if -1
   }
   google.protobuf.Any arg = 6;  /// Hook-specific arguments
 }
@@ -619,9 +616,9 @@ message ConfigureResumeHookRequest {
 //  -------------------------------------------------------------------------
 
 message PauseWorkerRequest {
-  int64 wid = 1;    /// ID of the worker to be paused
+  int64 wid = 1;  /// ID of the worker to be paused
 }
 
 message ResumeWorkerRequest {
-  int64 wid = 1;    /// ID of the worker to be resumed
+  int64 wid = 1;  /// ID of the worker to be resumed
 }

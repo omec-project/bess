@@ -83,7 +83,7 @@ class EndianBase<uint64_t> {
 //       will be different depending on whether rhs is native or big endian,
 //       which may not be immediately clear from the variable name.
 template <typename T>
-class[[gnu::packed]] BigEndian final : public EndianBase<T> {
+class [[gnu::packed]] BigEndian final : public EndianBase<T> {
  public:
   BigEndian() = default;
   BigEndian(const BigEndian<T> &o) = default;

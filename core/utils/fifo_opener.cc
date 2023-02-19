@@ -300,5 +300,5 @@ void FifoOpener::MarkDead(int fd, uint32_t gen) {
   }
 }
 
-}  // namespace bess
 }  // namespace utils
+}  // namespace bess

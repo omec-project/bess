@@ -170,7 +170,8 @@ PlainPacketPool::PlainPacketPool(size_t capacity, int socket_id)
 
   size_t page_shift = __builtin_ffs(getpagesize());
   size_t min_chunk_size, align;
-  size_t size = rte_mempool_op_calc_mem_size_default(pool_, pool_->size, page_shift, &min_chunk_size, &align);
+  size_t size = rte_mempool_op_calc_mem_size_default(
+      pool_, pool_->size, page_shift, &min_chunk_size, &align);
 
   void *addr = mmap(nullptr, size, PROT_READ | PROT_WRITE,
                     MAP_SHARED | MAP_ANONYMOUS, -1, 0);
@@ -201,8 +202,8 @@ BessPacketPool::BessPacketPool(size_t capacity, int socket_id)
   while (pool_->populated_size < pool_->size) {
     size_t deficit = pool_->size - pool_->populated_size;
     size_t min_chunk_size, align;
-    size_t bytes =
-        rte_mempool_op_calc_mem_size_default(pool_, deficit, page_shift, &min_chunk_size, &align);
+    size_t bytes = rte_mempool_op_calc_mem_size_default(
+        pool_, deficit, page_shift, &min_chunk_size, &align);
 
     auto [addr, alloced_bytes] = mem_.AllocUpto(bytes);
     if (addr == nullptr) {

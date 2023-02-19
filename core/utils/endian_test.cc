@@ -184,4 +184,4 @@ TEST(EndianTest, Shift) {
   }
 }
 
-}  // namespace (unnamed)
+}  // namespace

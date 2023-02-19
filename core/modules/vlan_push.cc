@@ -76,9 +76,10 @@ void VLANPush::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
       ethh = _mm_loadu_si128(reinterpret_cast<__m128i *>(new_head + 4));
       be16_t tpid(be16_t::swap(_mm_extract_epi16(ethh, 6)));
 
-      ethh = _mm_insert_epi32(ethh, (tpid.value() == Ethernet::Type::kVlan)
-                                        ? qinq_tag.raw_value()
-                                        : vlan_tag.raw_value(),
+      ethh = _mm_insert_epi32(ethh,
+                              (tpid.value() == Ethernet::Type::kVlan)
+                                  ? qinq_tag.raw_value()
+                                  : vlan_tag.raw_value(),
                               3);
 
       _mm_storeu_si128(reinterpret_cast<__m128i *>(new_head), ethh);

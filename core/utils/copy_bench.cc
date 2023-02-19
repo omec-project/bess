@@ -80,7 +80,7 @@ class CopyFixture : public benchmark::Fixture {
 
   void TearDown(benchmark::State &) override {
     CHECK_EQ(dst_[-1], '\xff');
-    //CHECK_EQ(dst_[size_], '\xff');  // Copy(sloppy=true) may violate this
+    // CHECK_EQ(dst_[size_], '\xff');  // Copy(sloppy=true) may violate this
 
     for (size_t i = 0; i < size_; i++) {
       CHECK_EQ(dst_[i], src_[i]) << "Byte " << i << " is different";
@@ -136,7 +136,7 @@ BENCHMARK_DEFINE_F(CopyFixture, Memcpy)(benchmark::State &state) {
 
 static void SetArguments(benchmark::internal::Benchmark *b) {
   // skip argument names for brevity
-  //b->ArgNames({"dst_align", "src_align", "size"});
+  // b->ArgNames({"dst_align", "src_align", "size"});
   b->Args({0, 0, 4})
       ->Args({0, 0, 7})
       ->Args({0, 0, 8})

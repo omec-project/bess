@@ -670,4 +670,4 @@ TEST_F(FifoTestFixture, MultipleFancyFifos) {
   // everything down now.
 }
 
-}  // namespace (unnamed)
+}  // namespace

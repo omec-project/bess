@@ -41,7 +41,7 @@ namespace utils {
 // +-------+-------+-------+--------+
 // |        VNI            | Rsvd.  |
 // +-------+-------+-------+--------+
-struct[[gnu::packed]] Vxlan {
+struct [[gnu::packed]] Vxlan {
   be32_t vx_flags;
   be32_t vx_vni;
 };

@@ -38,13 +38,12 @@ package bess.pb;
 option go_package = "github.com/omec-project/upf-epc/pfcpiface/bess_pb";
 
 service BESSControl {
-
   //  -------------------------------------------------------------------------
   //  System
   //  -------------------------------------------------------------------------
 
   /// Query version of bessd
-  rpc GetVersion (EmptyRequest) returns (VersionResponse) {}
+  rpc GetVersion(EmptyRequest) returns (VersionResponse) {}
 
   /// Reset the current packet processing datapath to the initial state.
   ///
@@ -57,7 +56,7 @@ service BESSControl {
   /// started (if not, it is a bug; please report).
   ///
   /// NOTE: There should be no running worker to run this command.
-  rpc ResetAll (EmptyRequest) returns (EmptyResponse) {}
+  rpc ResetAll(EmptyRequest) returns (EmptyResponse) {}
 
   /// Terminate the BESS daemon.
   ///
@@ -67,26 +66,25 @@ service BESSControl {
   ///
   /// NOTE: There should be no running worker to run this command.
   /// FIXME: rename (e.g., Terminate)
-  rpc KillBess (EmptyRequest) returns (EmptyResponse) {}
+  rpc KillBess(EmptyRequest) returns (EmptyResponse) {}
 
   /// Import a plugin
   ///
   /// At the moment plugins can only contain module types,
   /// but might also support drivers/hooks/schedulers in the future.
-  rpc ImportPlugin (ImportPluginRequest) returns (EmptyResponse) {}
+  rpc ImportPlugin(ImportPluginRequest) returns (EmptyResponse) {}
 
   /// Unload a plugin
   ///
   /// At the moment plugins can only contain module types,
   /// but might also support drivers/hooks/schedulers in the future.
-  rpc UnloadPlugin (UnloadPluginRequest) returns (EmptyResponse) {}
+  rpc UnloadPlugin(UnloadPluginRequest) returns (EmptyResponse) {}
 
   /// List imported plugins
   ///
   /// At the moment plugins can only contain module types,
   /// but might also support drivers/hooks/schedulers in the future.
-  rpc ListPlugins (EmptyRequest) returns (ListPluginsResponse) {}
-
+  rpc ListPlugins(EmptyRequest) returns (ListPluginsResponse) {}
 
   //  -------------------------------------------------------------------------
   //  Worker
@@ -103,45 +101,45 @@ service BESSControl {
   ///   ...
   ///  ResumeAll()
   /// Keep the duration as short as possible, to avoid packet drops.
-  rpc PauseAll (EmptyRequest) returns (EmptyResponse) {}
+  rpc PauseAll(EmptyRequest) returns (EmptyResponse) {}
 
   /// Pause the specified worker temporarily
   ///
   /// Some RPC commands to BESS or individual modules/ports require that
   /// threads must be inactive, to avoid race conditions.
-  /// For such commands, use PauseWorker at the beginning and ResumeWorker at the end.
+  /// For such commands, use PauseWorker at the beginning and ResumeWorker at
+  /// the end.
   ///  PauseWorker(0)
   ///   SomeCommand1()
   ///   SomeCommand2()
   ///   ...
   ///  ResumeWorker(0)
   /// Keep the duration as short as possible, to avoid packet drops.
-  rpc PauseWorker (PauseWorkerRequest) returns (EmptyResponse) {}
+  rpc PauseWorker(PauseWorkerRequest) returns (EmptyResponse) {}
 
   /// Resume the specified worker
-  rpc ResumeWorker (ResumeWorkerRequest) returns (EmptyResponse) {}
+  rpc ResumeWorker(ResumeWorkerRequest) returns (EmptyResponse) {}
 
   /// Resume all paused workers
-  rpc ResumeAll (EmptyRequest) returns (EmptyResponse) {}
+  rpc ResumeAll(EmptyRequest) returns (EmptyResponse) {}
 
   /// Remove all existing workers
   ///
   /// NOTE: There should be no running worker to run this command.
-  rpc ResetWorkers (EmptyRequest) returns (EmptyResponse) {}
+  rpc ResetWorkers(EmptyRequest) returns (EmptyResponse) {}
 
   /// Enumerate all existing workers
-  rpc ListWorkers (EmptyRequest) returns (ListWorkersResponse) {}
+  rpc ListWorkers(EmptyRequest) returns (ListWorkersResponse) {}
 
   /// Create a new worker
   ///
   /// NOTE: There should be no running worker to run this command.
-  rpc AddWorker (AddWorkerRequest) returns (EmptyResponse) {}
+  rpc AddWorker(AddWorkerRequest) returns (EmptyResponse) {}
 
   /// Remove a single worker
   ///
   /// NOTE: There should be no running worker to run this command.
-  rpc DestroyWorker (DestroyWorkerRequest) returns (EmptyResponse) {}
-
+  rpc DestroyWorker(DestroyWorkerRequest) returns (EmptyResponse) {}
 
   //  -------------------------------------------------------------------------
   //  Traffic classe & task
@@ -150,39 +148,39 @@ service BESSControl {
   /// Remove all existing traffic classes
   ///
   /// NOTE: There should be no running worker to run this command.
-  rpc ResetTcs (EmptyRequest) returns (EmptyResponse) {}
+  rpc ResetTcs(EmptyRequest) returns (EmptyResponse) {}
 
   /// Enumerate all existing workers
-  rpc ListTcs (ListTcsRequest) returns (ListTcsResponse) {}
+  rpc ListTcs(ListTcsRequest) returns (ListTcsResponse) {}
 
   /// Check scheduling contraints
-  rpc CheckSchedulingConstraints (EmptyRequest) returns (CheckSchedulingConstraintsResponse) {}
+  rpc CheckSchedulingConstraints(EmptyRequest)
+      returns (CheckSchedulingConstraintsResponse) {}
 
   /// Create a new traffic class
   ///
   /// NOTE: There should be no running worker to run this command.
-  rpc AddTc (AddTcRequest) returns (EmptyResponse) {}
+  rpc AddTc(AddTcRequest) returns (EmptyResponse) {}
 
   /// Update parameters of an existing traffic class
   ///
   /// NOTE: There should be no running worker to run this command.
-  rpc UpdateTcParams (UpdateTcParamsRequest) returns (EmptyResponse) {}
+  rpc UpdateTcParams(UpdateTcParamsRequest) returns (EmptyResponse) {}
 
   /// Change parent (and child arguments) of an existing traffic class
   ///
   /// NOTE: There should be no running worker to run this command.
-  rpc UpdateTcParent (UpdateTcParentRequest) returns (EmptyResponse) {}
+  rpc UpdateTcParent(UpdateTcParentRequest) returns (EmptyResponse) {}
 
   /// Collect statistics of a traffic class
-  rpc GetTcStats (GetTcStatsRequest) returns (GetTcStatsResponse) {}
-
+  rpc GetTcStats(GetTcStatsRequest) returns (GetTcStatsResponse) {}
 
   //  -------------------------------------------------------------------------
   //  Port
   //  -------------------------------------------------------------------------
 
   /// Enumerate all port drivers available
-  rpc ListDrivers (EmptyRequest) returns (ListDriversResponse) {}
+  rpc ListDrivers(EmptyRequest) returns (ListDriversResponse) {}
 
   /// Query detailed information of a port driver
   rpc GetDriverInfo(GetDriverInfoRequest) returns (GetDriverInfoResponse) {}
@@ -193,60 +191,59 @@ service BESSControl {
   /// (e.g., PortInc, PortOut, QueueInc, QueueOut)
   ///
   /// NOTE: There should be no running worker to run this command.
-  rpc ResetPorts (EmptyRequest) returns (EmptyResponse) {}
+  rpc ResetPorts(EmptyRequest) returns (EmptyResponse) {}
 
   /// Enumerate all initialized ports
-  rpc ListPorts (EmptyRequest) returns (ListPortsResponse) {}
+  rpc ListPorts(EmptyRequest) returns (ListPortsResponse) {}
 
   /// Create a new port from the specified driver
-  rpc CreatePort (CreatePortRequest) returns (CreatePortResponse) {}
+  rpc CreatePort(CreatePortRequest) returns (CreatePortResponse) {}
 
   /// Remove a port
   ///
   /// The port should not be being used by a port-related module.
   /// (e.g., PortInc, PortOut, QueueInc, QueueOut)
-  rpc DestroyPort (DestroyPortRequest) returns (EmptyResponse) {}
+  rpc DestroyPort(DestroyPortRequest) returns (EmptyResponse) {}
 
   /// Runtime-updatable configuration
-  rpc SetPortConf (SetPortConfRequest) returns (CommandResponse) {}
-  rpc GetPortConf (GetPortConfRequest) returns (GetPortConfResponse) {}
+  rpc SetPortConf(SetPortConfRequest) returns (CommandResponse) {}
+  rpc GetPortConf(GetPortConfRequest) returns (GetPortConfResponse) {}
 
   /// Collect port statistics
   ///
   /// At the moment, per-queue stats are not supported.
-  rpc GetPortStats (GetPortStatsRequest) returns (GetPortStatsResponse) {}
+  rpc GetPortStats(GetPortStatsRequest) returns (GetPortStatsResponse) {}
 
   /// Query link status
-  rpc GetLinkStatus (GetLinkStatusRequest) returns (GetLinkStatusResponse) {}
+  rpc GetLinkStatus(GetLinkStatusRequest) returns (GetLinkStatusResponse) {}
 
   // TODO: Add PortCommand, like ModuleCommand, which performs driver-specific
   //       actions on a port.
-
 
   //  -------------------------------------------------------------------------
   //  Module
   //  -------------------------------------------------------------------------
 
   /// Enumerate all module types available
-  rpc ListMclass (EmptyRequest) returns (ListMclassResponse) {}
+  rpc ListMclass(EmptyRequest) returns (ListMclassResponse) {}
 
   /// Query detailed information of a module type
-  rpc GetMclassInfo (GetMclassInfoRequest) returns (GetMclassInfoResponse) {}
+  rpc GetMclassInfo(GetMclassInfoRequest) returns (GetMclassInfoResponse) {}
 
   /// Remove all modules.
   ///
   /// This RPC will always succeed (unless there is a running worker)
   ///
   /// NOTE: There should be no running worker to run this command.
-  rpc ResetModules (EmptyRequest) returns (EmptyResponse) {}
+  rpc ResetModules(EmptyRequest) returns (EmptyResponse) {}
 
   /// Enumerate all initialized modules
-  rpc ListModules (EmptyRequest) returns (ListModulesResponse) {}
+  rpc ListModules(EmptyRequest) returns (ListModulesResponse) {}
 
   /// Create a new module instance from the given module type
   ///
   /// NOTE: There should be no running worker to run this command.
-  rpc CreateModule (CreateModuleRequest) returns (CreateModuleResponse) {}
+  rpc CreateModule(CreateModuleRequest) returns (CreateModuleResponse) {}
 
   /// Destroy an exsting module
   ///
@@ -254,10 +251,10 @@ service BESSControl {
   /// disconnected first. All tasks created by the module will also be destoyed.
   ///
   /// NOTE: There should be no running worker to run this command.
-  rpc DestroyModule (DestroyModuleRequest) returns (EmptyResponse) {}
+  rpc DestroyModule(DestroyModuleRequest) returns (EmptyResponse) {}
 
   /// Fetch detailed information of an module instance
-  rpc GetModuleInfo (GetModuleInfoRequest) returns (GetModuleInfoResponse) {}
+  rpc GetModuleInfo(GetModuleInfoRequest) returns (GetModuleInfoResponse) {}
 
   /// Connect two modules.
   ///
@@ -266,7 +263,7 @@ service BESSControl {
   /// while the igate can be connected to multiple output gates.
   ///
   /// NOTE: There should be no running worker to run this command.
-  rpc ConnectModules (ConnectModulesRequest) returns (EmptyResponse) {}
+  rpc ConnectModules(ConnectModulesRequest) returns (EmptyResponse) {}
 
   /// Disconnect two modules.
   ///
@@ -276,10 +273,10 @@ service BESSControl {
   /// to any input gate.
   ///
   /// NOTE: There should be no running worker to run this command.
-  rpc DisconnectModules (DisconnectModulesRequest) returns (EmptyResponse) {}
+  rpc DisconnectModules(DisconnectModulesRequest) returns (EmptyResponse) {}
 
   /// Dump various stats about BESS's packet pools
-  rpc DumpMempool (DumpMempoolRequest) returns (DumpMempoolResponse) {}
+  rpc DumpMempool(DumpMempoolRequest) returns (DumpMempoolResponse) {}
 
   /// Send a command to the specified module instance.
   ///
@@ -289,31 +286,34 @@ service BESSControl {
   ///
   /// NOTE: Some commands cannot be used if there are running workers.
   ///       For those commands you must pause all workers first.
-  rpc ModuleCommand (CommandRequest) returns (CommandResponse) {}
+  rpc ModuleCommand(CommandRequest) returns (CommandResponse) {}
 
   //  -------------------------------------------------------------------------
   //  Gate hooks
   //  -------------------------------------------------------------------------
 
   /// Enumerate all gatehook types available
-  rpc ListGateHookClass (EmptyRequest) returns (ListGateHookClassResponse) {}
+  rpc ListGateHookClass(EmptyRequest) returns (ListGateHookClassResponse) {}
 
   /// Query detailed information of a gatehook type
-  rpc GetGateHookClassInfo (GetGateHookClassInfoRequest) returns (GetGateHookClassInfoResponse) {}
+  rpc GetGateHookClassInfo(GetGateHookClassInfoRequest)
+      returns (GetGateHookClassInfoResponse) {}
 
   /// Enable/Disable a gate hook.
-  rpc ConfigureGateHook (ConfigureGateHookRequest) returns (ConfigureGateHookResponse) {}
+  rpc ConfigureGateHook(ConfigureGateHookRequest)
+      returns (ConfigureGateHookResponse) {}
 
   /// Enumerate all gatehook installed
-  rpc ListGateHooks (EmptyRequest) returns (ListGateHooksResponse) {}
+  rpc ListGateHooks(EmptyRequest) returns (ListGateHooksResponse) {}
 
   /// Send command to gate hook instance.
-  rpc GateHookCommand (GateHookCommandRequest) returns (CommandResponse) {}
+  rpc GateHookCommand(GateHookCommandRequest) returns (CommandResponse) {}
 
   //  -------------------------------------------------------------------------
   //  Resume hooks
   //  -------------------------------------------------------------------------
 
   /// Enable/Disable a resume hook.
-  rpc ConfigureResumeHook (ConfigureResumeHookRequest) returns (CommandResponse) {}
+  rpc ConfigureResumeHook(ConfigureResumeHookRequest)
+      returns (CommandResponse) {}
 }
