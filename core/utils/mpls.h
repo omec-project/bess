@@ -65,17 +65,11 @@ struct Mpls {
                  (bos ? (1 << kMplsBosShift) : 0) | (ttl << kMplsTtlShift));
   }
 
-  uint32_t Label() {
-    return (tag.value() & kMplsLabelMask) >> kMplsLabelShift;
-  }
+  uint32_t Label() { return (tag.value() & kMplsLabelMask) >> kMplsLabelShift; }
 
-  uint8_t Ttl() {
-    return (tag.value() & kMplsTtlMask) >> kMplsTtlShift;
-  }
+  uint8_t Ttl() { return (tag.value() & kMplsTtlMask) >> kMplsTtlShift; }
 
-  uint8_t Tc() {
-    return (tag.value() & kMplsTcMask) >> kMplsTcShift;
-  }
+  uint8_t Tc() { return (tag.value() & kMplsTcMask) >> kMplsTcShift; }
 
   bool isBottomOfStack() {
     return (tag.value() & kMplsBosMask) >> kMplsBosShift;

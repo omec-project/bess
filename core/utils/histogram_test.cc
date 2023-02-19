@@ -80,4 +80,4 @@ TEST(HistogramTest, DoubleQuartiles) {
   EXPECT_DOUBLE_EQ(6.0, ret.percentile_values[3]);  // 100th percentile
 }
 
-}  // namespace (unnamed)
+}  // namespace

@@ -49,4 +49,4 @@ class TscHzSetter {
   }
 } _dummy;
 
-}  // namespace (unnamed)
+}  // namespace

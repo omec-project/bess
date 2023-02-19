@@ -40,10 +40,10 @@
 #include "../utils/http_parser.h"
 #include "../utils/ip.h"
 
+using bess::utils::be16_t;
 using bess::utils::Ethernet;
 using bess::utils::Ipv4;
 using bess::utils::Tcp;
-using bess::utils::be16_t;
 
 const uint64_t TIME_OUT_NS = 10ull * 1000 * 1000 * 1000;  // 10 seconds
 
@@ -60,7 +60,7 @@ const Commands UrlFilter::cmds = {
      Command::THREAD_UNSAFE}};
 
 // Template for generating TCP packets without data
-struct[[gnu::packed]] PacketTemplate {
+struct [[gnu::packed]] PacketTemplate {
   Ethernet eth;
   Ipv4 ip;
   Tcp tcp;
@@ -362,23 +362,26 @@ void UrlFilter::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
       it->second.SetAnalyzed();
 
       // Inject RST to destination
-      EmitPacket(ctx, GenerateResetPacket(eth->src_addr, eth->dst_addr, ip->src,
-                                          ip->dst, tcp->src_port, tcp->dst_port,
-                                          tcp->seq_num, tcp->ack_num),
+      EmitPacket(ctx,
+                 GenerateResetPacket(eth->src_addr, eth->dst_addr, ip->src,
+                                     ip->dst, tcp->src_port, tcp->dst_port,
+                                     tcp->seq_num, tcp->ack_num),
                  0);
 
       // Inject 403 to source. 403 should arrive earlier than RST.
-      EmitPacket(ctx, Generate403Packet(eth->dst_addr, eth->src_addr, ip->dst,
-                                        ip->src, tcp->dst_port, tcp->src_port,
-                                        tcp->ack_num, tcp->seq_num),
+      EmitPacket(ctx,
+                 Generate403Packet(eth->dst_addr, eth->src_addr, ip->dst,
+                                   ip->src, tcp->dst_port, tcp->src_port,
+                                   tcp->ack_num, tcp->seq_num),
                  1);
 
       // Inject RST to source
-      EmitPacket(ctx, GenerateResetPacket(
-                          eth->dst_addr, eth->src_addr, ip->dst, ip->src,
-                          tcp->dst_port, tcp->src_port,
-                          be32_t(tcp->ack_num.value() + strlen(HTTP_403_BODY)),
-                          tcp->seq_num),
+      EmitPacket(ctx,
+                 GenerateResetPacket(
+                     eth->dst_addr, eth->src_addr, ip->dst, ip->src,
+                     tcp->dst_port, tcp->src_port,
+                     be32_t(tcp->ack_num.value() + strlen(HTTP_403_BODY)),
+                     tcp->seq_num),
                  1);
 
       // Drop the data packet

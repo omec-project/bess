@@ -11,7 +11,7 @@ You are welcome to [make a GitHub Pull Request](https://github.com/omec-project/
 Please respect the following coding styles. Let's not be too dogmatic, though.
 
 * C++: [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
-  * There is a [`.clang_format`](https://github.com/omec-project/bess/blob/master/core/.clang-format) file that you can utilize directly with [`clang-format`](https://clang.llvm.org/docs/ClangFormat.html) or integrate with your favorite editor ([Vim](https://github.com/rhysd/vim-clang-format), [Emacs](https://llvm.org/svn/llvm-project/cfe/trunk/tools/clang-format/clang-format.el), [Atom](https://atom.io/packages/clang-format), etc.)
+  * There is a [`.clang_format`](https://github.com/omec-project/bess/blob/master/.clang-format) file that you can utilize directly with [`clang-format`](https://clang.llvm.org/docs/ClangFormat.html) or integrate with your favorite editor ([Vim](https://github.com/rhysd/vim-clang-format), [Emacs](https://llvm.org/svn/llvm-project/cfe/trunk/tools/clang-format/clang-format.el), [Atom](https://atom.io/packages/clang-format), etc.)
 * C: [Linux kernel coding style](https://github.com/torvalds/linux/blob/master/Documentation/process/coding-style.rst)
   * Currently C is only used for the Linux kernel module.
 * Python: [PEP 8 -- Style Guide for Python Code](https://www.python.org/dev/peps/pep-0008/)

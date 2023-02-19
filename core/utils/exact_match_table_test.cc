@@ -150,11 +150,12 @@ TEST(EmTableTest, AddField) {
 //   batch.clear();
 //   for (size_t i = 0; i < n; i++) {
 //     bess::Packet *pkt = pkts[i];
-//     bess::utils::Copy(pkt->append(sizeof(databuf)), databuf, sizeof(databuf));
-//     batch.add(pkt);
+//     bess::utils::Copy(pkt->append(sizeof(databuf)), databuf,
+//     sizeof(databuf)); batch.add(pkt);
 //   }
 
-//   const auto buffer_fn = [](const bess::Packet *pkt, const ExactMatchField &) {
+//   const auto buffer_fn = [](const bess::Packet *pkt, const ExactMatchField &)
+//   {
 //     return pkt->head_data<void *>();
 //   };
 //   em.MakeKeys(&batch, buffer_fn, keys);

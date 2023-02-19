@@ -32,8 +32,8 @@
 #ifndef BESS_BESSCTL_H_
 #define BESS_BESSCTL_H_
 
-#include <string>
 #include <grpcpp/server_builder.h>
+#include <string>
 
 // gRPC server encapsulation. Usage:
 //   ApiServer server;

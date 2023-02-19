@@ -329,19 +329,18 @@ void ExactMatch::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
   int cnt = batch->cnt();
   Value default_value(default_gate);
 
-  int icnt=0;
-  for(int lcnt=0; lcnt<cnt ;lcnt=lcnt+icnt )
-   {
-    icnt = ((cnt-lcnt)>=64) ? 64 : cnt-lcnt  ;
+  int icnt = 0;
+  for (int lcnt = 0; lcnt < cnt; lcnt = lcnt + icnt) {
+    icnt = ((cnt - lcnt) >= 64) ? 64 : cnt - lcnt;
     ValueTuple *res[icnt];
-    uint64_t hit_mask = table_.Find(keys+lcnt, res, icnt);
+    uint64_t hit_mask = table_.Find(keys + lcnt, res, icnt);
 
     for (int j = 0; j < icnt; j++) {
-     if ((hit_mask & ((uint64_t)1ULL << j)) == 0)
-       EmitPacket(ctx, batch->pkts()[j+lcnt], default_gate);
-     else {
-       setValues(batch->pkts()[j+lcnt], res[j]->action);
-       EmitPacket(ctx, batch->pkts()[j+lcnt], res[j]->gate);
+      if ((hit_mask & ((uint64_t)1ULL << j)) == 0)
+        EmitPacket(ctx, batch->pkts()[j + lcnt], default_gate);
+      else {
+        setValues(batch->pkts()[j + lcnt], res[j]->action);
+        EmitPacket(ctx, batch->pkts()[j + lcnt], res[j]->gate);
       }
     }
   }
@@ -381,7 +380,8 @@ void ExactMatch::RuleFieldsFromPb(
       }
       for (int j = 0; j < field_size; j++) {
         rule->back().push_back(rule64 & 0xFFULL);
-        DLOG(INFO) << "Pushed " << std::hex << (rule64 & 0xFFULL) << " to rule.";
+        DLOG(INFO) << "Pushed " << std::hex << (rule64 & 0xFFULL)
+                   << " to rule.";
         rule64 >>= 8;
       }
     }
@@ -429,7 +429,7 @@ CommandResponse ExactMatch::CommandSetDefaultGate(
 }
 
 void ExactMatch::DeInit() {
-    table_.DeInit();
+  table_.DeInit();
 }
 
 ADD_MODULE(ExactMatch, "em", "Multi-field classifier with an exact match table")

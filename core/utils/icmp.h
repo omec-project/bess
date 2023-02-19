@@ -35,7 +35,7 @@ namespace bess {
 namespace utils {
 
 // A basic ICMP header definition.
-struct[[gnu::packed]] Icmp {
+struct [[gnu::packed]] Icmp {
   uint8_t type;       // ICMP packet type.
   uint8_t code;       // ICMP packet code.
   uint16_t checksum;  // ICMP packet checksum.

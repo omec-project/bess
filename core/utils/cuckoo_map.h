@@ -251,9 +251,7 @@ class CuckooMap {
     return -1;
   }
 
-  int find_dpdk(const void* key, void** data = 0,
-                hash_sig_t sig = 0)
-  {
+  int find_dpdk(const void* key, void** data = 0, hash_sig_t sig = 0) {
     if (IsDpdk) {
       if (data && !sig)
         return rte_hash_lookup_data(hash, key, data);
@@ -267,9 +265,7 @@ class CuckooMap {
     return -1;
   }
 
-  int find_dpdk(const void* key, void** data = 0,
-                hash_sig_t sig = 0) const
-  {
+  int find_dpdk(const void* key, void** data = 0, hash_sig_t sig = 0) const {
     if (IsDpdk) {
       if (data && !sig)
         return rte_hash_lookup_data(hash, key, data);
