@@ -62,7 +62,7 @@
  *    * mode: whether to schedule with per-packet or per-batch granularity
  * options
  *    are "packet" or "batch".
-*/
+ */
 class RoundRobin final : public Module {
  public:
   static const gate_idx_t kNumOGates = MAX_GATES;

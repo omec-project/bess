@@ -41,8 +41,8 @@ const Commands SequentialUpdate::cmds = {
      Command::THREAD_UNSAFE},
 };
 
-CommandResponse
-SequentialUpdate::Init(const sample::supdate::pb::SequentialUpdateArg &arg) {
+CommandResponse SequentialUpdate::Init(
+    const sample::supdate::pb::SequentialUpdateArg &arg) {
   return CommandAdd(arg);
 }
 
@@ -69,26 +69,26 @@ CommandResponse SequentialUpdate::CommandAdd(
     max = var.max();
 
     switch (size) {
-    case 1:
-      mask = be32_t(0x00ffffff);
-      min = std::min(min, static_cast<uint32_t>(0xff));
-      max = std::min(max, static_cast<uint32_t>(0xff));
-      break;
+      case 1:
+        mask = be32_t(0x00ffffff);
+        min = std::min(min, static_cast<uint32_t>(0xff));
+        max = std::min(max, static_cast<uint32_t>(0xff));
+        break;
 
-    case 2:
-      mask = be32_t(0x0000ffff);
-      min = std::min(min, static_cast<uint32_t>(0xffff));
-      max = std::min(max, static_cast<uint32_t>(0xffff));
-      break;
+      case 2:
+        mask = be32_t(0x0000ffff);
+        min = std::min(min, static_cast<uint32_t>(0xffff));
+        max = std::min(max, static_cast<uint32_t>(0xffff));
+        break;
 
-    case 4:
-      mask = be32_t(0x00000000);
-      min = std::min(min, static_cast<uint32_t>(0xffffffffu));
-      max = std::min(max, static_cast<uint32_t>(0xffffffffu));
-      break;
+      case 4:
+        mask = be32_t(0x00000000);
+        min = std::min(min, static_cast<uint32_t>(0xffffffffu));
+        max = std::min(max, static_cast<uint32_t>(0xffffffffu));
+        break;
 
-    default:
-      return CommandFailure(EINVAL, "'size' must be 1, 2, or 4");
+      default:
+        return CommandFailure(EINVAL, "'size' must be 1, 2, or 4");
     }
 
     if (offset + size > SNBUF_DATA) {

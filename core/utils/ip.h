@@ -46,7 +46,7 @@ bool ParseIpv4Address(const std::string &str, be32_t *addr);
 std::string ToIpv4Address(be32_t addr);
 
 // An IPv4 header definition loosely based on the BSD version.
-struct[[gnu::packed]] Ipv4 {
+struct [[gnu::packed]] Ipv4 {
   enum Flag : uint16_t {
     kMF = 1 << 13,  // More fragments
     kDF = 1 << 14,  // Do not fragment

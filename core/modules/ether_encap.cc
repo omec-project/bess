@@ -42,8 +42,8 @@ enum {
   ATTR_R_ETHER_TYPE,
 };
 
-CommandResponse EtherEncap::Init(
-    const bess::pb::EtherEncapArg &arg[[maybe_unused]]) {
+CommandResponse EtherEncap::Init(const bess::pb::EtherEncapArg &arg
+                                 [[maybe_unused]]) {
   using AccessMode = bess::metadata::Attribute::AccessMode;
 
   AddMetadataAttr("ether_src", sizeof(Ethernet::Address), AccessMode::kRead);

@@ -101,4 +101,4 @@ TEST(IPTest, PrefixCalc) {
   }
 }
 
-}  // namespace (unnamed)
+}  // namespace

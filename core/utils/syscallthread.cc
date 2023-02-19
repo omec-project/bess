@@ -176,5 +176,5 @@ void SyscallThreadAny::WaitForKnockThread() {
   }
 }
 
-}  // namespace bess
 }  // namespace utils
+}  // namespace bess

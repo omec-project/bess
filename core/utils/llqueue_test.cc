@@ -105,8 +105,8 @@ TEST(LLQueueTest, Resize) {
   ASSERT_EQ(q.Push(vals2, n), n);
   ASSERT_EQ(q.Size(), 2 * n);
 
-  int** output = new int*[2*n];
-  ASSERT_EQ(q.Pop(output, 2 * n), 2*n);
+  int** output = new int*[2 * n];
+  ASSERT_EQ(q.Pop(output, 2 * n), 2 * n);
   for (int i = 0; i < n; i++) {
     ASSERT_EQ(output[i], vals1[i]);
     ASSERT_EQ(output[i + n], vals2[i]);

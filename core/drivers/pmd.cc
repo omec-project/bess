@@ -259,8 +259,7 @@ CommandResponse flow_create_one(dpdk_port_t port_id,
 
 #define NUM_ELEMENTS(x) (sizeof(x) / sizeof((x)[0]))
 
-enum FlowProfile : uint32_t
-{
+enum FlowProfile : uint32_t {
   profileN3 = 3,
   profileN6 = 6,
   profileN9 = 9,
@@ -270,19 +269,17 @@ CommandResponse flow_create(dpdk_port_t port_id, const uint32_t &flow_profile) {
   CommandResponse err;
 
   rte_flow_item_type N39_NSA[] = {
-      RTE_FLOW_ITEM_TYPE_ETH, RTE_FLOW_ITEM_TYPE_IPV4, RTE_FLOW_ITEM_TYPE_UDP,
-      RTE_FLOW_ITEM_TYPE_GTPU, RTE_FLOW_ITEM_TYPE_IPV4,
-      RTE_FLOW_ITEM_TYPE_END};
+      RTE_FLOW_ITEM_TYPE_ETH,  RTE_FLOW_ITEM_TYPE_IPV4, RTE_FLOW_ITEM_TYPE_UDP,
+      RTE_FLOW_ITEM_TYPE_GTPU, RTE_FLOW_ITEM_TYPE_IPV4, RTE_FLOW_ITEM_TYPE_END};
 
   rte_flow_item_type N39_SA[] = {
-      RTE_FLOW_ITEM_TYPE_ETH, RTE_FLOW_ITEM_TYPE_IPV4, RTE_FLOW_ITEM_TYPE_UDP,
-      RTE_FLOW_ITEM_TYPE_GTPU, RTE_FLOW_ITEM_TYPE_GTP_PSC,
-      RTE_FLOW_ITEM_TYPE_IPV4,
+      RTE_FLOW_ITEM_TYPE_ETH,     RTE_FLOW_ITEM_TYPE_IPV4,
+      RTE_FLOW_ITEM_TYPE_UDP,     RTE_FLOW_ITEM_TYPE_GTPU,
+      RTE_FLOW_ITEM_TYPE_GTP_PSC, RTE_FLOW_ITEM_TYPE_IPV4,
       RTE_FLOW_ITEM_TYPE_END};
 
-  rte_flow_item_type N6[] = {
-      RTE_FLOW_ITEM_TYPE_ETH, RTE_FLOW_ITEM_TYPE_IPV4,
-      RTE_FLOW_ITEM_TYPE_END};
+  rte_flow_item_type N6[] = {RTE_FLOW_ITEM_TYPE_ETH, RTE_FLOW_ITEM_TYPE_IPV4,
+                             RTE_FLOW_ITEM_TYPE_END};
 
   switch (flow_profile) {
     uint64_t rss_types;
@@ -302,8 +299,8 @@ CommandResponse flow_create(dpdk_port_t port_id, const uint32_t &flow_profile) {
     // N6 traffic
     case profileN6:
       rss_types = ETH_RSS_IPV4 | ETH_RSS_L3_DST_ONLY;
-      err = flow_create_one(port_id, flow_profile, NUM_ELEMENTS(N6),
-                            rss_types, N6);
+      err = flow_create_one(port_id, flow_profile, NUM_ELEMENTS(N6), rss_types,
+                            N6);
       break;
 
     // N9 traffic with and without PDU Session container
@@ -384,15 +381,16 @@ CommandResponse PMDPort::Init(const bess::pb::PMDPortArg &arg) {
     return CommandFailure(-ret, "rte_eth_dev_configure() failed");
   }
 
-  int sid = arg.socket_case() == bess::pb::PMDPortArg::kSocketId ?
-	  arg.socket_id() : rte_eth_dev_socket_id(ret_port_id);
+  int sid = arg.socket_case() == bess::pb::PMDPortArg::kSocketId
+                ? arg.socket_id()
+                : rte_eth_dev_socket_id(ret_port_id);
   /* if socket_id is invalid, set to 0 */
   if (sid < 0 || sid > RTE_MAX_NUMA_NODES) {
     LOG(WARNING) << "Invalid socket, falling back... ";
     sid = 0;
   }
   LOG(INFO) << "Initializing Port:" << ret_port_id
-	    << " with memory from socket " << sid;
+            << " with memory from socket " << sid;
 
   eth_rxconf = dev_info.default_rxconf;
   eth_rxconf.rx_drop_en = 1;
@@ -470,8 +468,9 @@ CommandResponse PMDPort::Init(const bess::pb::PMDPortArg &arg) {
   }
   dpdk_port_id_ = ret_port_id;
 
-  int numa_node = arg.socket_case() == bess::pb::PMDPortArg::kSocketId ?
-              sid : rte_eth_dev_socket_id(ret_port_id);
+  int numa_node = arg.socket_case() == bess::pb::PMDPortArg::kSocketId
+                      ? sid
+                      : rte_eth_dev_socket_id(ret_port_id);
   node_placement_ =
       numa_node == -1 ? UNCONSTRAINED_SOCKET : (1ull << numa_node);
 
@@ -483,7 +482,7 @@ CommandResponse PMDPort::Init(const bess::pb::PMDPortArg &arg) {
 
   driver_ = dev_info.driver_name ?: "unknown";
 
-  if (arg.flow_profiles_size() > 0){
+  if (arg.flow_profiles_size() > 0) {
     for (int i = 0; i < arg.flow_profiles_size(); ++i) {
       err = flow_create(ret_port_id, arg.flow_profiles(i));
       if (err.error().code() != 0) {
@@ -603,10 +602,9 @@ void PMDPort::CollectStats(bool reset) {
 
   // ice/i40e/net_e1000_igb PMD drivers, ixgbevf and net_bonding vdevs don't
   // support per-queue stats
-  if (driver_ == "net_ice" || driver_ == "net_iavf" ||
-      driver_ == "net_i40e" || driver_ == "net_i40e_vf" ||
-      driver_ == "net_ixgbe_vf" || driver_ == "net_bonding" ||
-      driver_ == "net_e1000_igb") {
+  if (driver_ == "net_ice" || driver_ == "net_iavf" || driver_ == "net_i40e" ||
+      driver_ == "net_i40e_vf" || driver_ == "net_ixgbe_vf" ||
+      driver_ == "net_bonding" || driver_ == "net_e1000_igb") {
     // NOTE:
     // - if link is down, tx bytes won't increase
     // - if destination MAC address is incorrect, rx pkts won't increase
