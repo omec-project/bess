@@ -22,7 +22,6 @@ using bess::utils::Tcp;
 using bess::utils::Udp;
 
 enum { DEFAULT_GATE = 0, FORWARD_GATE };
-const unsigned short UDP_PORT_GTPU = 2152;
 /*----------------------------------------------------------------------------------*/
 void GtpuParser::set_gtp_parsing_attrs(be32_t *sip, be32_t *dip, be16_t *sp,
                                        be16_t *dp, be32_t *teid, be32_t *tipd,
