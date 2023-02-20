@@ -9,18 +9,6 @@
 #include "../pb/module_msg.pb.h"
 #include <rte_hash.h>
 /*----------------------------------------------------------------------------------*/
-/**
- * GTPU header
- */
-#define GTPU_VERSION 0x01
-#define GTP_PROTOCOL_TYPE_GTP 0x01
-#define GTP_GPDU 0xff
-
-/**
- * UDP header
- */
-#define UDP_PORT_GTPU 2152
-/*----------------------------------------------------------------------------------*/
 class GtpuEncap final : public Module {
  public:
   GtpuEncap() { max_allowed_workers_ = Worker::kMaxWorkers; }

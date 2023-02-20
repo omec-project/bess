@@ -65,4 +65,18 @@ struct [[gnu::packed]] Gtpv1PDUSessExt {
 }  // namespace bess
 
 /*----------------------------------------------------------------------------------*/
+/**
+ * GTPU header
+ */
+#define GTPU_VERSION 0x01
+#define GTP_PROTOCOL_TYPE_GTP 0x01
+#define GTP_GPDU 0xff
+#define GTPU_ECHO_RECOVERY 14
+#define GTPU_ECHO_REQUEST 0x01
+#define GTPU_ECHO_RESPONSE 0x02
+
+/// UDP header
+#define UDP_PORT_GTPU 2152
+
+/*----------------------------------------------------------------------------------*/
 #endif /* BESS_UTILS_GTP_H_ */
