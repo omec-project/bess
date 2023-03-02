@@ -11,6 +11,8 @@ jobs:
       matrix:
         os:
           - ubuntu-20.04
+    env:
+      BESS_DPDK_BRANCH: "dpdk-2011-focal"
     steps:
       - uses: actions/checkout@v2
       - run: sudo sysctl -w vm.nr_hugepages=512
@@ -19,7 +21,9 @@ jobs:
       - run: pip3 install --user -r requirements.txt
       - run: '[[ ${COVERAGE:-0} == 0 ]] || sudo apt-get install -y gcc-7'
       - run: '[[ ${SANITIZE:-0} == 0 ]] || sudo apt-get install -y llvm-3.9'
-      - run: 'docker pull ghcr.io/omec-project/upf-epc/bess_build | cat'
+      - run: |
+          cd env
+          yes n | ./rebuild_images.py focal64
       - run: sudo mkdir -p /mnt/huge
       - run: sudo mount -t hugetlbfs nodev /mnt/huge
       - run: export CXX="ccache $VER_CXX"
