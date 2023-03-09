@@ -1463,3 +1463,42 @@ message FlowMeasureCommandFlipArg {}
 message FlowMeasureFlipResponse {
   uint64 old_flag = 1;
 }
+
+/**
+ * The GtpuPathMonitoring module has a command `add()` and `delete().
+ * This command add or deletes an IP address from the GtpuPathMonitoring module.
+ */
+message GtpuPathMonitoringCommandAddDeleteArg {
+  uint32 gnb_ip = 1;  // The destination/gNB IP address.
+}
+
+/**
+ * The GtpuPathMonitoring module has a command `clear()` which takes no
+ * parameters.
+ * This command removes all IP addresses from the GtpuPathMonitoring module.
+ */
+message GtpuPathMonitoringCommandClearArg {}
+
+/**
+ * The GtpuPathMonitoring module has a command `read()`.
+ * This command requests to read the stats from the GtpuPathMonitoring module.
+ * It can also clear the stats
+ */
+message GtpuPathMonitoringCommandReadArg {
+  bool clear = 1;  // If true, the data will be all cleared after read
+}
+
+/**
+ * The GtpuPathMonitoring module has a command `readResponse()`.
+ * This command reads the stas from the GtpuPathMonitoring module.
+ */
+message GtpuPathMonitoringCommandReadResponse {
+  message Statistic {
+    uint32 gnb_ip = 1;        /// gNB IP
+    uint64 count = 2;         /// count
+    uint64 latency_min = 3;   /// minimum latency
+    uint64 latency_mean = 4;  /// average latency
+    uint64 latency_max = 5;   /// maximum latency
+  }
+  repeated Statistic statistics = 1;
+}
