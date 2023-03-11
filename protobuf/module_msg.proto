@@ -1490,7 +1490,7 @@ message GtpuPathMonitoringCommandReadArg {
 
 /**
  * The GtpuPathMonitoring module has a command `readResponse()`.
- * This command reads the stas from the GtpuPathMonitoring module.
+ * This command reads the stats from the GtpuPathMonitoring module.
  */
 message GtpuPathMonitoringCommandReadResponse {
   message Statistic {
