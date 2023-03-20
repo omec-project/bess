@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2020-2022 Intel Corporation
+
+# Example BESS script to receive packet from CNDP port.
+# Port index corresponds to the ports defined in lports section in fwd.jsonc file.
+
+myport = CndpPort(jsonc_file="/build/bess/bessctl/conf/cndp/fwd.jsonc", lport_index=0)
+
+input0 = PortInc(port=myport)
+
+input0 -> Sink()
