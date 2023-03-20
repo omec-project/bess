@@ -33,7 +33,7 @@ from test_utils import *
 
 # BESS default batch size
 # TODO: Any way to receive the parameter from bess daemon?
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 
 
 class BessBufferTest(BessModuleTestCase):
