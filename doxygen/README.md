@@ -1,4 +1,4 @@
-### How to generaate BESS code documentation
+### How to generate BESS code documentation
 
 * Install doxygen (sudo apt-get install doxygen)
 * cd bess/doxygen
