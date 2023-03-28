@@ -1,12 +1,17 @@
-# SPDX-License-Identifier: Apache-2.0
-# Copyright 2020-present Open Networking Foundation
-# Copyright 2019 Intel Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2020-2022 Intel Corporation
+#
 # vim: syntax=dockerfile
 
+# Build command from bess root directory to build besscndp docker image
+# docker build --build-arg http_proxy=$http_proxy \
+# --build-arg https_proxy=$http_proxy --build-arg no_proxy="$no_proxy" \
+# -t besscndp -f env/Dockerfile-cndp .
+
 ARG BASE_IMAGE=ubuntu:focal
-# Install CNDP dependencies and build CNDP.
 FROM ${BASE_IMAGE} AS cndp-build
 
+# Install CNDP dependencies and build CNDP.
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -48,7 +53,7 @@ WORKDIR /
 RUN git clone https://github.com/CloudNativeDataPlane/cndp.git
 WORKDIR /cndp
 # Use version of CNDP tested with BESS
-RUN git checkout d5ce4b9edc2e7ddb46a61b395deffafaf11a0500
+RUN git checkout 19d74af9b37c4150a3a054a394f7f13eb95ed0b8
 # Build and install CNDP shared libraries
 RUN make && make install
 # Build and install CNDP static libraries
@@ -88,32 +93,42 @@ COPY --from=cndp-build /usr/include/xdp/ /usr/include/xdp/
 # Set CNDP PKG_CONFIG_PATH
 ENV PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig
 
+# Install BESS
 RUN echo "APT::Install-Recommends false;" >> /etc/apt/apt.conf.d/00recommends && \
 	echo "APT::Install-Suggests false;" >> /etc/apt/apt.conf.d/00recommends && \
 	echo "APT::AutoRemove::RecommendsImportant false;" >> /etc/apt/apt.conf.d/00recommends && \
 	echo "APT::AutoRemove::SuggestsImportant false;" >> /etc/apt/apt.conf.d/00recommends
 
-COPY build-dep.yml /tmp/
-COPY kmod.yml /tmp/
-COPY ci.yml /tmp/
+COPY env/build-dep.yml /tmp/
+COPY env/kmod.yml /tmp/
+COPY env/ci.yml /tmp/
 
 # Install dependency packages with Ansible
 RUN apt-get -q update && \
-	apt-get install -y ansible curl && \
+	apt-get install -y ansible curl git sudo libgraph-easy-perl python-is-python3 && \
         ansible-playbook /tmp/ci.yml -i "localhost," -c local && \
 	apt-get purge -y ansible && \
 	apt-get autoremove -y && \
 	rm -rf /var/lib/apt/lists
-RUN update-alternatives --install /usr/local/bin/python python /usr/bin/python3 3
-RUN mkdir -p /build/bess
+RUN python3 -m pip install --upgrade pip && python3 -m pip install grpcio scapy protobuf==3.20.0 flask pyroute2
 
-# Build DPDK testpmd (used in bessctl samples)
-ARG BESS_DPDK_BRANCH=dpdk-2011-focal
-RUN cd /build/bess && \
-	curl -s -L https://github.com/omec-project/bess/archive/${BESS_DPDK_BRANCH}.tar.gz | tar zx --strip-components=1 && \
-	./build.py dpdk && \
-	cp /build/bess/deps/dpdk-20.11.3/build/app/dpdk-testpmd /usr/local/bin/ && \
-	rm -rf /build/bess
+RUN mkdir -p /build/bess
+RUN mkdir -p /build/bess/log
+
+
+# Copy required files and build bess
+WORKDIR /build/bess
+COPY bessctl bessctl
+COPY bin bin
+COPY core core
+COPY deps/*.patch deps/
+COPY env env
+COPY protobuf protobuf
+COPY pybess pybess
+COPY sample_plugin sample_plugin
+COPY build.py container_build.py install_git_hooks.sh ./
+RUN ./build.py bess
+RUN cp /build/bess/deps/dpdk-20.11.3/build/app/dpdk-testpmd /usr/local/bin/
 
 ENV CCACHE_DIR=/tmp/ccache
 ENV CCACHE_COMPRESS=true
