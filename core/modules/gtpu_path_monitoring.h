@@ -51,7 +51,6 @@ class GtpuPathMonitoring final : public Module {
   std::unordered_map<uint32_t, uint32_t>
       m_dstIp;              // GTP Tunnel destination {gNB IP, counter}
   uint16_t m_seqNumber{0};  // gtpu echo sequence number
-  uint64_t m_count{0};      // Counter for Tx gtpu echo pkts
 };
 
 #endif  // BESS_MODULES_GTPU_PATH_MONITORING_H_

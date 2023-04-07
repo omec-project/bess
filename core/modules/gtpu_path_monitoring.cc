@@ -73,15 +73,15 @@ void GtpuPathMonitoring::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
       m_seqNumber++;
 
     } else if (gtpuType == GTPU_ECHO_RESPONSE) {
-      uint32_t dst = iph->src.value();
+      uint32_t srcIp = iph->src.value();
       uint16_t seqNumber = speh->seqnum.value();
-      auto it = m_storedData.find(dst);
+      auto it = m_storedData.find(srcIp);
       if (it != m_storedData.end()) {
         auto itInn = it->second.find(seqNumber);
         if (itInn != it->second.end()) {
           Values values;
           uint64_t lat = (tsc_to_ns(rdtsc()) - itInn->second) / 2;
-          auto itDst = m_latency.find(dst);
+          auto itDst = m_latency.find(srcIp);
           if (itDst != m_latency.end()) {
             Values valuesIn = itDst->second;
             values.m_count = valuesIn.m_count + 1;
@@ -101,7 +101,7 @@ void GtpuPathMonitoring::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
             values.m_max = lat;
           }
 
-          m_latency[dst] = values;
+          m_latency[srcIp] = values;
           it->second.erase(itInn);
 
         } else {
@@ -112,18 +112,16 @@ void GtpuPathMonitoring::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
       }
 
       LOG(INFO) << "type:" << +gtpuType
-                << ", dstIp:" << ToIpv4Address(static_cast<be32_t>(dst))
+                << ", srcIp:" << ToIpv4Address(static_cast<be32_t>(srcIp))
                 << ", seqNumber:" << seqNumber << ", latency:["
-                << m_latency[dst].m_min << ", " << m_latency[dst].m_mean << ", "
-                << m_latency[dst].m_max << "]";
+                << m_latency[srcIp].m_min << ", " << m_latency[srcIp].m_mean
+                << ", " << m_latency[srcIp].m_max << "]";
       DropPacket(ctx, pkt);
     } else {
       LOG(ERROR) << "Unexpected GTP Type (" << +gtpuType << ")";
       DropPacket(ctx, pkt);
     }
   }
-
-  m_count++;
 }
 
 CommandResponse GtpuPathMonitoring::CommandReadStats(
@@ -151,6 +149,7 @@ CommandResponse GtpuPathMonitoring::CommandReadStats(
 
 CommandResponse GtpuPathMonitoring::Init(const bess::pb::EmptyArg &) {
   GtpuPathMonitoring::Clear();
+
   return CommandSuccess();
 }
 
@@ -163,6 +162,7 @@ CommandResponse GtpuPathMonitoring::CommandAdd(
   } else {
     it->second++;
   }
+
   return CommandSuccess();
 }
 
@@ -187,14 +187,15 @@ CommandResponse GtpuPathMonitoring::CommandDelete(
 CommandResponse GtpuPathMonitoring::CommandClear(
     const bess::pb::GtpuPathMonitoringCommandClearArg &) {
   GtpuPathMonitoring::Clear();
+
   return CommandSuccess();
 }
 
 void GtpuPathMonitoring::Clear() {
+  m_storedData.clear();
   m_latency.clear();
   m_dstIp.clear();
   m_seqNumber = 0;
-  m_count = 1;
 }
 
 ADD_MODULE(GtpuPathMonitoring, "gtpu_path_monitoring",
