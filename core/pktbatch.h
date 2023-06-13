@@ -70,7 +70,6 @@ class PacketBatch {
   }
 
   inline static const size_t kMaxBurst = 64;
-  static const size_t kMaxBurst = 64;
 
  private:
   int cnt_;
