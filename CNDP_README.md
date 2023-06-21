@@ -36,4 +36,4 @@ $ docker run --network=host -e http_proxy=${http_proxy} -e https_proxy=${http_pr
 3. Run bessctl controller from container shell: `./bessctl/bessctl`
 4. From bessctl shell , run bess daemon: `daemon start -log_dir /build/bess/log`
 5. Run sample BESS CNDP script: `run cndp/cndpfwd_coreid`. This will run cndpfwd BESS pipeline in a core id specified in "/build/bess/bessctl/conf/cndp/cndpfwd_coreid.bess" script. Before running the script, edit the script to update core in line `bess.add_worker(wid=0, core=28)` to a core id in CPU socket where the network device is attached to get better performance.
-6. If everything works fine, then you should see BESS pipeline logs when you run: `monior pipeline`
+6. If everything works fine, then you should see BESS pipeline logs when you run: `monitor pipeline`
