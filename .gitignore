@@ -9,6 +9,7 @@ core/extra.dpdk.mk
 core/kmod/.cache.mk
 *.retry
 *.cache.mk
+dictionary.dic
 
 # Vagrant stores temporary files in env/.vagrant
 env/.vagrant
@@ -52,7 +53,9 @@ compile_commands.json
 # virtualenv
 venv/
 
-# Keep GitHub Actions, reuse, and clang-format file
+# Keep GitHub Actions, reuse, clang-format file and spellchecking files
 !.github
 !.reuse
 !.clang-format
+!.spellcheck.yml
+!.wordlist.txt
