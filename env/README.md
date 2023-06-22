@@ -6,7 +6,7 @@ laptop or server.
 
 ## Playing with BESS VM
 
-You can launch a fully conigured VM on which you can build and test BESS at your
+You can launch a fully configured VM on which you can build and test BESS at your
 fingertips. We don't provide a binary VM image though. Instead, We provide a
 Vagrant (https://vagrantup.com) script that automatically generates a VM based
 on Ubuntu 18.04. You can install Vagrant not only on Linux, but also on Windows
@@ -19,7 +19,7 @@ $ vagrant up
 
 to launch a VM. The current BESS directory is mapped to `/opt/bess` in the VM.
 You can connect to the VM with `vagrant ssh`. All compilers and libraries are
-readiliy available.
+readily available.
 
 ## Building BESS without installing dependencies
 
