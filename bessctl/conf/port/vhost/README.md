@@ -38,7 +38,7 @@ VMs below.
 You can launch one or multiple VMs. Each VM runs `testpmd` that simply swaps
 source/destination MAC addresses of packets and forward them from one port to
 another. You must launch `vhost.bess` first, so that QEMU can connect to BESS
-vport sockets. Otherwise you will see an error like this:
+VPort sockets. Otherwise you will see an error like this:
 `qemu-system-x86_64: ... Failed to connect socket: No such file or directory`
 
 
