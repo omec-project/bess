@@ -110,9 +110,6 @@ void Measure::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
   uint64_t now_ns = tsc_to_ns(rdtsc());
   size_t offset = offset_;
 
-  mcslock_node_t mynode;
-  mcs_lock(&lock_, &mynode);
-
   pkt_cnt_ += batch->cnt();
 
   int cnt = batch->cnt();
@@ -132,20 +129,19 @@ void Measure::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
 
       bytes_cnt_ += batch->pkts()[i]->total_len();
 
-      rtt_hist_.Insert(diff);
+      rtt_hist_.AtomicInsert(diff);
       if (rand_.GetRealNonzero() <= jitter_sample_prob_) {
         if (unlikely(!last_rtt_ns_)) {
           last_rtt_ns_ = diff;
           continue;
         }
-        uint64_t jitter = absdiff(diff, last_rtt_ns_);
-        jitter_hist_.Insert(jitter);
+        int64_t jitter = diff - last_rtt_ns_;
+        jitter = jitter * ((jitter>0) - (jitter<0));
+        jitter_hist_.AtomicInsert(jitter);
         last_rtt_ns_ = diff;
       }
     }
   }
-
-  mcs_unlock(&lock_, &mynode);
 
   RunNextModule(ctx, batch);
 }
