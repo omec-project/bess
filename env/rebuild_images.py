@@ -60,7 +60,7 @@ def run_cmd(cmd, shell=False):
 def build(env):
     base = imgs[env]['base']
     tag_suffix = imgs[env]['tag_suffix']
-    bess_dpdk_branch = os.getenv('BESS_DPDK_BRANCH', 'dpdk-2011-focal')
+    bess_dpdk_branch = os.getenv('BESS_DPDK_BRANCH', 'master')
     version = time.strftime('%y%m%d')
 
     run_cmd('docker build '

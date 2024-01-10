@@ -108,7 +108,7 @@ RUN update-alternatives --install /usr/local/bin/python python /usr/bin/python3 
 RUN mkdir -p /build/bess
 
 # Build DPDK testpmd (used in bessctl samples)
-ARG BESS_DPDK_BRANCH=dpdk-2011-focal
+ARG BESS_DPDK_BRANCH=master
 RUN cd /build/bess && \
 	curl -s -L https://github.com/omec-project/bess/archive/${BESS_DPDK_BRANCH}.tar.gz | tar zx --strip-components=1 && \
 	./build.py dpdk && \
