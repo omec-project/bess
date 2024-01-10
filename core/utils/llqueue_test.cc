@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -103,8 +105,8 @@ TEST(LLQueueTest, Resize) {
   ASSERT_EQ(q.Push(vals2, n), n);
   ASSERT_EQ(q.Size(), 2 * n);
 
-  int** output = new int*[2*n];
-  ASSERT_EQ(q.Pop(output, 2 * n), 2*n);
+  int** output = new int*[2 * n];
+  ASSERT_EQ(q.Pop(output, 2 * n), 2 * n);
   for (int i = 0; i < n; i++) {
     ASSERT_EQ(output[i], vals1[i]);
     ASSERT_EQ(output[i + n], vals2[i]);

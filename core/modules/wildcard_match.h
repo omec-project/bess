@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -39,12 +41,13 @@
 #include "../pb/module_msg.pb.h"
 #include "../utils/cuckoo_map.h"
 
-using bess::utils::HashResult;
 using bess::utils::CuckooMap;
+using bess::utils::HashResult;
 
-#define MAX_TUPLES 8
+#define MAX_TUPLES 16
 #define MAX_FIELDS 8
 #define MAX_FIELD_SIZE 8
+#define BULK_SIZE 32
 static_assert(MAX_FIELD_SIZE <= sizeof(uint64_t),
               "field cannot be larger than 8 bytes");
 
@@ -53,11 +56,6 @@ static_assert(MAX_FIELD_SIZE <= sizeof(uint64_t),
 #if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
 #error this code assumes little endian architecture (x86)
 #endif
-
-struct WmData {
-  int priority;
-  gate_idx_t ogate;
-};
 
 struct WmField {
   int attr_id; /* -1 for offset-based fields */
@@ -73,6 +71,12 @@ struct WmField {
 
 struct wm_hkey_t {
   uint64_t u64_arr[MAX_FIELDS];
+};
+
+struct WmData {
+  int priority;
+  gate_idx_t ogate;
+  wm_hkey_t keyv;
 };
 
 class wm_eq {
@@ -127,6 +131,12 @@ class wm_hash {
  private:
   size_t len_;
 };
+struct rte_hash_parameters dpdk_params1 {
+  .name = "test2", .entries = 1 << 15, .reserved = 0,
+  .key_len = sizeof(wm_hkey_t), .hash_func = rte_hash_crc,
+  .hash_func_init_val = 0, .socket_id = (int)rte_socket_id(),
+  .extra_flag = RTE_HASH_EXTRA_FLAGS_RW_CONCURRENCY
+};
 
 class WildcardMatch final : public Module {
  public:
@@ -135,11 +145,20 @@ class WildcardMatch final : public Module {
   static const Commands cmds;
 
   WildcardMatch()
-      : Module(), default_gate_(), total_key_size_(), fields_(), tuples_() {
+      : Module(),
+        default_gate_(),
+        total_key_size_(),
+        total_value_size_(),
+        fields_(),
+        values_(),
+        tuples_() {
     max_allowed_workers_ = Worker::kMaxWorkers;
+    { tuples_.resize(MAX_TUPLES); }
   }
 
   CommandResponse Init(const bess::pb::WildcardMatchArg &arg);
+
+  void DeInit() override;
 
   void ProcessBatch(Context *ctx, bess::PacketBatch *batch) override;
 
@@ -157,30 +176,49 @@ class WildcardMatch final : public Module {
 
  private:
   struct WmTuple {
-    CuckooMap<wm_hkey_t, struct WmData, wm_hash, wm_eq> ht;
+    bool occupied;
+    CuckooMap<wm_hkey_t, struct WmData, wm_hash, wm_eq> *ht;
     wm_hkey_t mask;
+    struct rte_hash_parameters params;
+    std::string hash_name;
+    WmTuple() : occupied(0), ht(0) {
+      params = dpdk_params1;
+      std::ostringstream address;
+      address << this;
+      hash_name = "Wild" + address.str();
+      params.name = hash_name.c_str();
+    }
   };
 
-  gate_idx_t LookupEntry(const wm_hkey_t &key, gate_idx_t def_gate);
+  gate_idx_t LookupEntry(const wm_hkey_t &key, gate_idx_t def_gate,
+                         bess::Packet *pkt);
 
-  CommandResponse AddFieldOne(const bess::pb::Field &field, struct WmField *f);
+  bool LookupBulkEntry(wm_hkey_t *key, gate_idx_t def_gate, int i,
+                       gate_idx_t *Outgate, int cnt, bess::PacketBatch *batch);
+
+  CommandResponse AddFieldOne(const bess::pb::Field &field, struct WmField *f,
+                              uint8_t type);
 
   template <typename T>
   CommandResponse ExtractKeyMask(const T &arg, wm_hkey_t *key, wm_hkey_t *mask);
+  template <typename T>
+  CommandResponse ExtractValue(const T &arg, wm_hkey_t *keyv);
 
   int FindTuple(wm_hkey_t *mask);
   int AddTuple(wm_hkey_t *mask);
-  int DelEntry(int idx, wm_hkey_t *key);
-
+  bool DelEntry(int idx, wm_hkey_t *key);
   void Clear();
-
   gate_idx_t default_gate_;
 
-  size_t total_key_size_; /* a multiple of sizeof(uint64_t) */
+  size_t total_key_size_;   /* a multiple of sizeof(uint64_t) */
+  size_t total_value_size_; /* a multiple of sizeof(uint64_t) */
+  size_t entries_;          /* a power of 2 */
 
   // TODO(melvinw): this can be refactored to use ExactMatchTable
   std::vector<struct WmField> fields_;
-  std::vector<struct WmTuple> tuples_;
+  std::vector<struct WmField> values_;
+  std::vector<struct WmTuple> tuples_;  //[MAX_TUPLES];
+  std::vector<struct WmData> data_;
 };
 
 #endif  // BESS_MODULES_WILDCARDMATCH_H_

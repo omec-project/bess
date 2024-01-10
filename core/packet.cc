@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -94,7 +96,6 @@ static std::string HexDump(const void *buffer, size_t len) {
 std::string Packet::Dump() {
   std::ostringstream dump;
   Packet *pkt;
-  uint32_t dump_len = total_len();
   uint32_t nb_segs;
   uint32_t len;
 
@@ -142,7 +143,6 @@ std::string Packet::Dump() {
       dump << HexDump(head_data(), len);
     }
 
-    dump_len -= len;
     pkt = pkt->next_;
     nb_segs--;
   }

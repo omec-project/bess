@@ -2,6 +2,8 @@
 # Copyright (c) 2016-2017, Nefeli Networks, Inc.
 # All rights reserved.
 #
+# SPDX-License-Identifier: BSD-3-Clause
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
@@ -31,7 +33,6 @@
 from __future__ import print_function
 import re
 import tokenize
-import parser
 import io
 
 '''
@@ -71,7 +72,7 @@ a:x->b               Connect output gate x of a    a*i + b
 
 a->y:b               Connect a to input gate y     a + y*b
                      of b                          a.connect(next_mod=b,
-                     (x should be an integer)        igate=y)
+                     (y should be an integer)        igate=y)
 
 a:3->4:b             Connect output gate 3 of a    a*3 + 4*b
                      and input gate of 4           a.connect(next_mod=b,
@@ -95,7 +96,7 @@ Ringo:
 Python:
     __bess_module__('a','Foo') + __bess_module__('b', 'Bar')
 
-3. Create anonymous modules and connection them
+3. Create anonymous modules and connect them
 Ringo:
     Foo() -> Bar()
 Python:
@@ -171,8 +172,8 @@ def is_gate_expr(exp, is_ogate):
         exp_stripped = exp_stripped[:-1].strip()
 
     try:
-        parser.expr('(%s)' % exp_stripped)
-        parser.expr('%s%s%s' % (prefix, exp, postfix))
+        compile('(%s)' % exp_stripped, '', mode='eval')
+        compile('%s%s%s' % (prefix, exp, postfix), '', mode='eval')
     except SyntaxError:
         return False
     else:

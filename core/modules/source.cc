@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -45,7 +47,6 @@ CommandResponse Source::Init(const bess::pb::SourceArg &arg) {
     return CommandFailure(ENOMEM, "Task creation failed");
 
   pkt_size_ = 60;
-  burst_ = bess::PacketBatch::kMaxBurst;
 
   if (arg.pkt_size() > 0) {
     if (arg.pkt_size() > SNBUF_DATA) {

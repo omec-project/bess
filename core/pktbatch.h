@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -67,7 +69,7 @@ class PacketBatch {
     bess::utils::CopyInlined(pkts_, src->pkts_, cnt_ * sizeof(Packet *));
   }
 
-  inline static const size_t kMaxBurst = 32;
+  inline static const size_t kMaxBurst = 64;
 
  private:
   int cnt_;

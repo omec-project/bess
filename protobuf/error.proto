@@ -1,6 +1,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -30,6 +32,8 @@
 syntax = "proto3";
 
 package bess.pb;
+
+option go_package = "github.com/omec-project/upf-epc/pfcpiface/bess_pb";
 
 message Error {
   int32 code = 1;  // 0 for success, errno (>0) for failure

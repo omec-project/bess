@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -43,7 +45,9 @@ namespace utils {
 // template argument T which is the type to be enqueued and dequeued.
 template <typename T>
 class LockLessQueue final : public Queue<T> {
- static_assert(std::is_pointer<T>::value, "LockLessQueue only supports pointer types");
+  static_assert(std::is_pointer<T>::value,
+                "LockLessQueue only supports pointer types");
+
  public:
   static const size_t kDefaultRingSize = 256;
 
@@ -78,13 +82,13 @@ class LockLessQueue final : public Queue<T> {
   }
 
   int Push(T* objs, size_t count) override {
-    if(!llring_enqueue_bulk(ring_, reinterpret_cast<void**>(objs), count)) {
+    if (!llring_enqueue_bulk(ring_, reinterpret_cast<void**>(objs), count)) {
       return count;
     }
     return 0;
   }
 
-  int Pop(T &obj) override {
+  int Pop(T& obj) override {
     return llring_dequeue(ring_, reinterpret_cast<void**>(&obj));
   }
 

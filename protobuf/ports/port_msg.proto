@@ -1,5 +1,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
+// Copyright (c) 2020-2022 Intel Corporation.
 // All rights reserved.
+//
+// SPDX-License-Identifier: BSD-3-Clause
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -31,6 +34,8 @@ syntax = "proto3";
 
 package bess.pb;
 
+option go_package = "github.com/omec-project/upf-epc/pfcpiface/bess_pb";
+
 message PCAPPortArg {
   string dev = 1;
 }
@@ -47,6 +52,13 @@ message PMDPortArg {
   bool vlan_offload_rx_strip = 5;
   bool vlan_offload_rx_filter = 6;
   bool vlan_offload_rx_qinq = 7;
+  oneof socket { int32 socket_id = 8; }
+  bool promiscuous_mode = 9;
+  bool hwcksum = 10;
+
+  // N3 -> 3; N6 -> 6; N9 -> 9
+  // [3] or [6, 9]
+  repeated uint32 flow_profiles = 11;
 }
 
 message UnixSocketPortArg {
@@ -77,4 +89,12 @@ message VPortArg {
   uint64 tx_outer_tci = 7;
   bool loopback = 8;
   repeated string ip_addrs = 9;
+}
+
+message CndpPortArg {
+  /// CNDP JSONC configuration absolute file path.
+  string jsonc_file = 1;
+
+  /// lport index.
+  uint32 lport_index = 2;
 }

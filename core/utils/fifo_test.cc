@@ -1,6 +1,8 @@
 // Copyright (c) 2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -668,4 +670,4 @@ TEST_F(FifoTestFixture, MultipleFancyFifos) {
   // everything down now.
 }
 
-}  // namespace (unnamed)
+}  // namespace

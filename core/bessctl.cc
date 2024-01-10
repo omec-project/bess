@@ -3,6 +3,8 @@
 // Copyright (c) 2017, Cloudigo.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -1006,8 +1008,7 @@ class BESSControlImpl final : public BESSControl::Service {
     const char* driver_name;
     ::Port* port = nullptr;
 
-    VLOG(1) << "CreatePortRequest from client:" << std::endl
-            << request->DebugString();
+    VLOG(1) << "CreatePortRequest from client:\n" << request->DebugString();
 
     if (request->driver().length() == 0)
       return return_with_error(response, EINVAL, "Missing 'driver' field");
@@ -1206,8 +1207,7 @@ class BESSControlImpl final : public BESSControl::Service {
                       CreateModuleResponse* response) override {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
 
-    VLOG(1) << "CreateModuleRequest from client:" << std::endl
-            << request->DebugString();
+    VLOG(1) << "CreateModuleRequest from client:\n" << request->DebugString();
 
     if (!request->mclass().length()) {
       return return_with_error(response, EINVAL, "Missing 'mclass' field");
@@ -1313,8 +1313,7 @@ class BESSControlImpl final : public BESSControl::Service {
                         EmptyResponse* response) override {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
 
-    VLOG(1) << "ConnectModulesRequest from client:" << std::endl
-            << request->DebugString();
+    VLOG(1) << "ConnectModulesRequest from client:\n" << request->DebugString();
 
     const char* m1_name;
     const char* m2_name;
@@ -1454,8 +1453,7 @@ class BESSControlImpl final : public BESSControl::Service {
                               GetGateHookClassInfoResponse* response) override {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
 
-    VLOG(1) << "GetGateHookClassInfo from client:" << std::endl
-            << request->DebugString();
+    VLOG(1) << "GetGateHookClassInfo from client:\n" << request->DebugString();
     if (!request->name().length()) {
       return return_with_error(response, EINVAL,
                                "Argument must be a name in str");
@@ -1733,8 +1731,7 @@ class BESSControlImpl final : public BESSControl::Service {
                        GetMclassInfoResponse* response) override {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
 
-    VLOG(1) << "GetMclassInfo from client:" << std::endl
-            << request->DebugString();
+    VLOG(1) << "GetMclassInfo from client:\n" << request->DebugString();
     if (!request->name().length()) {
       return return_with_error(response, EINVAL,
                                "Argument must be a name in str");

@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -284,13 +286,13 @@ class alignas(64) Module {
   // Register a task.
   task_id_t RegisterTask(void *arg);
 
-  // Modules should call this function to declare additional metadata
-  // attributes at initialization time.
-  // Static metadata attributes that are defined in module class are
-  // automatically registered, so only attributes specific to a module
-  // 'instance'
-  // need this function.
-  // Returns its allocated ID (>= 0), or a negative number for error */
+  /* Modules should call this function to declare additional metadata
+   * attributes at initialization time.
+   * Static metadata attributes that are defined in module class are
+   * automatically registered, so only attributes specific to a module
+   * 'instance' need this function.
+   * Returns its allocated ID (>= 0), or a negative number for error
+   * */
   int AddMetadataAttr(const std::string &name, size_t size,
                       bess::metadata::Attribute::AccessMode mode);
 

@@ -1,6 +1,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -39,7 +41,7 @@ namespace utils {
 // +-------+-------+-------+--------+
 // |        VNI            | Rsvd.  |
 // +-------+-------+-------+--------+
-struct[[gnu::packed]] Vxlan {
+struct [[gnu::packed]] Vxlan {
   be32_t vx_flags;
   be32_t vx_vni;
 };

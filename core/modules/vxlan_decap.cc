@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -44,8 +46,8 @@ enum {
   ATTR_W_TUN_ID,
 };
 
-CommandResponse VXLANDecap::Init(
-    const bess::pb::VXLANDecapArg &arg[[maybe_unused]]) {
+CommandResponse VXLANDecap::Init(const bess::pb::VXLANDecapArg &arg
+                                 [[maybe_unused]]) {
   using AccessMode = bess::metadata::Attribute::AccessMode;
 
   AddMetadataAttr("tun_ip_src", 4, AccessMode::kWrite);

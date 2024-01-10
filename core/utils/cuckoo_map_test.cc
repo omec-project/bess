@@ -1,6 +1,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -42,7 +44,7 @@ struct CopyConstructorOnly {
   CopyConstructorOnly() = default;
   CopyConstructorOnly(CopyConstructorOnly &&other) = delete;
 
-  CopyConstructorOnly(int aa, int bb): a(aa), b(bb) {}
+  CopyConstructorOnly(int aa, int bb) : a(aa), b(bb) {}
   CopyConstructorOnly(const CopyConstructorOnly &other)
       : a(other.a), b(other.b) {}
 
@@ -55,7 +57,7 @@ struct MoveConstructorOnly {
   MoveConstructorOnly() = default;
   MoveConstructorOnly(const MoveConstructorOnly &other) = delete;
 
-  MoveConstructorOnly(int aa, int bb): a(aa), b(bb) {}
+  MoveConstructorOnly(int aa, int bb) : a(aa), b(bb) {}
   MoveConstructorOnly(MoveConstructorOnly &&other) noexcept
       : a(other.a), b(other.b) {
     other.a = 0;
@@ -95,7 +97,7 @@ TEST(CuckooMapTest, Insert) {
   EXPECT_EQ(cuckoo.Insert(1, 1)->second, 1);
 }
 
-template<typename T>
+template <typename T>
 void CompileTimeInstantiation() {
   std::map<int, T> m1;
   std::map<T, int> m2;

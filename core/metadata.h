@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -209,7 +211,7 @@ class Pipeline {
   // count(=int) represents how many modules registered the attribute, and the
   // attribute is deregistered once it reaches back to 0.
   // Those modules should agree on the same size(=size_t).
-  std::map<std::string, std::tuple<size_t, int> > registered_attrs_;
+  std::map<std::string, std::tuple<size_t, int>> registered_attrs_;
 };
 
 extern bess::metadata::Pipeline default_pipeline;

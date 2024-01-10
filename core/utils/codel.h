@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -37,22 +39,22 @@
 
 #include <glog/logging.h>
 
-#include "time.h"
 #include "queue.h"
+#include "time.h"
 
 namespace bess {
 namespace utils {
 // Codel(Controlled Delay Management) is an Queue controller based on this
 // article http://queue.acm.org/detail.cfm?id=2209336
 
-// It provides an active queue management to help prevent bufferbloat by dropping
-// queue entries at an increasing rate if the delay in the queue is above the
-// target queue delay. The equation used to calculate drop intervals is based on TCP
-// throughput response to drop probability.
+// It provides an active queue management to help prevent bufferbloat by
+// dropping queue entries at an increasing rate if the delay in the queue is
+// above the target queue delay. The equation used to calculate drop intervals
+// is based on TCP throughput response to drop probability.
 
 // template argument T is the type that is going to be enqueued/dequeued.
 template <typename T>
-class Codel final: public Queue<T> {
+class Codel final : public Queue<T> {
  public:
   // default delay target for codel
   static const uint64_t kDefaultTarget = 5000000;
@@ -66,10 +68,10 @@ class Codel final: public Queue<T> {
   // Takes a drop function which is a function that should take a dropped object
   // and handle it removing the object potentially including freeing the object.
   // If there is no need to handle a dropped object, NULL can be passed instead.
-  // target is the target delay in nanoseconds and the window is the buffer time u
-  // in nanosecond before changing into drop state.
-  Codel(void (*drop_func)(T)= NULL, size_t max_entries=0, uint64_t target = kDefaultTarget,
-      uint64_t window = kDefaultWindow)
+  // target is the target delay in nanoseconds and the window is the buffer time
+  // u in nanosecond before changing into drop state.
+  Codel(void (*drop_func)(T) = NULL, size_t max_entries = 0,
+        uint64_t target = kDefaultTarget, uint64_t window = kDefaultWindow)
       : delay_target_(target),
         window_(window),
         time_above_target_(0),
@@ -78,7 +80,7 @@ class Codel final: public Queue<T> {
         dropping_(0),
         max_size_(max_entries),
         queue_(),
-        drop_func_(drop_func) { }
+        drop_func_(drop_func) {}
 
   // deconstructor that drops all objects still left in the internal queue.
   virtual ~Codel() {
@@ -97,7 +99,7 @@ class Codel final: public Queue<T> {
     return 0;
   }
 
-  int Push(T* ptr, size_t count) override {
+  int Push(T *ptr, size_t count) override {
     size_t i = 0;
     for (; i < count; i++) {
       if (Push(ptr[i])) {
@@ -107,8 +109,9 @@ class Codel final: public Queue<T> {
     return i;
   }
 
-  // Retrieves the next entry from the queue and in the process, potentially drops
-  // objects as well as changes between dropping state and not dropping state.
+  // Retrieves the next entry from the queue and in the process, potentially
+  // drops objects as well as changes between dropping state and not dropping
+  // state.
   int Pop(T &obj) override {
     bool drop = false;
     Wrapper w;
@@ -124,7 +127,7 @@ class Codel final: public Queue<T> {
       // than the current time.
       err = DropDequeue(w, drop);
     } else if (drop && ((now - next_drop_time_ < window_) ||
-                           (now - time_above_target_ >= window_))) {
+                        (now - time_above_target_ >= window_))) {
       // if not in dropping state, determine whether to enter drop state and if
       // so, drop current object, get a new object and reset the drop counter.
       Drop(w);
@@ -149,10 +152,11 @@ class Codel final: public Queue<T> {
     return err;
   }
 
-  // Retrieves the next count entries from the queue and in the process, potentially
-  // drops objects as well as changes between dropping state and not dropping state.
-  // Does not necessarily return count if there are count present but some are dropped.
-  int Pop(T* objs, size_t count) override {
+  // Retrieves the next count entries from the queue and in the process,
+  // potentially drops objects as well as changes between dropping state and not
+  // dropping state. Does not necessarily return count if there are count
+  // present but some are dropped.
+  int Pop(T *objs, size_t count) override {
     size_t i = 0;
     T next_obj;
     for (; i < count; i++) {
@@ -164,9 +168,10 @@ class Codel final: public Queue<T> {
     }
     return i;
   }
-  // the underlying queue is deque which is a dynamically sized queue with a max size
-  // determined by system limit. Therefore, the capacity is a specified value used to
-  // limit the queue or if no value is specified, the queue's system limit.
+  // the underlying queue is deque which is a dynamically sized queue with a max
+  // size determined by system limit. Therefore, the capacity is a specified
+  // value used to limit the queue or if no value is specified, the queue's
+  // system limit.
   size_t Capacity() override {
     if (max_size_ != 0) {
       return max_size_;
@@ -185,10 +190,10 @@ class Codel final: public Queue<T> {
 
   size_t Size() override { return queue_.size(); }
 
-  // The undelying queue is deque which is a dynamically sized queue with a max size
-  // determined by system limits. Therefore, the resize method will error if the new_capacity
-  // is outside of the queue's system limits or otherwise, only change the imposed limit on
-  // the capacity of the queue.
+  // The undelying queue is deque which is a dynamically sized queue with a max
+  // size determined by system limits. Therefore, the resize method will error
+  // if the new_capacity is outside of the queue's system limits or otherwise,
+  // only change the imposed limit on the capacity of the queue.
   int Resize(size_t new_capacity) override {
     if (new_capacity <= Size()) {
       return -1;
@@ -204,7 +209,7 @@ class Codel final: public Queue<T> {
   // Calls the drop_func on the object if the drop function exists
   void Drop(Wrapper w) {
     if (drop_func_ != NULL) {
-        drop_func_(w.second);
+      drop_func_(w.second);
     }
   }
 
@@ -216,8 +221,8 @@ class Codel final: public Queue<T> {
 
   // Gets the next object from the queue and determines based on current state,
   // whether set the passed drop boolean to true(to tell the calling function to
-  // drop it). Takes a Wrapper to set to the next entry in the queue and a boolean
-  // to set if the entry should be dropped. Returns 0 on success.
+  // drop it). Takes a Wrapper to set to the next entry in the queue and a
+  // boolean to set if the entry should be dropped. Returns 0 on success.
   int RingDequeue(Wrapper &w, bool &drop) {
     if (!queue_.empty()) {
       w = queue_.front();
@@ -242,11 +247,11 @@ class Codel final: public Queue<T> {
     return 0;
   }
 
-  // Called while Codel is in drop state to determine whether to drop the current
-  // entries and dequeue the next entry. Will continue to drop entries until the
-  // next drop is greater than the current time. Takes a Wrapper which is the next
-  // entry in the queue which will potentially be replaced and a boolean determing
-  // if the entry should be dropped. Returns 0 on success.
+  // Called while Codel is in drop state to determine whether to drop the
+  // current entries and dequeue the next entry. Will continue to drop entries
+  // until the next drop is greater than the current time. Takes a Wrapper which
+  // is the next entry in the queue which will potentially be replaced and a
+  // boolean determing if the entry should be dropped. Returns 0 on success.
   int DropDequeue(Wrapper &w, bool &drop) {
     uint64_t now = NanoSecondTime();
     if (!drop) {
@@ -268,9 +273,7 @@ class Codel final: public Queue<T> {
   }
 
   // Returns the current time in microseconds.
-  uint64_t NanoSecondTime() {
-    return tsc_to_ns(rdtsc());
-  }
+  uint64_t NanoSecondTime() { return tsc_to_ns(rdtsc()); }
 
   uint64_t delay_target_;  // the delay that codel will adjust for
   uint64_t window_;        // minimum time before changing state
@@ -281,10 +284,10 @@ class Codel final: public Queue<T> {
 
   // the number of objects dropped while delay has been above target
   uint32_t drop_count_;
-  uint8_t dropping_;       // whether in dropping state(above target for window)
+  uint8_t dropping_;  // whether in dropping state(above target for window)
   size_t max_size_;
   std::deque<Wrapper> queue_;  // queue
-  void (*drop_func_)(T);  // the function to call to drop a value
+  void (*drop_func_)(T);       // the function to call to drop a value
 };
 
 }  // namespace utils

@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -70,7 +72,8 @@ static inline void mcs_lock(mcslock_t *lock, mcslock_node_t *mynode) {
 
 static inline void mcs_unlock(mcslock_t *lock, mcslock_node_t *mynode) {
   if (mynode->next == nullptr) {
-    if (__sync_bool_compare_and_swap(&lock->tail, mynode, nullptr)) return;
+    if (__sync_bool_compare_and_swap(&lock->tail, mynode, nullptr))
+      return;
 
     while (mynode->next == nullptr) {
       asm volatile("lfence" ::: "memory");

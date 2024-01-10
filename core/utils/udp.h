@@ -1,6 +1,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -34,7 +36,7 @@ namespace bess {
 namespace utils {
 
 // A basic UDP header definition.
-struct[[gnu::packed]] Udp {
+struct [[gnu::packed]] Udp {
   be16_t src_port;    // Source port.
   be16_t dst_port;    // Destination port.
   be16_t length;      // Length of header and data.

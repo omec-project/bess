@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -152,7 +154,9 @@ struct task_result DRR::RunTask(Context *ctx, bess::PacketBatch *batch,
                                 void *) {
   if (children_overload_ > 0) {
     return {
-        .block = true, .packets = 0, .bits = 0,
+        .block = true,
+        .packets = 0,
+        .bits = 0,
     };
   }
 

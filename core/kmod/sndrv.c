@@ -3,6 +3,8 @@
  *
  *   Copyright(c) 2014 Sangjin Han All rights reserved.
  *
+ *   SPDX-License-Identifier: BSD-3-Clause or GPL-2.0-only
+ *
  *   Redistribution and use in source and binary forms, with or without
  *   modification, are permitted provided that the following conditions
  *   are met:

@@ -1,6 +1,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -133,6 +135,7 @@ struct PortRange {
 // igate/ogate 1: reverse dir
 class NAT final : public Module {
  public:
+  NAT() { max_allowed_workers_ = 2; }
   enum Direction {
     kForward = 0,  // internal -> external
     kReverse = 1,  // external -> internal

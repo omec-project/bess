@@ -2,6 +2,8 @@
 // Copyright (c) 2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -39,8 +41,8 @@
 #include "../utils/ether.h"
 #include "../utils/ip.h"
 
-using bess::utils::Ethernet;
 using bess::utils::be32_t;
+using bess::utils::Ethernet;
 
 // ARP cache entry struct which keeps mapping between IP and MAC
 struct arp_entry {

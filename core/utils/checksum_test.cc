@@ -1,6 +1,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -97,7 +99,8 @@ TEST(ChecksumTest, Ipv4NoOptChecksum) {
   ip->src = be32_t(0x12345678);
   ip->dst = be32_t(0x12347890);
 
-  uint16_t cksum_dpdk = rte_ipv4_cksum(reinterpret_cast<const rte_ipv4_hdr *>(ip));
+  uint16_t cksum_dpdk =
+      rte_ipv4_cksum(reinterpret_cast<const rte_ipv4_hdr *>(ip));
   uint16_t cksum_bess = CalculateIpv4NoOptChecksum(*ip);
   EXPECT_EQ(cksum_dpdk, cksum_bess);
 
@@ -454,4 +457,4 @@ TEST(ChecksumTest, IncrementalUpdateSrcIpPort) {
     EXPECT_TRUE(VerifyIpv4TcpChecksum(*ip, *tcp));
   }
 }
-}  // namespace (unnamed)
+}  // namespace

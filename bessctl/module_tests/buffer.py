@@ -1,6 +1,8 @@
 # Copyright (c) 2016-2017, Nefeli Networks, Inc.
 # All rights reserved.
 #
+# SPDX-License-Identifier: BSD-3-Clause
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
@@ -31,7 +33,7 @@ from test_utils import *
 
 # BESS default batch size
 # TODO: Any way to receive the parameter from bess daemon?
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 
 
 class BessBufferTest(BessModuleTestCase):

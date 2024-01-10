@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -63,16 +65,15 @@ const Commands Measure::cmds = {
 CommandResponse Measure::Init(const bess::pb::MeasureArg &arg) {
   uint64_t latency_ns_max = arg.latency_ns_max();
   uint64_t latency_ns_resolution = arg.latency_ns_resolution();
-  if (latency_ns_max == 0) {
+  if (!latency_ns_max) {
     latency_ns_max = kDefaultMaxNs;
   }
-  if (latency_ns_resolution == 0) {
+  if (!latency_ns_resolution) {
     latency_ns_resolution = kDefaultNsPerBucket;
   }
-  uint64_t quotient = latency_ns_max / latency_ns_resolution;
-  if ((latency_ns_max % latency_ns_resolution) != 0) {
-    quotient += 1;  // absorb any remainder
-  }
+  uint64_t quotient =
+      (latency_ns_max + latency_ns_resolution - 1) / latency_ns_resolution;
+
   if (quotient > rtt_hist_.max_num_buckets() / 2) {
     return CommandFailure(E2BIG,
                           "excessive latency_ns_max / latency_ns_resolution");

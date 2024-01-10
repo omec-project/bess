@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -52,10 +54,9 @@ class Queue {
   // zero on success
   virtual int Pop(T&) = 0;
 
-
-  // Dequeue several objects. Takes table to put objects and the number of objects
-  // to be dequeued into the table returns the number of objects dequeued into the
-  // table
+  // Dequeue several objects. Takes table to put objects and the number of
+  // objects to be dequeued into the table returns the number of objects
+  // dequeued into the table
   virtual int Pop(T*, size_t) = 0;
 
   // Returns the total capacity of the queue

@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -69,7 +71,7 @@ static int l2_init(struct l2_table *l2tbl, int size, int bucket) {
     return -EINVAL;
   }
 
-  l2tbl->table = new(std::nothrow) l2_entry[size * bucket]{};
+  l2tbl->table = new (std::nothrow) l2_entry[size * bucket]{};
 
   if (l2tbl->table == nullptr) {
     return -ENOMEM;

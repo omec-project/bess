@@ -1,6 +1,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -34,7 +36,7 @@ namespace bess {
 namespace utils {
 
 // A basic TCP header definition loosely based on the BSD version.
-struct[[gnu::packed]] Tcp {
+struct [[gnu::packed]] Tcp {
   enum Flag : uint8_t {
     kFin = 0x01,
     kSyn = 0x02,

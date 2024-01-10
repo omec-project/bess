@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -143,11 +145,10 @@ static inline uint32_t CalculateSum(const void *buf, size_t len) {
   sum64 = (sum64 >> 32) + (sum64 & 0xFFFFFFFF);
 #else
   // Use stantard C language for 32 bit or other non-Intel
-  typedef union[[gnu::may_alias]] {
+  typedef union [[gnu::may_alias]] {
     uint32_t u64;
     uint16_t u16[4];
-  }
-  u16_64;
+  } u16_64;
   const u16_64 *ubuf64;
   ubuf64 = reinterpret_cast<const u16_64 *>(buf64);
   while (len >= sizeof(uint64_t)) {

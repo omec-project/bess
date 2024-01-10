@@ -2,6 +2,8 @@
 // Copyright (c) 2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -36,7 +38,9 @@
 // Compute L4 checksum on packet
 class L4Checksum final : public Module {
  public:
- L4Checksum() : Module(), verify_(false) { max_allowed_workers_ = Worker::kMaxWorkers; }
+  L4Checksum() : Module(), verify_(false) {
+    max_allowed_workers_ = Worker::kMaxWorkers;
+  }
 
   /* Gates: (0) Default, (1) Drop */
   static const gate_idx_t kNumOGates = 2;
@@ -46,6 +50,7 @@ class L4Checksum final : public Module {
 
  private:
   bool verify_;
+  bool hw_;
 };
 
 #endif  // BESS_MODULES_L4_CHECKSUM_H_

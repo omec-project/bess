@@ -1,8 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (c) 2014-2016, The Regents of the University of California.
 # Copyright (c) 2016-2017, Nefeli Networks, Inc.
 # All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -37,10 +39,10 @@ import subprocess
 import sys
 import time
 
-TARGET_REPO = 'nefelinetworks/bess_build'
+TARGET_REPO = 'ghcr.io/omec-project/upf-epc/bess_build'
 
 imgs = {
-    'bionic64': {'base': 'ubuntu:bionic', 'tag_suffix': ''},
+    'focal64': {'base': 'ubuntu:focal', 'tag_suffix': ''},
 }
 
 
@@ -58,7 +60,7 @@ def run_cmd(cmd, shell=False):
 def build(env):
     base = imgs[env]['base']
     tag_suffix = imgs[env]['tag_suffix']
-    bess_dpdk_branch = os.getenv('BESS_DPDK_BRANCH', 'master')
+    bess_dpdk_branch = os.getenv('BESS_DPDK_BRANCH', 'dpdk-2011-focal')
     version = time.strftime('%y%m%d')
 
     run_cmd('docker build '
@@ -87,10 +89,7 @@ def main(argv):
 
     version, tag_suffix = build(argv[1])
 
-    try:
-        prompt = raw_input  # Python 2
-    except NameError:
-        prompt = input      # Python 3
+    prompt = input      # Python 3
 
     if prompt('Do you wish to push the image? [y/N] ').lower() in ['y', 'yes']:
         push(version, tag_suffix)

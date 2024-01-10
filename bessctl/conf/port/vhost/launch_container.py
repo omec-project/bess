@@ -1,7 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (c) 2017, Nefeli Networks, Inc.
 # All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -59,8 +61,8 @@ PKT_SIZE = int(os.getenv('BESS_PKT_SIZE', '60'))
 VERBOSE = int(os.getenv('VERBOSE', '0'))
 
 SOCKDIR = '/tmp/bessd'
-IMAGE = 'nefelinetworks/bess_build'
-CONTAINER_NAME = 'nefeli_bessd'
+IMAGE = 'ghcr.io/omec-project/upf-epc/bess_build'
+CONTAINER_NAME = 'bessd'
 
 
 def launch(cid):

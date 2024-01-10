@@ -2,6 +2,8 @@
 # Copyright (c) 2017, Cloudigo.
 # All rights reserved.
 #
+# SPDX-License-Identifier: BSD-3-Clause
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
@@ -117,7 +119,7 @@ def load_test(filename):
     CRASH_TEST_INPUTS, OUTPUT_TEST_INPUTS, and CUSTOM_TEST_FUNCTIONS
     using .append() to add its tests.  The format of each of these is
     a bit different; see the wiki at
-    https://github.com/NetSys/bess/wiki/Python-Scripts
+    https://github.com/omec-project/bess/wiki/Python-Scripts
     """
     namespace = {
         '__builtins__': __builtins__,

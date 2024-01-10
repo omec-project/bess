@@ -1,6 +1,8 @@
 # Copyright (c) 2017, Cloudigo.
 # All rights reserved.
 #
+# SPDX-License-Identifier: BSD-3-Clause
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
@@ -32,7 +34,7 @@ import scapy.all as scapy
 eth_header = scapy.Ether(src='02:1e:67:9f:4d:ae', dst='ff:ff:ff:ff:ff:ff')
 arp_header = scapy.ARP(op=1, pdst='1.2.3.4')
 pkt = eth_header/arp_header
-packets = [str(pkt)]
+packets = [bytes(pkt)]
 
 arp::ArpResponder()
 arp.add(ip='1.2.3.4', mac_addr='A0:22:33:44:55:66')

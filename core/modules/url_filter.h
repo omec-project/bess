@@ -1,6 +1,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -45,10 +47,10 @@
 #include "../utils/tcp_flow_reconstruct.h"
 #include "../utils/trie.h"
 
-using bess::utils::TcpFlowReconstruct;
-using bess::utils::Trie;
 using bess::utils::be16_t;
 using bess::utils::be32_t;
+using bess::utils::TcpFlowReconstruct;
+using bess::utils::Trie;
 
 // A helper class that defines a TCP flow
 class alignas(16) Flow {

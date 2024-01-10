@@ -2,6 +2,8 @@
 # Copyright (c) 2016-2017, Nefeli Networks, Inc.
 # All rights reserved.
 #
+# SPDX-License-Identifier: BSD-3-Clause
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
@@ -38,7 +40,7 @@ pkt = eth/ip/udp/payload
 
 # RandomSplit randomly split/drops packets.
 Source() -> \
-        Rewrite(templates=[str(pkt)]) \
+        Rewrite(templates=[bytes(pkt)]) \
         -> rs::RandomSplit(drop_rate=0.75, gates=[0,1,2])
 
 sink::Sink()

@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -40,8 +42,8 @@ enum {
   ATTR_R_ETHER_TYPE,
 };
 
-CommandResponse EtherEncap::Init(
-    const bess::pb::EtherEncapArg &arg[[maybe_unused]]) {
+CommandResponse EtherEncap::Init(const bess::pb::EtherEncapArg &arg
+                                 [[maybe_unused]]) {
   using AccessMode = bess::metadata::Attribute::AccessMode;
 
   AddMetadataAttr("ether_src", sizeof(Ethernet::Address), AccessMode::kRead);

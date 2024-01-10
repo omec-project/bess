@@ -1,6 +1,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -31,7 +33,9 @@ syntax = "proto3";
 
 package bess.pb.test;
 
-message UnnestedDictMsg { map<int32, int32> dict = 1; }
+message UnnestedDictMsg {
+  map<int32, int32> dict = 1;
+}
 
 message NestedDictMsg {
   UnnestedDictMsg a = 1;

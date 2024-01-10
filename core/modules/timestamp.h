@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -39,7 +41,9 @@ class Timestamp final : public Module {
   using MarkerType = uint32_t;
   static const MarkerType kMarker = 0x54C5BE55;
 
-  Timestamp() : Module(), offset_(), attr_id_(-1) { max_allowed_workers_ = Worker::kMaxWorkers; }
+  Timestamp() : Module(), offset_(), attr_id_(-1) {
+    max_allowed_workers_ = Worker::kMaxWorkers;
+  }
 
   CommandResponse Init(const bess::pb::TimestampArg &arg);
 

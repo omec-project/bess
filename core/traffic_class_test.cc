@@ -1,6 +1,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -407,8 +409,9 @@ TEST(DefaultScheduleOnce, TwoLeavesWeightedFair) {
 // (lowest) priority leaf that is unblocked at that time.
 TEST(DefaultScheduleOnce, TwoLeavesPriority) {
   DummyModule dm;
-  DefaultScheduler s(CT("root", {PRIORITY}, {{0, CT("rr_1", {ROUND_ROBIN})},
-                                             {1, CT("rr_2", {ROUND_ROBIN})}}));
+  DefaultScheduler s(
+      CT("root", {PRIORITY},
+         {{0, CT("rr_1", {ROUND_ROBIN})}, {1, CT("rr_2", {ROUND_ROBIN})}}));
   ASSERT_EQ(3, TrafficClassBuilder::Find("root")->Size());
 
   RoundRobinTrafficClass *rr_1 =

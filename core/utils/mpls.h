@@ -1,6 +1,8 @@
 // Copyright (c) 2017, Cloudigo.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -63,17 +65,11 @@ struct Mpls {
                  (bos ? (1 << kMplsBosShift) : 0) | (ttl << kMplsTtlShift));
   }
 
-  uint32_t Label() {
-    return (tag.value() & kMplsLabelMask) >> kMplsLabelShift;
-  }
+  uint32_t Label() { return (tag.value() & kMplsLabelMask) >> kMplsLabelShift; }
 
-  uint8_t Ttl() {
-    return (tag.value() & kMplsTtlMask) >> kMplsTtlShift;
-  }
+  uint8_t Ttl() { return (tag.value() & kMplsTtlMask) >> kMplsTtlShift; }
 
-  uint8_t Tc() {
-    return (tag.value() & kMplsTcMask) >> kMplsTcShift;
-  }
+  uint8_t Tc() { return (tag.value() & kMplsTcMask) >> kMplsTcShift; }
 
   bool isBottomOfStack() {
     return (tag.value() & kMplsBosMask) >> kMplsBosShift;

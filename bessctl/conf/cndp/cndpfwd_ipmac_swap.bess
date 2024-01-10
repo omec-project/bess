@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2020-2022 Intel Corporation
+
+# Example BESS script for CNDP Packet forward. It receives the Ethernet/IP packet from recvport,
+# swaps the src and dst mac and ip address and sends the packet to sendport.
+# Port index corresponds to the ports defined in lports section in fwd.jsonc file.
+
+recvport = CndpPort(jsonc_file="/build/bess/bessctl/conf/cndp/fwd.jsonc", lport_index=0)
+sendport = CndpPort(jsonc_file="/build/bess/bessctl/conf/cndp/fwd.jsonc", lport_index=1)
+
+input0 = PortInc(port=recvport)
+output0 = PortOut(port=sendport)
+
+# Swap src/dst MAC
+macswap = MACSwap()
+
+# Swap src/dst IP addresses / ports
+ipswap = IPSwap()
+
+input0 -> macswap -> ipswap -> output0

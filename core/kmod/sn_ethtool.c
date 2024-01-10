@@ -2,6 +2,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -31,6 +33,8 @@
 #include "sn_common.h"
 #include "sn_kernel.h"
 #include "../snbuf_layout.h"
+
+#include <linux/ethtool.h>
 
 #define NUM_STATS_PER_TX_QUEUE (sizeof(struct sn_queue_tx_stats) / sizeof(u64))
 #define NUM_STATS_PER_RX_QUEUE (sizeof(struct sn_queue_rx_stats) / sizeof(u64))

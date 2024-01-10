@@ -1,6 +1,8 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
 // All rights reserved.
 //
+// SPDX-License-Identifier: BSD-3-Clause
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
@@ -27,25 +29,28 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-syntax="proto3";
+syntax = "proto3";
 /// This file contains some standard "types" for messages to/from BESS
 
 package bess.pb;
 
-/// The Field message represents one field in a packet -- either stored in metadata or in the packet body.
+option go_package = "github.com/omec-project/upf-epc/pfcpiface/bess_pb";
+
+/// The Field message represents one field in a packet -- either stored in
+/// metadata or in the packet body.
 message Field {
   oneof position {
-    string attr_name = 1; /// The metadata attribute assigned to store the data
-    uint32 offset = 2; /// The offset in bytes to store the data into
+    string attr_name = 1;  /// The metadata attribute assigned to store the data
+    uint32 offset = 2;     /// The offset in bytes to store the data into
   }
-  uint32 num_bytes = 3; /// The size of the data in bytes
+  uint32 num_bytes = 3;  /// The size of the data in bytes
 }
 
-/// The FieldData message encodes a value to insert into a packet; the value can be supplied as either an int or a bytestring.
+/// The FieldData message encodes a value to insert into a packet; the value can
+/// be supplied as either an int or a bytestring.
 message FieldData {
   oneof encoding {
-    bytes value_bin = 1; /// The value as a bytestring
-    uint64 value_int = 2; /// The value in integer format
+    bytes value_bin = 1;   /// The value as a bytestring
+    uint64 value_int = 2;  /// The value in integer format
   }
 }
-
