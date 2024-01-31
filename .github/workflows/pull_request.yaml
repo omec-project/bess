@@ -12,7 +12,7 @@ jobs:
         os:
           - ubuntu-20.04
     env:
-      BESS_DPDK_BRANCH: "dpdk-2011-focal"
+      BESS_DPDK_BRANCH: "master"
     steps:
       - uses: actions/checkout@v2
       - run: sudo sysctl -w vm.nr_hugepages=512
