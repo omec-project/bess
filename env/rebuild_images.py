@@ -63,7 +63,7 @@ def build(env):
     bess_dpdk_branch = os.getenv('BESS_DPDK_BRANCH', 'master')
     version = time.strftime('%y%m%d')
 
-    run_cmd('docker build '
+    run_cmd('docker build -f env/Dockerfile '
             '--build-arg BASE_IMAGE={base} '
             '--build-arg BESS_DPDK_BRANCH={branch} '
             '-t {target}:latest{suffix} -t {target}:{version}{suffix} '

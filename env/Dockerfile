@@ -93,9 +93,9 @@ RUN echo "APT::Install-Recommends false;" >> /etc/apt/apt.conf.d/00recommends &&
 	echo "APT::AutoRemove::RecommendsImportant false;" >> /etc/apt/apt.conf.d/00recommends && \
 	echo "APT::AutoRemove::SuggestsImportant false;" >> /etc/apt/apt.conf.d/00recommends
 
-COPY build-dep.yml /tmp/
-COPY kmod.yml /tmp/
-COPY ci.yml /tmp/
+COPY env/build-dep.yml /tmp/
+COPY env/kmod.yml /tmp/
+COPY env/ci.yml /tmp/
 
 # Install dependency packages with Ansible
 RUN apt-get -q update && \
@@ -107,15 +107,13 @@ RUN apt-get -q update && \
 RUN update-alternatives --install /usr/local/bin/python python /usr/bin/python3 3
 RUN mkdir -p /build/bess
 
+WORKDIR /build/bess
+COPY . .
+
 # Build DPDK testpmd (used in bessctl samples)
-ARG BESS_DPDK_BRANCH=master
-RUN cd /build/bess && \
-	curl -s -L https://github.com/omec-project/bess/archive/${BESS_DPDK_BRANCH}.tar.gz | tar zx --strip-components=1 && \
-	./build.py dpdk && \
+RUN ./build.py dpdk && \
 	cp /build/bess/deps/dpdk-20.11.3/build/app/dpdk-testpmd /usr/local/bin/ && \
 	rm -rf /build/bess
 
 ENV CCACHE_DIR=/tmp/ccache
 ENV CCACHE_COMPRESS=true
-
-WORKDIR /build/bess
