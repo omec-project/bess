@@ -12,7 +12,7 @@ jobs:
         os:
           - ubuntu-20.04
     env:
-      BESS_DPDK_BRANCH: "dpdk-2011-focal"
+      BESS_DPDK_BRANCH: "master"
     steps:
       - uses: actions/checkout@v2
       - run: sudo sysctl -w vm.nr_hugepages=512
@@ -27,9 +27,7 @@ jobs:
             build-essential libbsd-dev libelf-dev libbpf-dev libjson-c-dev \
             libnl-3-dev libnl-cli-3-dev libnuma-dev libpcap-dev meson \
             pkg-config libgflags2.2
-      - run: |
-          cd env
-          yes n | ./rebuild_images.py focal64
+      - run: yes n | ./env/rebuild_images.py focal64
       - run: sudo mkdir -p /mnt/huge
       - run: sudo mount -t hugetlbfs nodev /mnt/huge
       - run: export CXX="ccache $VER_CXX"
