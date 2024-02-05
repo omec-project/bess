@@ -29,3 +29,38 @@ jobs:
         uses: fossa-contrib/fossa-action@v3
         with:
           fossa-api-key: 9dc8fa92e3dd565687317beb87b56d89
+
+  clang-format:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        path:
+          - check: 'core'
+            exclude: '(kmod)' # Exclude "kmod" dir because of different format
+          - check: 'protobuf'
+            exclude: ''       # Nothing to exclude
+          - check: 'sample_plugin/modules'
+            exclude: ''       # Nothing to exclude
+          - check: 'sample_plugin/protobuf'
+            exclude: ''       # Nothing to exclude
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Clang-format check
+      uses: jidicula/clang-format-action@v4.11.0
+      with:
+        clang-format-version: '12'
+        check-path: ${{ matrix.path['check'] }}
+        exclude-regex: ${{ matrix.path['exclude'] }}
+
+  markdown-spelling:
+    name: Markdown spellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Check Spelling
+        uses: rojopolis/spellcheck-github-actions@0.35.0
+        with:
+          config_path: .spellcheck.yml
+          task_name: Markdown
