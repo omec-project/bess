@@ -1,20 +1,16 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2022 Intel Corporation
+# Copyright 2022-Present Intel Corporation
 
 name: Build and Test process
 on:
   - pull_request
+env:
+  BESS_DPDK_BRANCH: master
 jobs:
   build:
-    runs-on: '${{ matrix.os }}'
-    strategy:
-      matrix:
-        os:
-          - ubuntu-20.04
-    env:
-      BESS_DPDK_BRANCH: "master"
+    runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: sudo sysctl -w vm.nr_hugepages=512
       - run: sudo apt-get update
       - run: sudo apt-get install -y python3-pip python3-setuptools python3-coverage python3-pyelftools ccache
