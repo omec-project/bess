@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2024-Present Intel Corporation
+
+name: Build and Push image
+on:
+  push:
+    - master
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3.0.0
+        with:
+            registry: ghcr.io
+            username: ${{ github.repository_owner }}
+            password: ${{ secrets.CR_PAT }}
+
+      - name: docker build and push new BESS base image
+        run: yes y | ./env/rebuild_images.py focal64

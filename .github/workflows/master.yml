@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2024 Canonical Ltd.
+# Copyright 2024 Intel Corporation
 
 name: Master workflow
 
@@ -12,24 +13,6 @@ on:
       - master
 
 jobs:
-  license-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: reuse lint
-        uses: fsfe/reuse-action@v1
-
-  fossa-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: FOSSA scan
-        uses: fossa-contrib/fossa-action@v3
-        with:
-          fossa-api-key: 9dc8fa92e3dd565687317beb87b56d89
-
   clang-format:
     runs-on: ubuntu-latest
     strategy:
@@ -53,14 +36,32 @@ jobs:
         check-path: ${{ matrix.path['check'] }}
         exclude-regex: ${{ matrix.path['exclude'] }}
 
-  markdown-spelling:
+  check-spelling:
     name: Markdown spellcheck
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Check Spelling
-        uses: rojopolis/spellcheck-github-actions@0.35.0
+        uses: rojopolis/spellcheck-github-actions@0.36.0
         with:
           config_path: .spellcheck.yml
           task_name: Markdown
+
+  license-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: reuse lint
+        uses: fsfe/reuse-action@v1
+
+  fossa-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: FOSSA scan
+        uses: fossa-contrib/fossa-action@v3
+        with:
+          fossa-api-key: 0c3bbcdf20e157bbd487dae173751b28
