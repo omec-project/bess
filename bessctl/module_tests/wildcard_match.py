@@ -174,7 +174,7 @@ class BessWildcardMatchTest(BessModuleTestCase):
         #        pprint.pprint(b, indent=4)
         # pp2('iconf:', iconf, 'arg:', arg,
         #    '\nmut state:', cur_config, 'expecting:', expect_config)
-        #assert arg == iconf and cur_config == expect_config
+    #    assert arg == iconf and cur_config == expect_config
 
 suite = unittest.TestLoader().loadTestsFromTestCase(BessWildcardMatchTest)
 results = unittest.TextTestRunner(verbosity=2).run(suite)
