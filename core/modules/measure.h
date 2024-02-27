@@ -38,6 +38,7 @@
 #include "../utils/histogram.h"
 #include "../utils/mcslock.h"
 #include "../utils/random.h"
+#include <atomic>
 
 class Measure final : public Module {
  public:
@@ -69,22 +70,18 @@ class Measure final : public Module {
   static const uint64_t kDefaultNsPerBucket = 100;
   static const uint64_t kDefaultMaxNs = 100'000'000;  // 100 ms
   static constexpr double kDefaultIpDvSampleProb = 0.05;
-
   void Clear();
-
   Histogram<uint64_t> rtt_hist_;
   Histogram<uint64_t> jitter_hist_;
 
   Random rand_;
   double jitter_sample_prob_;
-  uint64_t last_rtt_ns_;
-
+  std::atomic<std::uint64_t> last_rtt_ns_;
   size_t offset_;  // in bytes
   int attr_id_;
 
-  uint64_t pkt_cnt_;
-  uint64_t bytes_cnt_;
-
+  std::atomic<std::uint64_t> pkt_cnt_;
+  std::atomic<std::uint64_t> bytes_cnt_;
   mcslock lock_;
 };
 

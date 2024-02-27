@@ -101,7 +101,6 @@ CommandResponse Measure::Init(const bess::pb::MeasureArg &arg) {
   }
 
   mcs_lock_init(&lock_);
-
   return CommandSuccess();
 }
 
@@ -109,12 +108,7 @@ void Measure::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
   // We don't use ctx->current_ns here for better accuracy
   uint64_t now_ns = tsc_to_ns(rdtsc());
   size_t offset = offset_;
-
-  mcslock_node_t mynode;
-  mcs_lock(&lock_, &mynode);
-
   pkt_cnt_ += batch->cnt();
-
   int cnt = batch->cnt();
   for (int i = 0; i < cnt; i++) {
     uint64_t pkt_time = 0;
@@ -122,31 +116,25 @@ void Measure::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
       pkt_time = get_attr<uint64_t>(this, attr_id_, batch->pkts()[i]);
     if (pkt_time || IsTimestamped(batch->pkts()[i], offset, &pkt_time)) {
       uint64_t diff;
-
       if (now_ns >= pkt_time) {
         diff = now_ns - pkt_time;
       } else {
         // The magic number matched, but timestamp doesn't seem correct
         continue;
       }
-
       bytes_cnt_ += batch->pkts()[i]->total_len();
-
-      rtt_hist_.Insert(diff);
+      rtt_hist_.AtomicInsert(diff);
       if (rand_.GetRealNonzero() <= jitter_sample_prob_) {
         if (unlikely(!last_rtt_ns_)) {
           last_rtt_ns_ = diff;
           continue;
         }
-        uint64_t jitter = absdiff(diff, last_rtt_ns_);
-        jitter_hist_.Insert(jitter);
+        uint64_t jitter = absdiff(diff, last_rtt_ns_.load());
+        jitter_hist_.AtomicInsert(jitter);
         last_rtt_ns_ = diff;
       }
     }
   }
-
-  mcs_unlock(&lock_, &mynode);
-
   RunNextModule(ctx, batch);
 }
 
