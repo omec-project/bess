@@ -7,7 +7,3 @@ Files: .codecov.yml .gitattributes .gitignore CONTRIBUTING.md README.md requirem
 Copyright: 2016-2017, Nefeli Networks, Inc.
 Copyright: 2017, The Regents of the University of California.
 License: BSD-3-Clause
-
-Files: deps/0001-af_packet-Avoid-set-ioctl-if-there-is-no-flag-diff.patch
-SPDX-License-Identifier: Apache-2.0
-Copyright 2019-present Intel Corporation

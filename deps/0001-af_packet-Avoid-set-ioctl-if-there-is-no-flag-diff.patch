@@ -1,3 +1,16 @@
+SPDX-License-Identifier: Apache-2.0
+Copyright 2019-present Intel Corporation
+
+From 4d95b7d7cb501cce958bb77e33e066f23ae52901 Mon Sep 17 00:00:00 2001
+From: "Arrobo, Gabriel" <gabriel.arrobo@intel.com>
+Date: Thu, 29 Feb 2024 11:34:41 -0800
+Subject: [PATCH] af_packet Avoid set ioctl if there is no flag diff
+
+Signed-off-by: Arrobo, Gabriel <gabriel.arrobo@intel.com>
+---
+ drivers/net/af_packet/rte_eth_af_packet.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
 diff --git a/drivers/net/af_packet/rte_eth_af_packet.c b/drivers/net/af_packet/rte_eth_af_packet.c
 index c13a0942aa..e47aefb64c 100644
 --- a/drivers/net/af_packet/rte_eth_af_packet.c
@@ -26,3 +39,6 @@ index c13a0942aa..e47aefb64c 100644
  	if (ioctl(s, SIOCSIFFLAGS, &ifr) < 0) {
  		ret = -errno;
  		goto out;
+-- 
+2.25.1
+
