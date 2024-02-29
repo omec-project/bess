@@ -91,7 +91,7 @@ BESS_DIR = os.path.dirname(os.path.abspath(__file__))
 DEPS_DIR = '%s/deps' % BESS_DIR
 
 DPDK_URL = 'https://fast.dpdk.org/rel'
-DPDK_VER = 'dpdk-20.11.3'
+DPDK_VER = 'dpdk-22.11.4'
 DPDK_TARGET = 'x86_64-native-linuxapp-gcc'
 
 kernel_release = cmd('uname -r', quiet=True).strip()
@@ -253,14 +253,14 @@ def download_dpdk(quiet=False):
 
 def configure_dpdk():
     print('Configuring DPDK...')
-    meson_opts = '--buildtype=debugoptimized'
+    meson_opts = '--buildtype=release -Denable_driver_sdk=true'
 
     arch = os.getenv('CPU')
     if arch:
         print(' - Building DPDK with -march=%s' % arch)
         meson_opts += ' -Dmachine=%s' % arch
 
-    cmd('meson %s %s %s' % (meson_opts, DPDK_BUILD, DPDK_DIR))
+    cmd('meson setup %s %s %s' % (meson_opts, DPDK_BUILD, DPDK_DIR))
 
 
 def makeflags():

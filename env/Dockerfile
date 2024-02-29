@@ -112,8 +112,8 @@ COPY . .
 
 # Build DPDK testpmd (used in bessctl samples)
 RUN ./build.py dpdk && \
-	cp /build/bess/deps/dpdk-20.11.3/build/app/dpdk-testpmd /usr/local/bin/ && \
-	rm -rf /build/bess
+    cp /build/bess/deps/dpdk-22.11.4/build/app/dpdk-testpmd /usr/local/bin/ && \
+    rm -rf /build/bess
 
 ENV CCACHE_DIR=/tmp/ccache
 ENV CCACHE_COMPRESS=true

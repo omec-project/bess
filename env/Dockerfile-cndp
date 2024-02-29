@@ -128,7 +128,7 @@ COPY pybess pybess
 COPY sample_plugin sample_plugin
 COPY build.py container_build.py install_git_hooks.sh ./
 RUN ./build.py bess
-RUN cp /build/bess/deps/dpdk-20.11.3/build/app/dpdk-testpmd /usr/local/bin/
+RUN cp /build/bess/deps/dpdk-22.11.4/build/app/dpdk-testpmd /usr/local/bin/
 
 ENV CCACHE_DIR=/tmp/ccache
 ENV CCACHE_COMPRESS=true

@@ -32,6 +32,9 @@
 
 #include "pmd.h"
 
+#include <bus_driver.h>
+#include <bus_pci_driver.h>
+#include <rte_bus.h>
 #include <rte_bus_pci.h>
 #include <rte_ethdev.h>
 #include <rte_flow.h>
@@ -50,14 +53,15 @@ static const rte_eth_conf default_eth_conf(const rte_eth_dev_info &dev_info,
                                            int nb_rxq) {
   rte_eth_conf ret = {};
 
-  ret.link_speeds = ETH_LINK_SPEED_AUTONEG;
-  ret.rxmode.mq_mode = (nb_rxq > 1) ? ETH_MQ_RX_RSS : ETH_MQ_RX_NONE;
+  ret.link_speeds = RTE_ETH_LINK_SPEED_AUTONEG;
+  ret.rxmode.mq_mode = (nb_rxq > 1) ? RTE_ETH_MQ_RX_RSS : RTE_ETH_MQ_RX_NONE;
   ret.rxmode.offloads = 0;
 
   ret.rx_adv_conf.rss_conf = {
       .rss_key = rss_key,
       .rss_key_len = sizeof(rss_key),
-      .rss_hf = (ETH_RSS_IP | ETH_RSS_UDP | ETH_RSS_TCP | ETH_RSS_SCTP) &
+      .rss_hf = (RTE_ETH_RSS_IP | RTE_ETH_RSS_UDP | RTE_ETH_RSS_TCP |
+                 RTE_ETH_RSS_SCTP) &
                 dev_info.flow_type_rss_offloads,
   };
 
@@ -104,11 +108,11 @@ void PMDPort::InitDriver() {
 // returns > 0 on error.
 static CommandResponse find_dpdk_port_by_id(dpdk_port_t port_id,
                                             dpdk_port_t *ret_port_id) {
-  if (port_id >= RTE_MAX_ETHPORTS) {
+  uint16_t user_id = RTE_ETH_DEV_NO_OWNER;
+  port_id = rte_eth_find_next_owned_by(port_id, user_id);
+
+  if (port_id == RTE_MAX_ETHPORTS) {
     return CommandFailure(EINVAL, "Invalid port id %d", port_id);
-  }
-  if (rte_eth_devices[port_id].state != RTE_ETH_DEV_ATTACHED) {
-    return CommandFailure(ENODEV, "Port id %d is not available", port_id);
   }
 
   *ret_port_id = port_id;
@@ -285,7 +289,7 @@ CommandResponse flow_create(dpdk_port_t port_id, const uint32_t &flow_profile) {
     uint64_t rss_types;
     // N3 traffic with and without PDU Session container
     case profileN3:
-      rss_types = ETH_RSS_IPV4 | ETH_RSS_L3_SRC_ONLY;
+      rss_types = RTE_ETH_RSS_IPV4 | RTE_ETH_RSS_L3_SRC_ONLY;
       err = flow_create_one(port_id, flow_profile, NUM_ELEMENTS(N39_NSA),
                             rss_types, N39_NSA);
       if (err.error().code() != 0) {
@@ -298,14 +302,14 @@ CommandResponse flow_create(dpdk_port_t port_id, const uint32_t &flow_profile) {
 
     // N6 traffic
     case profileN6:
-      rss_types = ETH_RSS_IPV4 | ETH_RSS_L3_DST_ONLY;
+      rss_types = RTE_ETH_RSS_IPV4 | RTE_ETH_RSS_L3_DST_ONLY;
       err = flow_create_one(port_id, flow_profile, NUM_ELEMENTS(N6), rss_types,
                             N6);
       break;
 
     // N9 traffic with and without PDU Session container
     case profileN9:
-      rss_types = ETH_RSS_IPV4 | ETH_RSS_L3_DST_ONLY;
+      rss_types = RTE_ETH_RSS_IPV4 | RTE_ETH_RSS_L3_DST_ONLY;
       err = flow_create_one(port_id, flow_profile, NUM_ELEMENTS(N39_NSA),
                             rss_types, N39_NSA);
       if (err.error().code() != 0) {
@@ -369,9 +373,9 @@ CommandResponse PMDPort::Init(const bess::pb::PMDPortArg &arg) {
     eth_conf.lpbk_mode = 1;
   }
   if (arg.hwcksum()) {
-    eth_conf.rxmode.offloads = DEV_RX_OFFLOAD_IPV4_CKSUM |
-                               DEV_RX_OFFLOAD_UDP_CKSUM |
-                               DEV_RX_OFFLOAD_TCP_CKSUM;
+    eth_conf.rxmode.offloads = RTE_ETH_RX_OFFLOAD_IPV4_CKSUM |
+                               RTE_ETH_RX_OFFLOAD_UDP_CKSUM |
+                               RTE_ETH_RX_OFFLOAD_TCP_CKSUM;
   }
 
   ret = rte_eth_dev_configure(ret_port_id, num_rxq, num_txq, &eth_conf);
@@ -452,9 +456,10 @@ CommandResponse PMDPort::Init(const bess::pb::PMDPortArg &arg) {
   }
 
   int offload_mask = 0;
-  offload_mask |= arg.vlan_offload_rx_strip() ? ETH_VLAN_STRIP_OFFLOAD : 0;
-  offload_mask |= arg.vlan_offload_rx_filter() ? ETH_VLAN_FILTER_OFFLOAD : 0;
-  offload_mask |= arg.vlan_offload_rx_qinq() ? ETH_VLAN_EXTEND_OFFLOAD : 0;
+  offload_mask |= arg.vlan_offload_rx_strip() ? RTE_ETH_VLAN_STRIP_OFFLOAD : 0;
+  offload_mask |=
+      arg.vlan_offload_rx_filter() ? RTE_ETH_VLAN_FILTER_OFFLOAD : 0;
+  offload_mask |= arg.vlan_offload_rx_qinq() ? RTE_ETH_VLAN_EXTEND_OFFLOAD : 0;
   if (offload_mask) {
     ret = rte_eth_dev_set_vlan_offload(ret_port_id, offload_mask);
     if (ret != 0) {

@@ -79,8 +79,8 @@ void IPChecksum::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
     if (verify_) {
       if (hw_) {
         struct rte_mbuf *m = (struct rte_mbuf *)batch->pkts()[i];
-        if (unlikely((m->ol_flags & PKT_RX_IP_CKSUM_MASK) ==
-                     PKT_RX_IP_CKSUM_BAD))
+        if (unlikely((m->ol_flags & RTE_MBUF_F_RX_IP_CKSUM_MASK) ==
+                     RTE_MBUF_F_RX_IP_CKSUM_BAD))
           EmitPacket(ctx, (bess::Packet *)m, FAIL_GATE);
         else
           EmitPacket(ctx, (bess::Packet *)m, FORWARD_GATE);
