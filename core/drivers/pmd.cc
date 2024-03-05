@@ -108,11 +108,14 @@ void PMDPort::InitDriver() {
 // returns > 0 on error.
 static CommandResponse find_dpdk_port_by_id(dpdk_port_t port_id,
                                             dpdk_port_t *ret_port_id) {
-  uint16_t user_id = RTE_ETH_DEV_NO_OWNER;
-  port_id = rte_eth_find_next_owned_by(port_id, user_id);
-
-  if (port_id == RTE_MAX_ETHPORTS) {
+  if (port_id >= RTE_MAX_ETHPORTS) {
     return CommandFailure(EINVAL, "Invalid port id %d", port_id);
+  }
+  if (!rte_eth_dev_is_valid_port(port_id)) {
+    return CommandFailure(ENODEV, "Port id %d is not available", port_id);
+  }
+  if (rte_eth_dev_socket_id(port_id) < 0) {
+    return CommandFailure(ENODEV, "Port id %d is not attached", port_id);
   }
 
   *ret_port_id = port_id;
