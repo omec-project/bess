@@ -1,5 +1,4 @@
-scapy
-flask
+coverage
 grpcio
-protobuf==3.20
 pyroute2
+scapy
