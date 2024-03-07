@@ -4,7 +4,8 @@
 name: Build and Push image
 on:
   push:
-    - master
+    branches:
+      - master
 
 jobs:
   build:
