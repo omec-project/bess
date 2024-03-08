@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2023 Intel Corporation
+aetherproject
 Ansible
 bess
 pre
@@ -72,6 +73,7 @@ Felicián
 Németh
 LaTeX
 doxygen
+sdcore
 sudo
 CNDP
 bessctl
