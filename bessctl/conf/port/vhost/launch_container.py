@@ -61,7 +61,7 @@ PKT_SIZE = int(os.getenv('BESS_PKT_SIZE', '60'))
 VERBOSE = int(os.getenv('VERBOSE', '0'))
 
 SOCKDIR = '/tmp/bessd'
-IMAGE = 'ghcr.io/omec-project/upf-epc/bess_build'
+IMAGE = 'registry.aetherproject.org/sdcore/bess_build'
 CONTAINER_NAME = 'bessd'
 
 

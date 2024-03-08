@@ -39,7 +39,7 @@ import subprocess
 import sys
 import time
 
-TARGET_REPO = 'ghcr.io/omec-project/upf-epc/bess_build'
+TARGET_REPO = 'registry.aetherproject.org/sdcore/bess_build'
 
 imgs = {
     'focal64': {'base': 'ubuntu:focal', 'tag_suffix': ''},

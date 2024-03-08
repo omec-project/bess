@@ -15,9 +15,9 @@ jobs:
 
       - uses: docker/login-action@v3.0.0
         with:
-            registry: ghcr.io
-            username: ${{ github.repository_owner }}
-            password: ${{ secrets.CR_PAT }}
+          registry: registry.aetherproject.org
+          username: ${{ secrets.AETHER_REGISTRY_USERNAME }}
+          password: ${{ secrets.AETHER_REGISTRY_PASSWORD }}
 
-      - name: docker build and push new BESS base image
+      - name: Build and push new BESS base image
         run: yes y | ./env/rebuild_images.py focal64

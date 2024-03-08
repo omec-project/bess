@@ -6,7 +6,6 @@ on:
   pull_request:
     branches:
       - master
-  push:
 
 jobs:
   build:
@@ -14,12 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup environment
-        run: |
-          wget https://raw.githubusercontent.com/DPDK/dpdk/main/usertools/dpdk-hugepages.py -O dpdk-hugepages.py
-          chmod +x dpdk-hugepages.py
-          sudo mkdir -p /dev/hugepages
-          sudo ./dpdk-hugepages.py -p 1G --setup 8G
+      - name: Setup environment (Hugepages)
+        run: sudo sysctl -w vm.nr_hugepages=512
 
       - name: Setup dependencies
         run: |
