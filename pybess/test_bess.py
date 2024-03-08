@@ -38,10 +38,10 @@ from concurrent import futures
 
 from . import bess
 from .builtin_pb import bess_msg_pb2 as bess_msg
-from .builtin_pb import service_pb2
+from .builtin_pb import service_pb2_grpc
 
 
-class DummyServiceImpl(service_pb2.BESSControlServicer):
+class DummyServiceImpl(service_pb2_grpc.BESSControlServicer):
 
     def __init__(self):
         pass
@@ -72,7 +72,7 @@ class TestBESS(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
-        service_pb2.add_BESSControlServicer_to_server(
+        service_pb2_grpc.add_BESSControlServicer_to_server(
             DummyServiceImpl(),
             server)
         server.add_insecure_port('[::]:%d' % cls.PORT)
