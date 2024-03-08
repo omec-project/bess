@@ -34,7 +34,7 @@ $ ./container_build.py
 ```
 
 then the script will automatically fetch the container image
-(ghcr.io/omec-project/upf-epc/bess_build) and build BESS inside the
+(registry.aetherproject.org/sdcore/bess_build) and build BESS inside the
 container. Since the BESS binary is mostly static-linked to external libraries,
 the binary built in the container should be readily runnable in the host as
 well.
