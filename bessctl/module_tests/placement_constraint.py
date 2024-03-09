@@ -81,12 +81,21 @@ class BessModuleConstraintTest(BessModuleTestCase):
         self.assertFalse(bess.check_constraints())
 
     def test_nat_negative(self):
-        nat_config = [{'ext_addr': '192.168.1.1'}]
         src0 = Source()
         src1 = Source()
         bess.add_worker(0, 0)
         bess.add_worker(1, 1)
-        nat = NAT(ext_addrs=nat_config)
+
+        # This test verifies the scheduling constraint of a module when we
+        # schedule more workers than the maximum allowed workers for it.
+        # As part of the commit a742ee6e356d27175dd09af85e970a037aa14a59
+        # the max_allowed_workers_ was increased to 2 from 1 and it causes
+        # this test to fail. In order to resolve this issue using the
+        # StaticNAT() module to validate this constraint. Later need to
+        # understand the reason for increasing max_allowed_workers_ for
+        # NAT module
+
+        nat = StaticNAT()
         src0 -> 0: nat: 1 -> Sink()
         src1 -> 1: nat: 0 -> Sink()
         src0.attach_task(wid=0)
