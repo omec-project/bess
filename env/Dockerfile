@@ -1,14 +1,15 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2020-present Open Networking Foundation
-# Copyright 2019 Intel Corporation
+# Copyright 2019-present Intel Corporation
 # vim: syntax=dockerfile
 
-ARG BASE_IMAGE=ubuntu:focal
 # Install CNDP dependencies and build CNDP.
-FROM ${BASE_IMAGE} AS cndp-build
+FROM ubuntu:20.04 AS cndp-build
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
+    ca-certificates \
     build-essential \
     golang \
     libelf-dev \
@@ -31,16 +32,16 @@ RUN apt-get update && apt-get install -y \
     lld \
     m4 \
     linux-tools-common \
-    libbpf-dev \
-    && rm -rf /var/lib/apt/lists/*
+    libbpf-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install libxdp
-RUN git clone https://github.com/xdp-project/xdp-tools.git
-WORKDIR /xdp-tools/
-RUN git checkout v1.2.2
-RUN ./configure
-WORKDIR /xdp-tools/
-RUN make -j; PREFIX=/usr make -j install
+WORKDIR /xdp-tools
+RUN git clone https://github.com/xdp-project/xdp-tools.git . && \
+    git checkout v1.2.2 && \
+    ./configure && \
+    make -j; PREFIX=/usr make -j install
 ENV PKG_CONFIG_PATH=/usr/lib/pkgconfig
 
 # Get CNDP from GitHub
@@ -55,14 +56,15 @@ RUN make && make install
 RUN make static_build=1 rebuild install
 
 # Build the prometheus-metrics app
-WORKDIR /cndp/lang/go/stats/prometheus/
+WORKDIR /cndp/lang/go/stats/prometheus
 RUN go build prometheus.go
 
-FROM ${BASE_IMAGE}
+FROM ubuntu:20.04
 
 # Install CNDP dependencies
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
     build-essential \
     ethtool \
     libbsd-dev \
@@ -73,7 +75,9 @@ RUN apt-get update && apt-get install -y \
     libnl-cli-3-dev \
     libnuma1 \
     libpcap0.8 \
-    pkg-config
+    pkg-config && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy required CNDP libraries, header files, pkg-config and binaries.
 COPY --from=cndp-build /cndp/usr/local/bin/cndpfwd /usr/bin/
@@ -88,24 +92,21 @@ COPY --from=cndp-build /usr/include/xdp/ /usr/include/xdp/
 # Set CNDP PKG_CONFIG_PATH
 ENV PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig
 
-RUN echo "APT::Install-Recommends false;" >> /etc/apt/apt.conf.d/00recommends && \
-	echo "APT::Install-Suggests false;" >> /etc/apt/apt.conf.d/00recommends && \
-	echo "APT::AutoRemove::RecommendsImportant false;" >> /etc/apt/apt.conf.d/00recommends && \
-	echo "APT::AutoRemove::SuggestsImportant false;" >> /etc/apt/apt.conf.d/00recommends
-
 COPY env/build-dep.yml /tmp/
 COPY env/kmod.yml /tmp/
 COPY env/ci.yml /tmp/
 
 # Install dependency packages with Ansible
-RUN apt-get -q update && \
-	apt-get install -y ansible curl && \
-        ansible-playbook /tmp/ci.yml -i "localhost," -c local && \
-	apt-get purge -y ansible && \
-	apt-get autoremove -y && \
-	rm -rf /var/lib/apt/lists
-RUN update-alternatives --install /usr/local/bin/python python /usr/bin/python3 3
-RUN mkdir -p /build/bess
+RUN apt-get update && \
+    apt-get install -y \
+    --no-install-recommends \
+    ansible \
+    curl && \
+    ansible-playbook /tmp/ci.yml -i "localhost," -c local && \
+    apt-get purge -y ansible && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build/bess
 COPY . .
