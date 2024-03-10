@@ -5,29 +5,36 @@
       become: true
       when: ansible_distribution == 'Ubuntu' and ansible_lsb.major_release|int < 18
 
-    - name: Install prerequisite packages
-      apt: name={{item}} update_cache=yes
+    - name: Install APT prerequisite packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - g++
+          - make
+          - libunwind8-dev
+          - liblzma-dev
+          - zlib1g-dev
+          - libpcap-dev
+          - libssl-dev
+          - libnuma-dev
+          - libgflags-dev
+          - libgoogle-glog-dev
+          - libgtest-dev
+          - python3
+          - python3-apt
+          - python3-pip
+          - pkg-config
+        update_cache: yes
       become: true
-      with_items:
-        - apt-transport-https
-        - ca-certificates
-        - g++
-        - g++-7
-        - make
-        - libunwind8-dev
-        - liblzma-dev
-        - zlib1g-dev
-        - libpcap-dev
-        - libssl-dev
-        - libnuma-dev
-        - libgflags-dev
-        - libgoogle-glog-dev
-        - libgtest-dev
-        - python3
-        - python3-pip
-        - python3-pyelftools
-        - python3-setuptools
-        - pkg-config
+
+    - name: Install PIP prerequisite packages
+      become: true
+      pip:
+        name:
+          - pyelftools
+          - setuptools
+        executable: pip3
 
     - name: Install DPDK build system
       become: true
@@ -39,26 +46,25 @@
 
     # pre-packaged meat for Bionic Beaver or higher
     - name: Install gRPC and its requirements (apt)
-      apt: name={{item}}
-      become: true
-      with_items:
-        - libc-ares-dev
-        - libbenchmark-dev
-        - libgrpc++-dev
-        - libprotobuf-dev
-        - protobuf-compiler-grpc
+      apt:
+        name:
+          - libc-ares-dev
+          - libbenchmark-dev
+          - libgrpc++-dev
+          - libprotobuf-dev
+          - protobuf-compiler-grpc
       when: ansible_distribution == 'Debian' or (ansible_distribution == 'Ubuntu' and ansible_lsb.major_release|int >= 18)
 
     # for Ubuntu < 18.04, grpc has to be installed manually
     - name: Install gRPC and its requirements (from source)
       block:
         - name: Install grpc denepdencies
-          apt: name={{item}}
+          apt:
+            name:
+              - autoconf
+              - libtool
+              - cmake
           become: true
-          with_items:
-            - autoconf
-            - libtool
-            - cmake
 
         - name: Download gRPC
           git: repo=https://github.com/google/grpc dest=/tmp/grpc accept_hostkey=yes version=v1.3.2

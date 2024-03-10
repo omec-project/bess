@@ -1,5 +1,5 @@
 # Docker is an optional package.
-# Some BESS examples make uee of Docker to demonstrate container networking.
+# Some BESS examples make use of Docker to demonstrate container networking.
 - hosts: all
   tags: docker
   tasks:
@@ -11,5 +11,9 @@
       become: true
 
     - name: Install Docker
-      apt: name=docker-ce state=latest update_cache=yes
+      apt:
+        name:
+          - docker-ce
+        state: latest
+        update_cache: yes
       become: true

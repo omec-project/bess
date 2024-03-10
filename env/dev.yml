@@ -6,15 +6,17 @@
   tags: dev
   tasks:
     - name: Install recommended packages for developers
-      apt: name={{item}} update_cache=yes
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - git
+          - gdb
+          - linux-tools-common
+          - vim
+          - nano
+          - lcov
+          - python-autopep8
+          - graphviz
+        update_cache: yes
       become: true
-      with_items:
-        - apt-transport-https
-        - ca-certificates
-        - git
-        - gdb
-        - linux-tools-common
-        - vim
-        - lcov
-        - python-autopep8
-        - graphviz
