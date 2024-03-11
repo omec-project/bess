@@ -44,7 +44,7 @@ import argparse
 
 IMAGE = os.getenv('IMAGE', 'registry.aetherproject.org/sdcore/bess_build') + ':' + os.getenv('TAG_SUFFIX', 'latest')
 BESS_DIR_HOST = os.path.dirname(os.path.abspath(__file__))
-BESS_DIR_CONTAINER = '/build/bess'
+BESS_DIR_CONTAINER = '/bess'
 BUILD_SCRIPT = './build.py'
 PLUGINS = []
 
