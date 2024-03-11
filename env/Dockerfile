@@ -108,13 +108,12 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-WORKDIR /build/bess
+WORKDIR /bess
 COPY . .
 
 # Build DPDK testpmd (used in bessctl samples)
 RUN ./build.py dpdk && \
-    cp /build/bess/deps/dpdk-22.11.4/build/app/dpdk-testpmd /usr/local/bin/ && \
-    rm -rf /build/bess
+    cp /bess/deps/dpdk-22.11.4/build/app/dpdk-testpmd /usr/local/bin/
 
 ENV CCACHE_DIR=/tmp/ccache
 ENV CCACHE_COMPRESS=true
