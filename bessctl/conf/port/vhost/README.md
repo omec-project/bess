@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2016-2017, Nefeli Networks, Inc.
+SPDX-FileCopyrightText: 2017, The Regents of the University of California.
+SPDX-License-Identifier: BSD-3-Clause
+-->
+
 This example is to demonstrate how to connect BESS to VMs or containers.
 
 ### Requirements

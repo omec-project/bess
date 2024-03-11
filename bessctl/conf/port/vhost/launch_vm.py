@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # Copyright (c) 2017, Nefeli Networks, Inc.
+# SPDX-FileCopyrightText: 2024, Intel Corporation
 # All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
