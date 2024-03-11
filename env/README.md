@@ -1,3 +1,10 @@
+<!--
+SPDX-FileCopyrightText: 2016-2017, Nefeli Networks, Inc.
+SPDX-FileCopyrightText: 2017, The Regents of the University of California.
+SPDX-FileCopyrightText: 2024, Intel Corporation
+SPDX-License-Identifier: BSD-3-Clause
+-->
+
 This directory contains various scripts to help users start trying BESS without
 much pain. There is a Vagrant script that allows you to bring up a VM that is
 pre-configured with all required dependencies. There are also Ansible scripts in

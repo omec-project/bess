@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2016-2017, Nefeli Networks, Inc.
+SPDX-FileCopyrightText: 2017, The Regents of the University of California.
+SPDX-License-Identifier: BSD-3-Clause
+-->
+
 ## BESS (Berkeley Extensible Software Switch)
 
 BESS (formerly known as [SoftNIC](https://www2.eecs.berkeley.edu/Pubs/TechRpts/2015/EECS-2015-155.html)) is a modular framework for software switches. BESS itself is *not* a virtual switch; it is neither pre-configured nor hard-coded to provide particular functionality, such as Ethernet bridging or OpenFlow-driven switching. Instead, you (or an external controller) can *configure* your own packet processing datapath by composing small "modules". While the basic concept is similar to [Click](http://read.cs.ucla.edu/click/click), BESS does not sacrifice performance for programmability.
