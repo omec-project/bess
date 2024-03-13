@@ -114,9 +114,11 @@ static CommandResponse find_dpdk_port_by_id(dpdk_port_t port_id,
   if (!rte_eth_dev_is_valid_port(port_id)) {
     return CommandFailure(ENODEV, "Port id %d is not available", port_id);
   }
-  if (rte_eth_dev_socket_id(port_id) < 0) {
-    return CommandFailure(ENODEV, "Port id %d is not attached", port_id);
-  }
+  if (rte_eth_dev_socket_id(port_id) >= 0 &&
+      rte_eth_dev_socket_id(port_id) != (int)rte_socket_id())
+    LOG(WARNING) << "DPDK port_id " << port_id
+                 << " is on remote NUMA node to polling thread.\n\t"
+                    "Performance will not be optimal.";
 
   *ret_port_id = port_id;
   return CommandSuccess();
