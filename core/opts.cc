@@ -34,6 +34,7 @@
 #include <glog/logging.h>
 
 #include <cstdint>
+#include <regex>
 
 #include "bessd.h"
 #include "worker.h"
@@ -66,6 +67,27 @@ static bool ValidateIovaMode(const char *, const std::string &value) {
 DEFINE_string(iova, "", "DPDK IOVA mode: pa or va. Set auto if not specified");
 static bool _iova_dummy [[maybe_unused]] =
     google::RegisterFlagValidator(&FLAGS_iova, &ValidateIovaMode);
+
+static bool ValidateAllow(const char *, const std::string &value) {
+  std::regex pciAddressRegex(
+      R"(^[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-7]$)");
+  std::istringstream iss(value);
+  std::string temp;
+  while (std::getline(iss, temp, ',')) {
+    if (temp.empty()) {
+      continue;
+    }
+    if (!std::regex_match(temp, pciAddressRegex)) {
+      return false;
+    }
+  }
+  return true;
+}
+DEFINE_string(
+    allow, "",
+    "Allow PCI list (comma separated). Set as all available if not specified");
+static bool _allow_dummy [[maybe_unused]] =
+    google::RegisterFlagValidator(&FLAGS_allow, &ValidateAllow);
 
 static bool ValidateCoreID(const char *, int32_t value) {
   if (!is_cpu_present(value)) {
