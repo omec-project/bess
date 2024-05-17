@@ -53,5 +53,6 @@ DECLARE_bool(no_crashlog);
 DECLARE_int32(buffers);
 DECLARE_bool(dpdk);
 DECLARE_string(iova);
+DECLARE_string(allow);
 
 #endif  // BESS_OPTS_H_

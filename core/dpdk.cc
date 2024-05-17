@@ -45,7 +45,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <sstream>
 #include <string>
+#include <vector>
 
 #include "memory.h"
 #include "opts.h"
@@ -127,6 +129,22 @@ void init_eal(int dpdk_mb_per_socket, std::string nonworker_corelist) {
 
   if (FLAGS_iova != "")
     rte_args.Append({"--iova", FLAGS_iova});
+
+  if (FLAGS_allow != "") {
+    LOG(INFO) << "FLAGS_allow value(s): " << FLAGS_allow;
+    std::istringstream iss(FLAGS_allow);
+    std::vector<std::string> pciAddresses;
+    std::string temp;
+
+    while (std::getline(iss, temp, ',')) {
+      pciAddresses.push_back(temp);
+    }
+
+    for (const std::string &address : pciAddresses) {
+      LOG(INFO) << "PCI address is: " << address;
+      rte_args.Append({"--allow", address});
+    }
+  }
 
   if (dpdk_mb_per_socket <= 0) {
     rte_args.Append({"--no-huge"});
