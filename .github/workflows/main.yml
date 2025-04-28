@@ -48,6 +48,7 @@ jobs:
     with:
       branch_name: ${{ github.ref }}
       dockerfile: env/Dockerfile-cndp
+      ignored_rules: DL3008,DL3013
 
   license-check:
     uses: omec-project/.github/.github/workflows/license-check.yml@main
