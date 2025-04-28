@@ -1,6 +1,6 @@
-/* SPDX-License-Identifier: BSD-3-Clause
- * Copyright(c) 2019-2021 Intel Corporation.
- */
+// SPDX-License-Identifier: BSD-3-Clause
+// Copyright(c) 2019-2021 Intel Corporation.
+// Copyright 2025 Canonical Ltd.
 
 #include "cndp.h"
 #include <algorithm>        // std::min
