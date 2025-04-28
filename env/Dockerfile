@@ -4,7 +4,7 @@
 # vim: syntax=dockerfile
 
 # Install CNDP dependencies and build CNDP.
-FROM ubuntu:20.04 AS cndp-build
+FROM ubuntu:22.04 AS cndp-build
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
@@ -59,7 +59,7 @@ RUN make static_build=1 rebuild install
 WORKDIR /cndp/lang/go/stats/prometheus
 RUN go build prometheus.go
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 # Install CNDP dependencies
 ENV DEBIAN_FRONTEND=noninteractive
