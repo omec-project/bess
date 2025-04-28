@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2022-Present Intel Corporation
-
-name: Build and Test
+# Copyright 2025 Canonical Ltd.
 on:
   pull_request:
     branches:
@@ -9,34 +8,6 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup environment (Hugepages)
-        run: sudo sysctl -w vm.nr_hugepages=512
-
-      - name: Setup dependencies
-        run: |
-          sudo apt-get install -y ccache libbpf0
-          sudo pip3 install -r requirements.txt
-          yes n | ./env/rebuild_images.py focal64
-          sudo mkdir -p /mnt/huge
-          sudo mount -t hugetlbfs nodev /mnt/huge
-          export CXX="ccache $VER_CXX"
-          ccache -s
-
-      - name: Build BESS
-        run: |
-          sudo ./container_build.py bess
-          sudo ./container_build.py kmod_buildtest
-
-      - name: Test BESS
-        run: |
-          (cd core && ./all_test --gtest_shuffle)
-          coverage run -m unittest discover -v
-          python3 bessctl/run_module_tests.py
-          sudo python3 bessctl/run_module_tests.py --test_dir bessctl/module_tests/cndp
-          ccache -s
-          bessctl/bessctl daemon stop
-          [[ ${COVERAGE:-0} == 0 ]] || { sleep 3; codecov --gcov-exec gcov-7; }
+    uses: dariofaccin/.github/.github/workflows/bess-build-test.yml@add-bess-specific-workflows
+    with:
+      branch_name: ${{ github.ref }}
