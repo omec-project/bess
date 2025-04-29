@@ -164,8 +164,10 @@ class ExactMatch final : public Module {
     }
 
     if (mt_attr_name.length() > 0) {
-      v->attr_id = m->AddMetadataAttr(
+      if (m != nullptr) {
+        v->attr_id = m->AddMetadataAttr(
           mt_attr_name, v->size, bess::metadata::Attribute::AccessMode::kWrite);
+        }
       if (v->attr_id < 0) {
         return std::make_pair(
             -v->attr_id,
