@@ -99,6 +99,10 @@ class BessUrlFilterTest(BessModuleTestCase):
         self.assertSamePackets(pkt_outs[0][1], good_pkt)
 
         self.assertEquals(len(pkt_outs[1]), 2)
+        packet_1 = scapy.Ether(pkt_outs[1][0])
+        print("Packet 1:", packet_1.show())
+        packet_2 = scapy.Ether(err_pkt)
+        print("Packet 2:", packet_2.show())
         self.assertSamePackets(pkt_outs[1][0], err_pkt)
 
     def test_urlfilter_selfconfig(self):
