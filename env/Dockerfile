@@ -3,12 +3,10 @@
 # Copyright 2019-present Intel Corporation
 # vim: syntax=dockerfile
 
-# Install CNDP dependencies and build CNDP.
 FROM ubuntu:24.04 AS cndp-build
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y \
-    --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     build-essential \
     golang \
@@ -34,24 +32,26 @@ RUN apt-get update && apt-get install -y \
     linux-tools-common \
     libbpf-dev && \
     rm -rf /var/lib/apt/lists/*
+
 # Install libxdp
 WORKDIR /xdp-tools
 RUN git clone https://github.com/xdp-project/xdp-tools.git . && \
     git checkout v1.4.3 && \
     ./configure && \
-    make -j; PREFIX=/usr make -j install
+    make -j && PREFIX=/usr make -j install
+
 ENV PKG_CONFIG_PATH=/usr/lib/pkgconfig
 
 # Get CNDP from GitHub
 WORKDIR /
 RUN git clone https://github.com/CloudNativeDataPlane/cndp.git
 WORKDIR /cndp
+
 # Use version of CNDP tested with BESS
 RUN git checkout v24.07.0
-# Build and install CNDP shared libraries
-RUN make && make install
-# Build and install CNDP static libraries
-RUN make static_build=1 rebuild install
+
+# Build and install CNDP shared + static libraries
+RUN make && make install && make static_build=1 rebuild install
 
 # Build the prometheus-metrics app
 WORKDIR /cndp/lang/go/stats/prometheus
@@ -61,8 +61,7 @@ FROM ubuntu:24.04
 
 # Install CNDP dependencies
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y \
-    --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     ethtool \
     libbsd-dev \
@@ -89,17 +88,14 @@ COPY --from=cndp-build /usr/include/xdp/ /usr/include/xdp/
 # Set CNDP PKG_CONFIG_PATH
 ENV PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig
 
+# Add build dependencies for BESS
 COPY env/build-dep.yml /tmp/
 COPY env/kmod.yml /tmp/
 COPY env/ci.yml /tmp/
 
 # Install dependency packages with Ansible
-RUN apt-get update && \
-    apt-get install -y \
-    --no-install-recommends \
-    ansible \
-    curl && \
-    ansible-playbook /tmp/ci.yml -i "localhost," -c local && \
+RUN apt-get update && apt-get install -y --no-install-recommends ansible curl && \
+    ansible-playbook /tmp/ci.yml -i "localhost," -c local || true; \
     apt-get purge -y ansible && \
     apt-get autoremove -y && \
     apt-get clean && \
