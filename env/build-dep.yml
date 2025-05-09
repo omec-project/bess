@@ -29,21 +29,13 @@
         update_cache: yes
       become: true
 
-    - name: Install PIP prerequisite packages
+    - name: Install PIP prerequisite packages (with --break-system-packages)
       become: true
-      pip:
-        name:
-          - pyelftools
-          - setuptools
-        executable: pip3
+      command: pip3 install --break-system-packages pyelftools setuptools
 
-    - name: Install DPDK build system
+    - name: Install DPDK build system (with --break-system-packages)
       become: true
-      pip:
-        name:
-          - meson
-          - ninja
-        executable: pip3
+      command: pip3 install --break-system-packages meson ninja
 
     - name: Install gRPC and its requirements (apt)
       apt:

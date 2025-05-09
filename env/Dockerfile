@@ -4,7 +4,7 @@
 # vim: syntax=dockerfile
 
 # Install CNDP dependencies and build CNDP.
-FROM ubuntu:20.04 AS cndp-build
+FROM ubuntu:24.04 AS cndp-build
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
@@ -34,12 +34,11 @@ RUN apt-get update && apt-get install -y \
     linux-tools-common \
     libbpf-dev && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
+    rm -rf /var/lib/apt/lists/* || true
 # Install libxdp
 WORKDIR /xdp-tools
 RUN git clone https://github.com/xdp-project/xdp-tools.git . && \
-    git checkout v1.2.2 && \
+    git checkout v1.4.3 && \
     ./configure && \
     make -j; PREFIX=/usr make -j install
 ENV PKG_CONFIG_PATH=/usr/lib/pkgconfig
@@ -49,7 +48,7 @@ WORKDIR /
 RUN git clone https://github.com/CloudNativeDataPlane/cndp.git
 WORKDIR /cndp
 # Use version of CNDP tested with BESS
-RUN git checkout d5ce4b9edc2e7ddb46a61b395deffafaf11a0500
+RUN git checkout v24.07.0
 # Build and install CNDP shared libraries
 RUN make && make install
 # Build and install CNDP static libraries
@@ -59,7 +58,7 @@ RUN make static_build=1 rebuild install
 WORKDIR /cndp/lang/go/stats/prometheus
 RUN go build prometheus.go
 
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
 # Install CNDP dependencies
 ENV DEBIAN_FRONTEND=noninteractive
@@ -77,7 +76,7 @@ RUN apt-get update && apt-get install -y \
     libpcap0.8 \
     pkg-config && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* || true
 
 # Copy required CNDP libraries, header files, pkg-config and binaries.
 COPY --from=cndp-build /cndp/usr/local/bin/cndpfwd /usr/bin/
@@ -106,7 +105,7 @@ RUN apt-get update && \
     apt-get purge -y ansible && \
     apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* || true
 
 WORKDIR /build/bess
 COPY . .

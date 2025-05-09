@@ -43,7 +43,7 @@ import time
 TARGET_REPO = 'registry.aetherproject.org/sdcore/bess_build'
 
 imgs = {
-    'focal64': {'base': 'ubuntu:focal', 'tag_suffix': ''},
+    'noble64': {'base': 'ubuntu:noble', 'tag_suffix': ''},
 }
 
 
