@@ -20,7 +20,7 @@ jobs:
         run: |
           sudo apt-get install -y ccache libbpf1
           sudo pip3 install -r requirements.txt
-          yes n | ./env/rebuild_images.py focal64
+          ./env/rebuild_images.py noble64 --yes
           sudo mkdir -p /mnt/huge
           sudo mount -t hugetlbfs nodev /mnt/huge
           export CXX="ccache $VER_CXX"

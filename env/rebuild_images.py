@@ -84,18 +84,25 @@ def push(version, tag_suffix):
 
 
 def main(argv):
-    if len(argv) != 2 or argv[1] not in imgs.keys():
+    if len(argv) < 2 or argv[1] not in imgs:
         print_usage(argv[0])
         return 2
 
-    version, tag_suffix = build(argv[1])
+    env = argv[1]
+    auto_push = '--yes' in argv or '--no-prompt' in argv
 
-    prompt = input      # Python 3
+    version, tag_suffix = build(env)
 
-    if prompt('Do you wish to push the image? [y/N] ').lower() in ['y', 'yes']:
+    if auto_push:
         push(version, tag_suffix)
     else:
-        print('The image was not pushed')
+        try:
+            if input('Do you wish to push the image? [y/N] ').strip().lower() in ['y', 'yes']:
+                push(version, tag_suffix)
+            else:
+                print('The image was not pushed')
+        except EOFError:
+            print('No input available, skipping push.')
 
     return 0
 

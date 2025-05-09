@@ -21,4 +21,4 @@ jobs:
           password: ${{ secrets.AETHER_REGISTRY_PASSWORD }}
 
       - name: Build and push new BESS base image
-        run: yes y | ./env/rebuild_images.py focal64
+        run: ./env/rebuild_images.py noble64 --yes
