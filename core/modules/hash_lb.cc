@@ -87,7 +87,8 @@ CommandResponse HashLB::CommandSetMode(
     fields_table_ = ExactMatchTable<int>();
     for (int i = 0; i < arg.fields_size(); i++) {
       const auto &f = arg.fields(i);
-      const auto err = fields_table_.AddField(f.offset(), f.num_bytes(), 0, i, this);
+      const auto err =
+          fields_table_.AddField(f.offset(), f.num_bytes(), 0, i, this);
       if (err.first) {
         return CommandFailure(-err.first, "Error adding field %d: %s", i,
                               err.second.c_str());
