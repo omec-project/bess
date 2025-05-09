@@ -18,7 +18,7 @@ jobs:
 
       - name: Setup dependencies
         run: |
-          sudo apt-get install -y ccache libbpf0
+          sudo apt-get install -y ccache libbpf1
           sudo pip3 install -r requirements.txt
           yes n | ./env/rebuild_images.py focal64
           sudo mkdir -p /mnt/huge
