@@ -33,7 +33,7 @@ RUN apt-get update && apt-get install -y \
     m4 \
     linux-tools-common \
     libbpf-dev && \
-    apt-get clean
+    rm -rf /var/lib/apt/lists/*
 # Install libxdp
 WORKDIR /xdp-tools
 RUN git clone https://github.com/xdp-project/xdp-tools.git . && \
@@ -74,7 +74,7 @@ RUN apt-get update && apt-get install -y \
     libnuma1 \
     libpcap0.8 \
     pkg-config && \
-    apt-get clean
+    rm -rf /var/lib/apt/lists/*
 
 # Copy required CNDP libraries, header files, pkg-config and binaries.
 COPY --from=cndp-build /cndp/usr/local/bin/cndpfwd /usr/bin/
@@ -102,7 +102,8 @@ RUN apt-get update && \
     ansible-playbook /tmp/ci.yml -i "localhost," -c local && \
     apt-get purge -y ansible && \
     apt-get autoremove -y && \
-    apt-get clean
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build/bess
 COPY . .
