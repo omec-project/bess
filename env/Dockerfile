@@ -95,7 +95,11 @@ COPY env/ci.yml /tmp/
 
 # Install dependency packages with Ansible
 RUN apt-get update && apt-get install -y --no-install-recommends ansible curl && \
-    ansible-playbook /tmp/ci.yml -i "localhost," -c local || true; \
+    if ansible-playbook /tmp/ci.yml -i "localhost," -c local; then \
+        echo "Ansible playbook succeeded"; \
+    else \
+        echo "Ansible playbook failed, continuing anyway"; \
+    fi; \
     apt-get purge -y ansible && \
     apt-get autoremove -y && \
     apt-get clean && \
