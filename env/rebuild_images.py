@@ -47,6 +47,7 @@ FULL_TARGET = TARGET_REGISTRY + TARGET_REPOSITORY + TARGET
 
 imgs = {
     'focal64': {'base': 'ubuntu:focal', 'tag_suffix': ''},
+    'jammy64': {'base': 'ubuntu:jammy', 'tag_suffix': ''},
 }
 
 
@@ -64,7 +65,7 @@ def run_cmd(cmd, shell=False):
 def build(env):
     base = imgs[env]['base']
     tag_suffix = imgs[env]['tag_suffix']
-    bess_dpdk_branch = os.getenv('BESS_DPDK_BRANCH', 'master')
+    bess_dpdk_branch = os.getenv('BESS_DPDK_BRANCH', 'main')
     version = time.strftime('%y%m%d')
 
     run_cmd('docker build -f env/Dockerfile '

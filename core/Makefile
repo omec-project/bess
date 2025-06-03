@@ -67,13 +67,13 @@ HAS_PKG_CONFIG := $(shell command -v $(PKG_CONFIG) 2>&1 >/dev/null && echo yes |
 
 # We always want these libraries to be dynamically linked even when the
 # user requests a static build.
-ALWAYS_DYN_LIBS := -lpthread -ldl
+ALWAYS_DYN_LIBS := -lpcap -lpthread -ldl -lgrpc++
 # These libraries are not supported by pkg-config.
-ALWAYS_LIBS := -lpcap -lgflags -lnuma
+ALWAYS_LIBS := -lgflags -lnuma
 # If pkg-config is available, we just need a list of the dependecies.
-PKG_CONFIG_DEPS := libdpdk libglog protobuf grpc++ libunwind zlib libcndp
+PKG_CONFIG_DEPS := libdpdk libglog protobuf libcndp
 # If pkg-config is not available, we need to list the libs we depend on.
-NO_PKG_CONFIG_LIBS := -lglog -lgflags -lprotobuf -lgrpc++ -lunwind -lz
+NO_PKG_CONFIG_LIBS := -lglog -lgflags -lprotobuf
 # If pkg-config is not available and we're static linking, we also need
 # the indirect dependecies.  This is annoying, because they may change
 # in future versions.
