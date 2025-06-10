@@ -290,10 +290,6 @@ static inline uint16_t CalculateIpv4Checksum(const Ipv4 &iph) {
   const uint32_t *buf32 = reinterpret_cast<const uint32_t *>(&iph);
   size_t ip_header_len = iph.header_length << 2;
 
-  if (likely(ip_header_len == sizeof(iph))) {
-    return CalculateIpv4NoOptChecksum(iph);
-  }
-
   if (unlikely(ip_header_len < sizeof(iph))) {
     return 0;  // Invalid IP header. Give up.
   }
