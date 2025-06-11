@@ -103,7 +103,6 @@ CXXFLAGS += -std=c++17 -g3 -ggdb3 -march=$(CPU) \
             -isystem $(dir $<).. -isystem $(COREDIR)/modules \
             -D_GNU_SOURCE \
             -Werror -Wall -Wextra -Wcast-align -Wno-error=deprecated-declarations \
-            -Wno-maybe-uninitialized -Wno-nonnull \
             -Wno-error=array-bounds \
             $(PKG_CFLAGS)
 
