@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-// Copyright(c) 2019-2021 Intel Corporation.
-// Copyright 2025 Canonical Ltd.
+// Copyright 2019-2021 Intel Corporation.
 
 #ifndef BESS_DRIVERS_CNDP_H_
 #define BESS_DRIVERS_CNDP_H_

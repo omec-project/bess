@@ -1,6 +1,7 @@
 # Copyright (c) 2014-2017, The Regents of the University of California.
 # Copyright (c) 2016-2017, Nefeli Networks, Inc.
 # Copyright (c) 2020-2022 Intel Corporation.
+# Copyright 2025 Canonical Ltd.
 # All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause

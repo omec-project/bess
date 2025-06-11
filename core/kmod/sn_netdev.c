@@ -499,7 +499,7 @@ static int sn_poll(struct napi_struct *napi, int budget)
 		/* last check for race condition.
 		 * see sn_enable_interrupt() */
 		if (rx_queue->dev->ops->pending_rx(rx_queue)) {
-			napi_schedule(napi); // Changed from napi_reschedule to napi_schedule
+			napi_schedule(napi);
 			sn_disable_interrupt(rx_queue);
 		}
 	}

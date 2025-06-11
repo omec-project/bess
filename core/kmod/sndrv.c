@@ -1,7 +1,6 @@
 // BSD LICENSE
 //
-// Copyright(c) 2014 Sangjin Han All rights reserved.
-// Copyright 2025 Canonical Ltd.
+// Copyright 2014 Sangjin Han All rights reserved.
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //

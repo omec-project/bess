@@ -2,8 +2,7 @@
 #
 # BSD LICENSE
 #
-# Copyright(c) 2010-2014 Intel Corporation. All rights reserved.
-# Copyright 2025 Canonical Ltd.
+# Copyright 2010-2014 Intel Corporation. All rights reserved.
 # All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
