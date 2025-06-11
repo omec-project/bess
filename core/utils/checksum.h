@@ -256,10 +256,6 @@ static inline bool VerifyIpv4Checksum(const Ipv4 &iph) {
   const uint32_t *buf32 = reinterpret_cast<const uint32_t *>(&iph);
   size_t ip_header_len = iph.header_length << 2;
 
-  if (likely(ip_header_len == sizeof(iph))) {
-    return VerifyIpv4NoOptChecksum(iph);
-  }
-
   if (unlikely(ip_header_len < sizeof(iph))) {
     return false;  // Invalid IP header
   }
