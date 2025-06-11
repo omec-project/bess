@@ -29,7 +29,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import logging
 import socket
 import sys
 from test_utils import *
@@ -100,12 +99,6 @@ class BessUrlFilterTest(BessModuleTestCase):
         self.assertSamePackets(pkt_outs[0][1], good_pkt)
 
         self.assertEquals(len(pkt_outs[1]), 2)
-        packet_1 = pkt_outs[1][0]
-        packet_2 = scapy.Ether(err_pkt)
-        logging.basicConfig()
-        logger = logging.getLogger("UT")
-        logger.warning("Packet 1: %s", packet_1)
-        logger.warning("Packet 2: %s", packet_2)
         self.assertSamePackets(pkt_outs[1][0], err_pkt)
 
     def test_urlfilter_selfconfig(self):
