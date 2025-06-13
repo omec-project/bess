@@ -25,7 +25,7 @@ jobs:
             exclude: ''       # Nothing to exclude
           - check: 'sample_plugin/protobuf'
             exclude: ''       # Nothing to exclude
-    uses: dariofaccin/.github/.github/workflows/check-clang-format.yml@add-bess-specific-workflows
+    uses: omec-project/.github/.github/workflows/check-clang-format.yml@main
     with:
       branch_name: ${{ github.ref }}
       clang_format_version: '12'
@@ -38,13 +38,13 @@ jobs:
       branch_name: ${{ github.ref }}
 
   hadolint:
-    uses: dariofaccin/.github/.github/workflows/hadolint.yml@add-bess-specific-workflows
+    uses: omec-project/.github/.github/workflows/hadolint.yml@main
     with:
       branch_name: ${{ github.ref }}
       dockerfile: env/Dockerfile
 
   hadolint-cndp:
-    uses: dariofaccin/.github/.github/workflows/hadolint.yml@add-bess-specific-workflows
+    uses: omec-project/.github/.github/workflows/hadolint.yml@main
     with:
       branch_name: ${{ github.ref }}
       dockerfile: env/Dockerfile-cndp

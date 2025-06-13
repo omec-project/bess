@@ -8,4 +8,4 @@ on:
 
 jobs:
   build:
-    uses: dariofaccin/.github/.github/workflows/bess-release-image.yml@add-bess-specific-workflows
+    uses: omec-project/.github/.github/workflows/bess-release-image.yml@main

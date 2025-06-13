@@ -8,6 +8,6 @@ on:
 
 jobs:
   build:
-    uses: dariofaccin/.github/.github/workflows/bess-build-test.yml@add-bess-specific-workflows
+    uses: omec-project/.github/.github/workflows/bess-build-test.yml@main
     with:
       branch_name: ${{ github.ref }}
