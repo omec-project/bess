@@ -59,6 +59,8 @@
 
 static int sn_poll(struct napi_struct *napi, int budget);
 static void sn_enable_interrupt(struct sn_queue *rx_queue);
+static netdev_features_t sn_fix_features(struct net_device *dev,
+                                         netdev_features_t features);
 
 static void sn_test_cache_alignment(struct sn_device *dev)
 {
@@ -172,8 +174,12 @@ static int sn_alloc_queues(struct sn_device *dev,
 	}
 
 	for (i = 0; i < dev->num_rxq; i++) {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,0,0)
 		netif_napi_add(dev->netdev, &dev->rx_queues[i]->rx.napi,
 				sn_poll, NAPI_POLL_WEIGHT);
+#else
+		netif_napi_add(dev->netdev, &dev->rx_queues[i]->rx.napi, sn_poll);
+#endif
 #ifdef CONFIG_NET_RX_BUSY_POLL
 		napi_hash_add(&dev->rx_queues[i]->rx.napi);
 #endif
@@ -274,7 +280,6 @@ static void sn_process_rx_metadata(struct sk_buff *skb,
 		skb->encapsulation = 1;
 #endif
 		/* fall through */
-
 	case SN_RX_CSUM_CORRECT:
 		skb->ip_summed = CHECKSUM_UNNECESSARY;
 		break;
@@ -494,7 +499,7 @@ static int sn_poll(struct napi_struct *napi, int budget)
 		/* last check for race condition.
 		 * see sn_enable_interrupt() */
 		if (rx_queue->dev->ops->pending_rx(rx_queue)) {
-			napi_reschedule(napi);
+			napi_schedule(napi);
 			sn_disable_interrupt(rx_queue);
 		}
 	}
@@ -554,7 +559,6 @@ skip_send:
 	case NET_XMIT_CN:
 		queue->tx.stats.throttled++;
 		/* fall through */
-
 	case NET_XMIT_SUCCESS:
 		queue->tx.stats.packets++;
 		queue->tx.stats.bytes += skb->len;
@@ -827,7 +831,7 @@ int sn_create_netdev(void *bar, struct sn_device **dev_ret)
 	netdev->netdev_ops = &sn_netdev_ops;
 	netdev->ethtool_ops = &sn_ethtool_ops;
 
-	memcpy(netdev->dev_addr, conf->mac_addr, ETH_ALEN);
+	memcpy(netdev->dev_addr, (void *)conf->mac_addr, ETH_ALEN);
 
 	ret = sn_alloc_queues(dev, conf + 1,
 			conf->bar_size - sizeof(struct sn_conf_space),

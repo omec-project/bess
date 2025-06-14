@@ -70,6 +70,40 @@ TEST(EmTableTest, AddRule) {
   em.DeInit();
 }
 
+TEST(EmTableTest, FindMakeKeysPktBatch) {
+  const size_t n = 2;
+  ExactMatchTable<uint16_t> em;
+  em.Init(1 << 6);
+  ExactMatchRuleFields rule = {{0x04, 0x03, 0x02, 0x01}};
+  ExactMatchKey keys[n];
+  bess::PacketBatch batch;
+  bess::PlainPacketPool pool;
+  bess::Packet *pkts[n];
+  pool.AllocBulk(pkts, n, 0);
+  char databuf[32] = {0};
+
+  ASSERT_EQ(0, em.AddField(0, 4, 0, 0).first);
+  ASSERT_EQ(0, em.AddRule(0xF00, rule).first);
+
+  batch.clear();
+  for (size_t i = 0; i < n; i++) {
+    bess::Packet *pkt = pkts[i];
+    bess::utils::Copy(pkt->append(sizeof(databuf)), databuf, sizeof(databuf));
+    batch.add(pkt);
+  }
+
+  const auto buffer_fn = [](const bess::Packet *pkt, const ExactMatchField &) {
+    return pkt->head_data<void *>();
+  };
+  em.MakeKeys(&batch, buffer_fn, keys);
+  for (size_t i = 0; i < n; i++) {
+    // Packets are bogus, shouldn't match anything.
+    ASSERT_EQ(0xDEAD, em.Find(keys[i], 0xDEAD));
+  }
+  em.ClearRules();
+  em.DeInit();
+}
+
 TEST(EmTableTest, LookupOneFieldOneRule) {
   ExactMatchTable<uint16_t> em;
   em.AddField(0, 4, 0, 0);
@@ -145,40 +179,6 @@ TEST(EmTableTest, IgnoreBytesPastEnd) {
   ASSERT_EQ(0, em.AddRule(0x600d, rule).first);
   uint16_t ret = em.Find(keys[0], 0xDEAD);
   ASSERT_EQ(0x600d, ret);
-  em.ClearRules();
-  em.DeInit();
-}
-
-TEST(EmTableTest, FindMakeKeysPktBatch) {
-  const size_t n = 2;
-  ExactMatchTable<uint16_t> em;
-  em.Init(1 << 6);
-  ExactMatchRuleFields rule = {{0x04, 0x03, 0x02, 0x01}};
-  ExactMatchKey keys[n];
-  bess::PacketBatch batch;
-  bess::PlainPacketPool pool;
-  bess::Packet *pkts[n];
-  pool.AllocBulk(pkts, n, 0);
-  char databuf[32] = {0};
-
-  ASSERT_EQ(0, em.AddField(0, 4, 0, 0).first);
-  ASSERT_EQ(0, em.AddRule(0xF00, rule).first);
-
-  batch.clear();
-  for (size_t i = 0; i < n; i++) {
-    bess::Packet *pkt = pkts[i];
-    bess::utils::Copy(pkt->append(sizeof(databuf)), databuf, sizeof(databuf));
-    batch.add(pkt);
-  }
-
-  const auto buffer_fn = [](const bess::Packet *pkt, const ExactMatchField &) {
-    return pkt->head_data<void *>();
-  };
-  em.MakeKeys(&batch, buffer_fn, keys);
-  for (size_t i = 0; i < n; i++) {
-    // Packets are bogus, shouldn't match anything.
-    ASSERT_EQ(0xDEAD, em.Find(keys[i], 0xDEAD));
-  }
   em.ClearRules();
   em.DeInit();
 }
