@@ -14,7 +14,6 @@ on:
 
 jobs:
   clang-format:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         path:
@@ -26,73 +25,37 @@ jobs:
             exclude: ''       # Nothing to exclude
           - check: 'sample_plugin/protobuf'
             exclude: ''       # Nothing to exclude
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Clang-format check
-      uses: jidicula/clang-format-action@v4.11.0
-      with:
-        clang-format-version: '12'
-        check-path: ${{ matrix.path['check'] }}
-        exclude-regex: ${{ matrix.path['exclude'] }}
+    uses: omec-project/.github/.github/workflows/check-clang-format.yml@main
+    with:
+      branch_name: ${{ github.ref }}
+      clang_format_version: '12'
+      check_path: ${{ matrix.path['check'] }}
+      exclude_regex: ${{ matrix.path['exclude'] }}
 
   check-spelling:
-    name: Markdown spellcheck
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Check Spelling
-        uses: rojopolis/spellcheck-github-actions@0.36.0
-        with:
-          config_path: .spellcheck.yml
-          task_name: Markdown
+    uses: omec-project/.github/.github/workflows/check-spelling.yml@main
+    with:
+      branch_name: ${{ github.ref }}
 
   hadolint:
-    name: hadolint
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Dockerfile linter
-        uses: hadolint/hadolint-action@v3.1.0
-        # For now, ignoring:
-        # DL3008 warning: Pin versions in apt get install (e.g., apt-get install <package>=<version>)
-        with:
-          dockerfile: env/Dockerfile
-          ignore: DL3008
+    uses: omec-project/.github/.github/workflows/hadolint.yml@main
+    with:
+      branch_name: ${{ github.ref }}
+      dockerfile: env/Dockerfile
 
   hadolint-cndp:
-    name: hadolint
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Dockerfile linter
-        uses: hadolint/hadolint-action@v3.1.0
-        # For now, ignoring:
-        # DL3008 warning: Pin versions in apt get install (e.g., apt-get install <package>=<version>); and
-        # DL3013 warning: Pin versions in pip (e.g., pip install <package>==<version>)
-        with:
-          dockerfile: env/Dockerfile-cndp
-          ignore: DL3008,DL3013
+    uses: omec-project/.github/.github/workflows/hadolint.yml@main
+    with:
+      branch_name: ${{ github.ref }}
+      dockerfile: env/Dockerfile-cndp
+      ignored_rules: DL3008,DL3013
 
   license-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    uses: omec-project/.github/.github/workflows/license-check.yml@main
+    with:
+      branch_name: ${{ github.ref }}
 
-      - name: reuse lint
-        uses: fsfe/reuse-action@v3
-
-  fossa-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: FOSSA scan
-        uses: fossa-contrib/fossa-action@v3
-        with:
-          fossa-api-key: 0c3bbcdf20e157bbd487dae173751b28
+  fossa-scan:
+    uses: omec-project/.github/.github/workflows/fossa-scan.yml@main
+    with:
+      branch_name: ${{ github.ref }}

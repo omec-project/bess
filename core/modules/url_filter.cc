@@ -1,4 +1,5 @@
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
+// Copyright 2025 Canonical Ltd.
 // All rights reserved.
 //
 // SPDX-License-Identifier: BSD-3-Clause
@@ -135,7 +136,7 @@ inline static bess::Packet *Generate403Packet(const Ethernet::Address &src_eth,
 
   tcp->checksum = bess::utils::CalculateIpv4TcpChecksum(*tcp, src_ip, dst_ip,
                                                         sizeof(*tcp) + len);
-  ip->checksum = bess::utils::CalculateIpv4NoOptChecksum(*ip);
+  ip->checksum = bess::utils::CalculateIpv4Checksum(*ip);
 
   return pkt;
 }

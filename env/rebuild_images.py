@@ -40,10 +40,14 @@ import subprocess
 import sys
 import time
 
-TARGET_REPO = 'registry.aetherproject.org/sdcore/bess_build'
+TARGET_REGISTRY = os.getenv("DOCKER_REGISTRY", "registry.aetherproject.org/")
+TARGET_REPOSITORY = os.getenv("DOCKER_REPOSITORY", "sdcore/")
+TARGET = "bess_build"
+FULL_TARGET = TARGET_REGISTRY + TARGET_REPOSITORY + TARGET
 
 imgs = {
     'focal64': {'base': 'ubuntu:focal', 'tag_suffix': ''},
+    'jammy64': {'base': 'ubuntu:jammy', 'tag_suffix': ''},
 }
 
 
@@ -61,26 +65,26 @@ def run_cmd(cmd, shell=False):
 def build(env):
     base = imgs[env]['base']
     tag_suffix = imgs[env]['tag_suffix']
-    bess_dpdk_branch = os.getenv('BESS_DPDK_BRANCH', 'master')
+    bess_dpdk_branch = os.getenv('BESS_DPDK_BRANCH', 'main')
     version = time.strftime('%y%m%d')
 
     run_cmd('docker build -f env/Dockerfile '
             '--build-arg BASE_IMAGE={base} '
             '--build-arg BESS_DPDK_BRANCH={branch} '
             '-t {target}:latest{suffix} -t {target}:{version}{suffix} '
-            '.'.format(base=base, branch=bess_dpdk_branch, target=TARGET_REPO,
+            '.'.format(base=base, branch=bess_dpdk_branch, target=FULL_TARGET,
                        version=version, suffix=tag_suffix))
 
-    print('Build succeeded: {}:{}{}'.format(TARGET_REPO, version, tag_suffix))
-    print('Build succeeded: {}:latest{}'.format(TARGET_REPO, tag_suffix))
+    print('Build succeeded: {}:{}{}'.format(FULL_TARGET, version, tag_suffix))
+    print('Build succeeded: {}:latest{}'.format(FULL_TARGET, tag_suffix))
 
     return version, tag_suffix
 
 
 def push(version, tag_suffix):
     run_cmd('docker login')
-    run_cmd('docker push {}:latest{}'.format(TARGET_REPO, tag_suffix))
-    run_cmd('docker push {}:{}{}'.format(TARGET_REPO, version, tag_suffix))
+    run_cmd('docker push {}:latest{}'.format(FULL_TARGET, tag_suffix))
+    run_cmd('docker push {}:{}{}'.format(FULL_TARGET, version, tag_suffix))
 
 
 def main(argv):

@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2016, The Regents of the University of California.
 // Copyright (c) 2016-2017, Nefeli Networks, Inc.
+// Copyright 2025 Canonical Ltd.
 // All rights reserved.
 //
 // SPDX-License-Identifier: BSD-3-Clause
@@ -164,8 +165,11 @@ class ExactMatch final : public Module {
     }
 
     if (mt_attr_name.length() > 0) {
-      v->attr_id = m->AddMetadataAttr(
-          mt_attr_name, v->size, bess::metadata::Attribute::AccessMode::kWrite);
+      if (m != nullptr) {
+        v->attr_id =
+            m->AddMetadataAttr(mt_attr_name, v->size,
+                               bess::metadata::Attribute::AccessMode::kWrite);
+      }
       if (v->attr_id < 0) {
         return std::make_pair(
             -v->attr_id,

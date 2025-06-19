@@ -8,7 +8,7 @@
 # --build-arg https_proxy=$http_proxy --build-arg no_proxy="$no_proxy" \
 # -t besscndp -f env/Dockerfile-cndp .
 
-FROM ubuntu:20.04 AS cndp-build
+FROM ubuntu:22.04 AS cndp-build
 
 # Install CNDP dependencies and build CNDP.
 ENV DEBIAN_FRONTEND=noninteractive
@@ -64,7 +64,7 @@ RUN make static_build=1 rebuild install
 WORKDIR /cndp/lang/go/stats/prometheus
 RUN go build prometheus.go
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 # Install CNDP dependencies
 ENV DEBIAN_FRONTEND=noninteractive
