@@ -7,5 +7,6 @@ on:
       - main
 
 jobs:
-  build:
+  bess-release-image:
     uses: omec-project/.github/.github/workflows/bess-release-image.yml@main
+    secrets: inherit
