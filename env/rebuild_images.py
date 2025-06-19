@@ -94,7 +94,7 @@ def main(argv):
 
     version, tag_suffix = build(argv[1])
 
-    prompt = input      # Python 3
+    prompt = input  # Python 3
 
     if prompt('Do you wish to push the image? [y/N] ').lower() in ['y', 'yes']:
         push(version, tag_suffix)
