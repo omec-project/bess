@@ -76,25 +76,30 @@ void GtpuParser::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
           be32_t teid = (be32_t)gtph->teid.value();
           /* reuse iph, tcph, and udph for innser headers too */
           iph = (Ipv4 *)((char *)gtph + gtph->header_length());
-          if (iph->protocol == Ipv4::kTcp) {
-            tcph = (Tcp *)((char *)iph + (iph->header_length << 2));
-            set_gtp_parsing_attrs(&iph->src, &iph->dst, &tcph->src_port,
-                                  &tcph->dst_port, (be32_t *)&teid,
-                                  &old_iph->dst, &iph->protocol, p);
-          } else if (iph->protocol == Ipv4::kUdp) {
-            udph = (Udp *)((char *)iph + (iph->header_length << 2));
-            set_gtp_parsing_attrs(&iph->src, &iph->dst, &udph->src_port,
-                                  &udph->dst_port, (be32_t *)&teid,
-                                  &old_iph->dst, &iph->protocol, p);
-          } else if (iph->protocol == Ipv4::kEsp) {
-            // ESP has no ports, encrypted payload
-            set_gtp_parsing_attrs(&iph->src, &iph->dst, (be16_t *)&_const_val,
-                                  (be16_t *)&_const_val, (be32_t *)&teid,
-                                  &old_iph->dst, &iph->protocol, p);
-          } else {
-            set_gtp_parsing_attrs(&iph->src, &iph->dst, (be16_t *)&_const_val,
-                                  (be16_t *)&_const_val, (be32_t *)&teid,
-                                  &old_iph->dst, &iph->protocol, p);
+          switch (iph->protocol) {
+            case Ipv4::kTcp:
+              tcph = (Tcp *)((char *)iph + (iph->header_length << 2));
+              set_gtp_parsing_attrs(&iph->src, &iph->dst, &tcph->src_port,
+                                    &tcph->dst_port, (be32_t *)&teid,
+                                    &old_iph->dst, &iph->protocol, p);
+              break;
+            case Ipv4::kUdp:
+              udph = (Udp *)((char *)iph + (iph->header_length << 2));
+              set_gtp_parsing_attrs(&iph->src, &iph->dst, &udph->src_port,
+                                    &udph->dst_port, (be32_t *)&teid,
+                                    &old_iph->dst, &iph->protocol, p);
+              break;
+            case Ipv4::kEsp:
+              // ESP has no ports, encrypted payload
+              set_gtp_parsing_attrs(&iph->src, &iph->dst, (be16_t *)&_const_val,
+                                    (be16_t *)&_const_val, (be32_t *)&teid,
+                                    &old_iph->dst, &iph->protocol, p);
+              break;
+            default:
+              set_gtp_parsing_attrs(&iph->src, &iph->dst, (be16_t *)&_const_val,
+                                    (be16_t *)&_const_val, (be32_t *)&teid,
+                                    &old_iph->dst, &iph->protocol, p);
+              break;
           }
         } else {
           set_gtp_parsing_attrs(&iph->src, &iph->dst, &udph->src_port,
@@ -102,16 +107,16 @@ void GtpuParser::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
                                 (be32_t *)&_const_val, &iph->protocol, p);
         }
         break;
-      case Ipv4::kIcmp: {
+      case Ipv4::kIcmp:
         set_gtp_parsing_attrs(&iph->src, &iph->dst, (be16_t *)&_const_val,
                               (be16_t *)&_const_val, (be32_t *)&_const_val,
                               (be32_t *)&_const_val, &iph->protocol, p);
-      } break;
-      case Ipv4::kEsp: {
+        break;
+      case Ipv4::kEsp:
         set_gtp_parsing_attrs(&iph->src, &iph->dst, (be16_t *)&_const_val,
                               (be16_t *)&_const_val, (be32_t *)&_const_val,
                               (be32_t *)&_const_val, &iph->protocol, p);
-      } break;
+        break;
       default:
         /* nothing here at the moment */
         break;
