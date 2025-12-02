@@ -20,7 +20,6 @@ jobs:
     permissions:
       contents: read
       actions: read
-      security-events: write
       id-token: write
       attestations: write
     strategy:
@@ -44,7 +43,6 @@ jobs:
   check-spelling:
     permissions:
       contents: read
-      security-events: write
       actions: read
       id-token: write
       attestations: write
@@ -55,7 +53,6 @@ jobs:
   hadolint:
     permissions:
       contents: read
-      security-events: write
       id-token: write
       attestations: write
     uses: omec-project/.github/.github/workflows/hadolint.yml@453e42d23f0366133ec7c053ee92a97f374f3ac5 # v0.0.1
@@ -66,7 +63,6 @@ jobs:
   hadolint-cndp:
     permissions:
       contents: read
-      security-events: write
       id-token: write
       attestations: write
     uses: omec-project/.github/.github/workflows/hadolint.yml@453e42d23f0366133ec7c053ee92a97f374f3ac5 # v0.0.1
@@ -87,7 +83,6 @@ jobs:
   fossa-scan:
     permissions:
       contents: read
-      security-events: write
       id-token: write
       attestations: write
     uses: omec-project/.github/.github/workflows/fossa-scan.yml@453e42d23f0366133ec7c053ee92a97f374f3ac5 # v0.0.1
@@ -111,7 +106,6 @@ jobs:
       pages: read
       pull-requests: read
       repository-projects: read
-      security-events: write
       statuses: read
     uses: omec-project/.github/.github/workflows/scorecard-analysis.yml@453e42d23f0366133ec7c053ee92a97f374f3ac5 # v0.0.1
     with:
