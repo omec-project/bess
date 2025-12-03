@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-3-Clause
 -->
 
 ![Release](https://img.shields.io/github/v/release/omec-project/bess?sort=semver)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/omec-project/bess/badge)](https://scorecard.dev/viewer/?uri=github.com/omec-project/bess)
 
 ## BESS (Berkeley Extensible Software Switch)
 
