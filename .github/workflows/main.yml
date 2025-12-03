@@ -2,7 +2,7 @@
 # Copyright 2024 Canonical Ltd.
 # Copyright 2024 Intel Corporation
 
-name: Main workflow
+name: CI Pipeline
 
 on:
   pull_request:
