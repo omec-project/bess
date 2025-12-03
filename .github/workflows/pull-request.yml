@@ -6,6 +6,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   build:
     uses: omec-project/.github/.github/workflows/bess-build-test.yml@main
