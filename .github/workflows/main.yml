@@ -2,7 +2,7 @@
 # Copyright 2024 Canonical Ltd.
 # Copyright 2024 Intel Corporation
 
-name: Main workflow
+name: CI Pipeline
 
 on:
   pull_request:
@@ -12,8 +12,16 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   clang-format:
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
     strategy:
       matrix:
         path:
@@ -25,7 +33,7 @@ jobs:
             exclude: ''       # Nothing to exclude
           - check: 'sample_plugin/protobuf'
             exclude: ''       # Nothing to exclude
-    uses: omec-project/.github/.github/workflows/check-clang-format.yml@main
+    uses: omec-project/.github/.github/workflows/check-clang-format.yml@453e42d23f0366133ec7c053ee92a97f374f3ac5 # v0.0.1
     with:
       branch_name: ${{ github.ref }}
       clang_format_version: '12'
@@ -33,29 +41,74 @@ jobs:
       exclude_regex: ${{ matrix.path['exclude'] }}
 
   check-spelling:
-    uses: omec-project/.github/.github/workflows/check-spelling.yml@main
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+    uses: omec-project/.github/.github/workflows/check-spelling.yml@453e42d23f0366133ec7c053ee92a97f374f3ac5 # v0.0.1
     with:
       branch_name: ${{ github.ref }}
 
   hadolint:
-    uses: omec-project/.github/.github/workflows/hadolint.yml@main
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    uses: omec-project/.github/.github/workflows/hadolint.yml@453e42d23f0366133ec7c053ee92a97f374f3ac5 # v0.0.1
     with:
       branch_name: ${{ github.ref }}
       dockerfile: env/Dockerfile
 
   hadolint-cndp:
-    uses: omec-project/.github/.github/workflows/hadolint.yml@main
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    uses: omec-project/.github/.github/workflows/hadolint.yml@453e42d23f0366133ec7c053ee92a97f374f3ac5 # v0.0.1
     with:
       branch_name: ${{ github.ref }}
       dockerfile: env/Dockerfile-cndp
       ignored_rules: DL3008,DL3013
 
   license-check:
-    uses: omec-project/.github/.github/workflows/license-check.yml@main
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    uses: omec-project/.github/.github/workflows/license-check.yml@453e42d23f0366133ec7c053ee92a97f374f3ac5 # v0.0.1
     with:
       branch_name: ${{ github.ref }}
 
   fossa-scan:
-    uses: omec-project/.github/.github/workflows/fossa-scan.yml@main
+    permissions:
+      contents: read
+      security-events: write
+      id-token: write
+      attestations: write
+    uses: omec-project/.github/.github/workflows/fossa-scan.yml@453e42d23f0366133ec7c053ee92a97f374f3ac5 # v0.0.1
+    with:
+      branch_name: ${{ github.ref }}
+
+  analysis:
+    if: github.repository_owner == 'omec-project'
+    permissions:
+      actions: read
+      artifact-metadata: read
+      attestations: read
+      checks: read
+      contents: read
+      deployments: read
+      discussions: read
+      id-token: write
+      issues: read
+      models: read
+      packages: read
+      pages: read
+      pull-requests: read
+      repository-projects: read
+      security-events: write
+      statuses: read
+    uses: omec-project/.github/.github/workflows/scorecard-analysis.yml@453e42d23f0366133ec7c053ee92a97f374f3ac5 # v0.0.1
     with:
       branch_name: ${{ github.ref }}

@@ -20,3 +20,7 @@ If you are new to BESS, we recommend you start here:
 4. [Connect BESS to a Network Interface, VM, or Container](https://github.com/omec-project/bess/wiki/Hooking-up-BESS-Ports)
 
 Documentation can be found [here](https://github.com/omec-project/bess/wiki/). Please consider [contributing](https://github.com/omec-project/bess/wiki/How-to-Contribute) to the project!
+
+## Reach out to us through
+
+1. #sdcore-dev channel in [Aether Community Slack](https://aether5g-project.slack.com)

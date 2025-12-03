@@ -1,12 +1,22 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2024-Present Intel Corporation
 # Copyright 2025 Canonical Ltd.
+name: Release Pipeline
+
 on:
   push:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   bess-release-image:
-    uses: omec-project/.github/.github/workflows/bess-release-image.yml@main
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+    uses: omec-project/.github/.github/workflows/bess-release-image.yml@453e42d23f0366133ec7c053ee92a97f374f3ac5 # v0.0.1
     secrets: inherit
