@@ -18,7 +18,7 @@ Following are the steps required to build BESS CNDP docker image:
 From the top level BESS directory call:
 
 ```
-$ docker build -t besscndp --build-arg http_proxy=${http_proxy} --build-arg https_proxy=${http_proxy} -f env/Dockerfile-cndp .
+$ docker build -t besscndp --build-arg http_proxy=${http_proxy} --build-arg https_proxy=${http_proxy} -f env/Dockerfile .
 ```
 
 ### Step 2: Run the besscndp docker container
