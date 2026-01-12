@@ -18,5 +18,5 @@ jobs:
       actions: read
       id-token: write
       attestations: write
-    uses: omec-project/.github/.github/workflows/bess-release-image.yml@76c248f1621bfe102956c558ea8cecfe5df143bf # v0.0.3
+    uses: omec-project/.github/.github/workflows/bess-release-image.yml@23e0adf45c41d1564468697ae12bae734510e388 # v0.0.4
     secrets: inherit
