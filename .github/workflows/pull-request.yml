@@ -11,6 +11,6 @@ permissions:
 
 jobs:
   build:
-    uses: omec-project/.github/.github/workflows/bess-build-test.yml@23e0adf45c41d1564468697ae12bae734510e388 # v0.0.4
+    uses: omec-project/.github/.github/workflows/bess-build-test.yml@20ee3dc51e32d7d25e79e8729b07f3671ad92a5d # v0.0.7
     with:
       branch_name: ${{ github.ref }}
