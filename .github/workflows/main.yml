@@ -33,7 +33,7 @@ jobs:
             exclude: ''       # Nothing to exclude
           - check: 'sample_plugin/protobuf'
             exclude: ''       # Nothing to exclude
-    uses: omec-project/.github/.github/workflows/check-clang-format.yml@20ee3dc51e32d7d25e79e8729b07f3671ad92a5d # v0.0.7
+    uses: omec-project/.github/.github/workflows/check-clang-format.yml@1e62855922cacee05c51f0fc7245fc9e1e7b38a6 # v0.0.8
     with:
       branch_name: ${{ github.ref }}
       clang_format_version: '12'
@@ -46,7 +46,7 @@ jobs:
       actions: read
       id-token: write
       attestations: write
-    uses: omec-project/.github/.github/workflows/check-spelling.yml@20ee3dc51e32d7d25e79e8729b07f3671ad92a5d # v0.0.7
+    uses: omec-project/.github/.github/workflows/check-spelling.yml@1e62855922cacee05c51f0fc7245fc9e1e7b38a6 # v0.0.8
     with:
       branch_name: ${{ github.ref }}
 
@@ -55,7 +55,7 @@ jobs:
       contents: read
       id-token: write
       attestations: write
-    uses: omec-project/.github/.github/workflows/hadolint.yml@20ee3dc51e32d7d25e79e8729b07f3671ad92a5d # v0.0.7
+    uses: omec-project/.github/.github/workflows/hadolint.yml@1e62855922cacee05c51f0fc7245fc9e1e7b38a6 # v0.0.8
     with:
       branch_name: ${{ github.ref }}
       dockerfile: env/Dockerfile
@@ -65,7 +65,7 @@ jobs:
       contents: read
       id-token: write
       attestations: write
-    uses: omec-project/.github/.github/workflows/license-check.yml@20ee3dc51e32d7d25e79e8729b07f3671ad92a5d # v0.0.7
+    uses: omec-project/.github/.github/workflows/license-check.yml@1e62855922cacee05c51f0fc7245fc9e1e7b38a6 # v0.0.8
     with:
       branch_name: ${{ github.ref }}
 
@@ -75,7 +75,7 @@ jobs:
       security-events: write
       id-token: write
       attestations: write
-    uses: omec-project/.github/.github/workflows/fossa-scan.yml@20ee3dc51e32d7d25e79e8729b07f3671ad92a5d # v0.0.7
+    uses: omec-project/.github/.github/workflows/fossa-scan.yml@1e62855922cacee05c51f0fc7245fc9e1e7b38a6 # v0.0.8
     with:
       branch_name: ${{ github.ref }}
 
@@ -98,6 +98,6 @@ jobs:
       repository-projects: read
       security-events: write
       statuses: read
-    uses: omec-project/.github/.github/workflows/scorecard-analysis.yml@20ee3dc51e32d7d25e79e8729b07f3671ad92a5d # v0.0.7
+    uses: omec-project/.github/.github/workflows/scorecard-analysis.yml@1e62855922cacee05c51f0fc7245fc9e1e7b38a6 # v0.0.8
     with:
       branch_name: ${{ github.ref }}
