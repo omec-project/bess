@@ -40,8 +40,8 @@ import subprocess
 import sys
 import time
 
-TARGET_REGISTRY = os.getenv("DOCKER_REGISTRY", "registry.aetherproject.org/")
-TARGET_REPOSITORY = os.getenv("DOCKER_REPOSITORY", "sdcore/")
+TARGET_REGISTRY = os.getenv("DOCKER_REGISTRY", "ghcr.io/")
+TARGET_REPOSITORY = os.getenv("DOCKER_REPOSITORY", "omec-project/bess/")
 TARGET = "bess_build"
 FULL_TARGET = TARGET_REGISTRY + TARGET_REPOSITORY + TARGET
 
@@ -82,7 +82,6 @@ def build(env):
 
 
 def push(version, tag_suffix):
-    run_cmd('docker login')
     run_cmd('docker push {}:latest{}'.format(FULL_TARGET, tag_suffix))
     run_cmd('docker push {}:{}{}'.format(FULL_TARGET, version, tag_suffix))
 
