@@ -82,7 +82,6 @@ def build(env):
 
 
 def push(version, tag_suffix):
-    run_cmd('docker login')
     run_cmd('docker push {}:latest{}'.format(FULL_TARGET, tag_suffix))
     run_cmd('docker push {}:{}{}'.format(FULL_TARGET, version, tag_suffix))
 
