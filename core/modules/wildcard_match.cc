@@ -626,8 +626,10 @@ CommandResponse WildcardMatch::CommandClear(const bess::pb::EmptyArg &) {
 void WildcardMatch::Clear() {
   for (auto &tuple : tuples_) {
     if (tuple.occupied) {
+      tuple.ht->DeInit();
+      delete tuple.ht;
+      tuple.ht = nullptr;
       tuple.occupied = 0;
-      tuple.ht->Clear();
     }
   }
 }
