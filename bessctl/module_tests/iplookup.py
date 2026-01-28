@@ -29,6 +29,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import errno
 from test_utils import *
 
 
@@ -38,7 +39,7 @@ class BessIPLookupTest(BessModuleTestCase):
         try:
             ipl = IPLookup()
         except bess.Error as e:
-            if e.code == 12:  # ENOMEM
+            if e.code == errno.ENOMEM:
                 self.skipTest("Insufficient DPDK memory for IPLookup module")
             raise
 
@@ -64,7 +65,7 @@ class BessIPLookupTest(BessModuleTestCase):
         try:
             ipl = IPLookup()
         except bess.Error as e:
-            if e.code == 12:  # ENOMEM
+            if e.code == errno.ENOMEM:
                 self.skipTest("Insufficient DPDK memory for IPLookup module")
             raise
         with self.assertRaises(bess.Error):
