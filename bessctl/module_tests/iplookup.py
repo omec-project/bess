@@ -35,7 +35,13 @@ from test_utils import *
 class BessIPLookupTest(BessModuleTestCase):
 
     def test_iplookup(self):
-        ipl = IPLookup()
+        try:
+            ipl = IPLookup()
+        except bess.Error as e:
+            if e.code == 12:  # ENOMEM
+                self.skipTest("Insufficient DPDK memory for IPLookup module")
+            raise
+
         pkts = [get_tcp_packet(sip='12.22.22.22', dip='22.22.22.22'),
                 get_tcp_packet(sip='12.22.22.22', dip='32.22.22.22'),
                 get_tcp_packet(sip='12.22.22.22', dip='42.22.22.22')]
@@ -55,7 +61,12 @@ class BessIPLookupTest(BessModuleTestCase):
         self.assertSamePackets(pkt_outs[1][0], pkts[1])
 
     def test_prefix(self):
-        ipl = IPLookup()
+        try:
+            ipl = IPLookup()
+        except bess.Error as e:
+            if e.code == 12:  # ENOMEM
+                self.skipTest("Insufficient DPDK memory for IPLookup module")
+            raise
         with self.assertRaises(bess.Error):
             ipl.add(prefix='22.22.22.0', prefix_len=16, gate=0)
 
