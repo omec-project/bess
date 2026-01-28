@@ -193,7 +193,9 @@ void ModuleGraph::ConfigureTasks() {
       bess::TrafficClass *c = tc_pair.second;
       if (c->policy() == bess::POLICY_LEAF) {
         auto leaf = static_cast<bess::LeafTrafficClass *>(c);
-        leaf->task()->UpdatePerGateBatch(gate_cnt_);
+        if (Task *task = leaf->task()) {
+          task->UpdatePerGateBatch(gate_cnt_);
+        }
       }
     }
   }
@@ -406,7 +408,9 @@ void ModuleGraph::PropagateActiveWorker() {
         bess::TrafficClass *c = tc_pair.second;
         if (c->policy() == bess::POLICY_LEAF && c->Root() == root) {
           auto leaf = static_cast<bess::LeafTrafficClass *>(c);
-          leaf->task()->AddActiveWorker(i);
+          if (Task *task = leaf->task()) {
+            task->AddActiveWorker(i);
+          }
         }
       }
     }
