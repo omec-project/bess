@@ -5,6 +5,6 @@
 
 coverage
 grpcio
-protobuf==3.20.3
+protobuf==6.33.5
 pyroute2
 scapy
