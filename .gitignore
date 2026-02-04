@@ -11,6 +11,7 @@ core/.deps
 core/extra.mk
 core/extra.dpdk.mk
 core/kmod/.cache.mk
+core/kmod/bess.mod
 *.retry
 *.cache.mk
 dictionary.dic
