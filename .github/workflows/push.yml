@@ -7,30 +7,16 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "env/Dockerfile"
+      - "env/*.yml"
+      - "env/requirements*.txt"
 
 permissions:
   contents: read
 
 jobs:
-  check-bess-env-changes:
-    runs-on: ubuntu-latest
-    outputs:
-      should-build: ${{ steps.filter.outputs.bess-env }}
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v6.0.0
-      
-      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
-        id: filter
-        with:
-          filters: |
-            bess-env:
-              - 'env/Dockerfile'
-              - 'env/*.yml'
-              - 'env/requirements*.txt'
-
   bess-release-image:
-    needs: check-bess-env-changes
-    if: needs.check-bess-env-changes.outputs.should-build == 'true'
     permissions:
       contents: read
       packages: write
