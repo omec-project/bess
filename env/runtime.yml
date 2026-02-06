@@ -11,8 +11,8 @@
         name:
           - apt-transport-https
           - ca-certificates
-          - python
-          - python-pip
+          - python3
+          - python3-pip
           - libgraph-easy-perl
           - tcpdump
         update_cache: yes
@@ -20,13 +20,15 @@
 
     - name: Install list of Python packages
       pip:
-        name:
-          - protobuf==3.20
-          - grpcio
-          - scapy
-          - flask
-        state: latest
+        requirements: "{{ playbook_dir }}/requirements-run.txt"
+        state: present
+        executable: pip3
+        extra_args: --require-hashes
       become: true
+
+    - name: Note about C++ runtime libraries
+      debug:
+        msg: "Note: For runtime environments, ensure protobuf 26.1 and gRPC 1.68 C++ libraries are installed (from Docker image or built separately)"
 
     - shell: ls -d /sys/devices/system/node/node* | wc -l
       register: num_nodes

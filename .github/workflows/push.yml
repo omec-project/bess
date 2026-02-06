@@ -12,7 +12,25 @@ permissions:
   contents: read
 
 jobs:
+  check-bess-env-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      should-build: ${{ steps.filter.outputs.bess-env }}
+    steps:
+      - uses: actions/checkout@v6
+      
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            bess-env:
+              - 'env/Dockerfile'
+              - 'env/*.yml'
+              - 'env/requirements*.txt'
+
   bess-release-image:
+    needs: check-bess-env-changes
+    if: needs.check-bess-env-changes.outputs.should-build == 'true'
     permissions:
       contents: read
       packages: write

@@ -110,7 +110,7 @@ class FifoOpener {
         opening_(false),
         shutting_down_(false),
         thread_(path_.c_str(), this) {}
-  ~FifoOpener();
+  virtual ~FifoOpener();
 
   /*!
    * Only allowed until calling one of the Open*()s.

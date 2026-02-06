@@ -75,8 +75,12 @@ def main():
 
     any_failure = 0
 
+    # Use --dpdk=false to run without hugepages in CI environments
+    dpdk_flag = '--dpdk=false' if os.environ.get('BESS_DPDK_DISABLE') else ''
+    daemon_start_cmd = '%s daemon start -m 0 %s' % (bessctl, dpdk_flag)
+
     try:
-        run_cmd('%s daemon start -m 0' % bessctl)
+        run_cmd(daemon_start_cmd)
     except CommandError:
         raise Exception('bess daemon could not start')
 
@@ -87,7 +91,7 @@ def main():
             run_cmd('%s daemon reset -- run file %s' % (bessctl, file_name))
         except CommandError:
             any_failure = 1
-            run_cmd('%s daemon start -m 0' % bessctl)
+            run_cmd(daemon_start_cmd)
 
     sys.exit(any_failure)
 

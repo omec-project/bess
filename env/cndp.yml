@@ -1,0 +1,111 @@
+# SPDX-FileCopyrightText: 2026 Intel Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
+# CNDP (Cloud Native Data Plane) installation
+
+- hosts: all
+  tags: cndp
+  tasks:
+    - name: Install CNDP build dependencies
+      apt:
+        name:
+          - libelf-dev
+          - libbsd-dev
+          - libjson-c-dev
+          - libnl-3-dev
+          - libnl-cli-3-dev
+          - libnuma-dev
+          - libpcap-dev
+          - libbpf-dev
+          - llvm
+          - llvm-dev
+          - libclang-dev
+          - clang
+          - lld
+          - linux-libc-dev
+          - gcc-multilib
+          - m4
+          - meson
+          - pkg-config
+          - golang
+          - wget
+          - git
+          - ca-certificates
+          - build-essential
+          - curl
+          - linux-tools-common
+        update_cache: yes
+      become: true
+
+    - name: Install libxdp
+      become: true
+      block:
+        - name: Clone libxdp repository
+          git:
+            repo: https://github.com/xdp-project/xdp-tools.git
+            dest: /tmp/xdp-tools
+            version: v1.2.2
+            depth: 1
+
+        - name: Build and install libxdp
+          shell: |
+            cd /tmp/xdp-tools
+            ./configure
+            make -j$(nproc)
+            PREFIX=/usr make install
+          args:
+            creates: /usr/lib/libxdp.so
+
+        - name: Remove libxdp source
+          file:
+            path: /tmp/xdp-tools
+            state: absent
+
+    - name: Install CNDP
+      become: true
+      block:
+        - name: Clone CNDP repository
+          git:
+            repo: https://github.com/CloudNativeDataPlane/cndp.git
+            dest: /tmp/cndp
+            version: d5ce4b9edc2e7ddb46a61b395deffafaf11a0500
+
+        - name: Build and install CNDP shared libraries
+          shell: |
+            cd /tmp/cndp
+            make -j$(nproc)
+            make install
+
+        - name: Build and install CNDP static libraries
+          shell: |
+            cd /tmp/cndp
+            make static_build=1 rebuild
+            make install
+
+        - name: Copy CNDP files to system locations
+          shell: |
+            cp -r /tmp/cndp/usr/local/include/cndp /usr/local/include/
+            cp /tmp/cndp/usr/local/lib/x86_64-linux-gnu/*.so* /usr/lib/ 2>/dev/null || true
+            cp /tmp/cndp/usr/local/lib/x86_64-linux-gnu/*.a /usr/lib/ 2>/dev/null || true
+            cp /tmp/cndp/usr/local/lib/pkgconfig/libcndp.pc /usr/lib/pkgconfig/
+            cp /tmp/cndp/usr/local/bin/cndpfwd /usr/bin/ 2>/dev/null || true
+
+        - name: Build prometheus-metrics app
+          shell: |
+            cd /tmp/cndp/lang/go/stats/prometheus
+            go build prometheus.go
+            cp prometheus /usr/bin/
+          args:
+            creates: /usr/bin/prometheus
+
+        - name: Run ldconfig after CNDP installation
+          shell: ldconfig
+
+        - name: Remove CNDP source
+          file:
+            path: /tmp/cndp
+            state: absent
+
+    - name: CNDP installation complete
+      debug:
+        msg: "CNDP installation complete"

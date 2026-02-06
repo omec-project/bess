@@ -13,7 +13,6 @@
           - ca-certificates
           - build-essential
           - linux-headers-generic
-          - linux-headers-{{ansible_kernel}}
         state: latest
         update_cache: yes
       become: true

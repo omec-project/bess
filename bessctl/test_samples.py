@@ -72,9 +72,13 @@ class TestSamples(unittest.TestCase):
           (physical/virtual ports, docker, etc.) and do not run interactively.
     """
 
+    # Store dpdk_flag as class variable so it can be reused when restarting daemon
+    dpdk_flag = '--dpdk=false' if os.environ.get('BESS_DPDK_DISABLE') else ''
+
     @classmethod
     def setUpClass(cls):
-        run_cmd('%s daemon start' % bessctl)
+        # Use --dpdk=false to run without hugepages in CI environments
+        run_cmd('%s daemon start %s' % (bessctl, cls.dpdk_flag))
 
     @classmethod
     def tearDownClass(cls):
@@ -87,7 +91,7 @@ def generate_test_method(path):
             run_cmd('%s run file %s' % (bessctl, path))
         except CommandError:
             # bessd may have crashed. Relaunch for next tests.
-            run_cmd('%s daemon start' % bessctl)
+            run_cmd('%s daemon start %s' % (bessctl, TestSamples.dpdk_flag))
             raise
 
         # 0.5 seconds should be enough to detect packet leaks in the datapath.
@@ -99,7 +103,7 @@ def generate_test_method(path):
             run_cmd('%s daemon reset' % bessctl)
         except CommandError:
             # bessd may have crashed. Relaunch for next tests.
-            run_cmd('%s daemon start' % bessctl)
+            run_cmd('%s daemon start %s' % (bessctl, TestSamples.dpdk_flag))
             raise
 
     return template
