@@ -39,7 +39,7 @@
     - name: Enable huge pages
       ansible.posix.sysctl:
         name: vm.nr_hugepages
-        value: {{ num_nodes.stdout|int * 512 }}
+        value: "{{ num_nodes.stdout|int * 512 }}"
         sysctl_set: yes
       when: "{{ def_hugepage_size.stdout.find('2048 kB') != -1 }}"
       become: true
