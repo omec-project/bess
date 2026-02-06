@@ -185,8 +185,8 @@ typing-extensions==4.15.0 \
 
 # Additional testing/development tools
 codecov==2.1.13 \
-    --hash=sha256:2362b84dc1de2cd920c5423a2c6f28a970671b304f86bbed94b9bed1b687e509 \
-    --hash=sha256:e8b51bb9b8a193882226e96661c0c41750d84e2e83469b637fa0352d34169c70
+    --hash=sha256:c2ca5e51bba9ebb43644c43d0690148a55086f7f5e6fd36170858fa4206744d5 \
+    --hash=sha256:2362b685633caeaf45b9951a9b76ce359cd3581dd515b430c6c3f5dfb4d92a8c
 coverage==7.13.2 \
     --hash=sha256:f4af3b01763909f477ea17c962e2cca8f39b350a4e46e3a30838b2c12e31b81b \
     --hash=sha256:36393bd2841fa0b59498f75466ee9bdec4f770d3254f031f23e8fd8e140ffdd2 \
