@@ -68,6 +68,8 @@ HAS_PKG_CONFIG := $(shell command -v $(PKG_CONFIG) 2>&1 >/dev/null && echo yes |
 
 # We always want these libraries to be dynamically linked even when the
 # user requests a static build.
+# Note: -lgrpc and -lgpr are listed explicitly in addition to -lgrpc++
+# because newer gRPC installations no longer pull them in transitively
 ALWAYS_DYN_LIBS := -lpcap -lpthread -ldl -lgrpc++ -lgrpc -lgpr
 # These libraries are not supported by pkg-config.
 ALWAYS_LIBS := -lgflags -lnuma
