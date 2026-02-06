@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2022-Present Intel Corporation
 # Copyright 2025 Canonical Ltd.
+name: CI Build & Test Pipeline
+
 on:
   pull_request:
     branches:
