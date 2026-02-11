@@ -26,5 +26,5 @@ def get_pipeline():
         # NOTE: MessageToJson will convert 64-bit integers to strings!
         info_pb = app.bess.get_module_info(m_pb.name)
         modules[m_pb.name] = json.loads(
-            MessageToJson(info_pb, including_default_value_fields=True))
+            MessageToJson(info_pb, always_print_fields_with_no_presence=True))
     return jsonify(modules)
