@@ -25,3 +25,27 @@ jobs:
       attestations: write
     uses: omec-project/.github/.github/workflows/bess-release-image.yml@d2c362a98ad0cb4911ea762e25109f71f2301d9e # v0.0.12
     secrets: inherit
+
+  sbom-source:
+    needs: tag-github
+    permissions:
+      contents: read
+      actions: read
+    uses: omec-project/.github/.github/workflows/sbom-source.yml@d2c362a98ad0cb4911ea762e25109f71f2301d9e # v0.0.12
+    with:
+      changed: ${{ needs.tag-github.outputs.changed }}
+      branch_name: ${{ github.ref }}
+      artifact_name: ${{ github.event.repository.name }}-${{ needs.tag-github.outputs.version }}.spdx.json
+      sbom_format: spdx-json
+      path: .
+
+  grype-scan:
+    needs: [tag-github, sbom-source]
+    permissions:
+      contents: read
+      actions: read
+      security-events: write # Required for SARIF upload to Code Scanning
+    uses: omec-project/.github/.github/workflows/grype-scan.yml@d2c362a98ad0cb4911ea762e25109f71f2301d9e # v0.0.12
+    with:
+      changed: ${{ needs.tag-github.outputs.changed }}
+      artifact_name: ${{ github.event.repository.name }}-${{ needs.tag-github.outputs.version }}.spdx.json
