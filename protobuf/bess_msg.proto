@@ -167,7 +167,9 @@ message CheckSchedulingConstraintsResponse {
     int32 assigned_node = 3;
     int32 assigned_core = 4;
   }
-  message ViolatingModule { string name = 1; }
+  message ViolatingModule {
+    string name = 1;
+  }
   Error error = 1;
   bool fatal = 2;
   repeated ViolatingClass violations = 3;
