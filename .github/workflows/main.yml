@@ -33,10 +33,10 @@ jobs:
             exclude: ''       # Nothing to exclude
           - check: 'sample_plugin/protobuf'
             exclude: ''       # Nothing to exclude
-    uses: omec-project/.github/.github/workflows/check-clang-format.yml@d2c362a98ad0cb4911ea762e25109f71f2301d9e # v0.0.12
+    uses: omec-project/.github/.github/workflows/check-clang-format.yml@40ff5b9cd1d59e64caae6f30ed9ccbece3951ea6 # v0.0.17
     with:
       branch_name: ${{ github.ref }}
-      clang_format_version: '12'
+      clang_format_version: '14'
       check_path: ${{ matrix.path['check'] }}
       exclude_regex: ${{ matrix.path['exclude'] }}
 
