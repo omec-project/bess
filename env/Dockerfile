@@ -131,13 +131,9 @@ ENV PLUGINS_DIR=plugins
 
 WORKDIR /bess
 COPY . .
-RUN cp -a protobuf /protobuf
-
-# Build DPDK
-RUN ./build.py dpdk
-
-# Plugins: SequentialUpdate
-RUN mkdir -p plugins && \
+RUN cp -a protobuf /protobuf && \
+    ./build.py dpdk && \
+    mkdir -p plugins && \
     mv sample_plugin plugins
 
 # Build and copy artifacts
