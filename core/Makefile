@@ -100,7 +100,7 @@ endif
 # these headers.  Should fix the warnings.  Using -isystem also disables
 # -MMD dependency recording (should we use -MD?).
 COREDIR := $(abspath .)
-CPU ?= haswell
+CPU ?= native
 CXXFLAGS += -std=c++17 -g3 -ggdb3 -march=$(CPU) \
             -isystem $(COREDIR) \
             -isystem $(dir $<).. -isystem $(COREDIR)/modules \
