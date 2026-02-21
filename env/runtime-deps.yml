@@ -5,7 +5,9 @@
 # and host-based installations (via runtime.yml).
 
 - hosts: all
-  tags: runtime-deps
+  tags:
+    - runtime
+    - runtime-deps
   tasks:
     - name: Install runtime packages
       apt:

@@ -127,7 +127,7 @@ FROM bess-env AS bess-build
 
 ARG CPU=native
 ARG MAKEFLAGS
-ENV PLUGINS_DIR=plugins
+ENV CPU=${CPU} MAKEFLAGS=${MAKEFLAGS} PLUGINS_DIR=plugins
 
 WORKDIR /bess
 COPY . .
@@ -181,7 +181,7 @@ COPY --from=bess-build /usr/bin/cndpfwd /usr/bin/
 COPY --from=bess-build /usr/local/bin/protoc /usr/local/bin/
 
 # Copy only shared libraries (no static .a files, no headers)
-COPY --from=bess-build /usr/local/lib/x86_64-linux-gnu/*.so /usr/local/lib/x86_64-linux-gnu/
+COPY --from=bess-build /usr/local/lib/x86_64-linux-gnu/*.so* /usr/local/lib/x86_64-linux-gnu/
 COPY --from=bess-build /usr/local/lib/libproto*.so* /usr/local/lib/
 COPY --from=bess-build /usr/local/lib/libgrpc*.so* /usr/local/lib/
 COPY --from=bess-build /usr/local/lib/libgpr*.so* /usr/local/lib/
@@ -202,3 +202,7 @@ COPY --from=bess-build /usr/lib/x86_64-linux-gnu/libjson-c.so* /usr/lib/x86_64-l
 COPY --from=bess-build /usr/local/include/google/protobuf /usr/local/include/google/protobuf
 
 RUN ldconfig
+
+# Default target: build environment for container_build.py and local development.
+# Use --target bess-build-export for the slim pre-built image (used by UPF CI).
+FROM bess-env
