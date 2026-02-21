@@ -125,7 +125,7 @@ RUN ldconfig
 # BESS build stage: compile BESS and DPDK from source
 FROM bess-env AS bess-build
 
-ARG CPU=native
+ARG CPU=haswell
 ARG MAKEFLAGS
 ENV CPU=${CPU} MAKEFLAGS=${MAKEFLAGS} PLUGINS_DIR=plugins
 
