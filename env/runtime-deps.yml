@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: 2026, Intel Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# Runtime dependencies for BESS. Used by both the Docker export image
+# and host-based installations (via runtime.yml).
+
+- hosts: all
+  tags:
+    - runtime
+    - runtime-deps
+  tasks:
+    - name: Install runtime packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - python3
+          - python3-pip
+          - libgraph-easy-perl
+          - tcpdump
+          - libelf1
+          - libbsd0
+          - libjson-c5
+          - libnl-3-200
+          - libnl-cli-3-200
+          - libnl-route-3-200
+          - libnuma1
+          - libpcap0.8
+          - libunwind8
+          - liblzma5
+          - zlib1g
+          - libssl3
+          - libgflags2.2
+          - libgoogle-glog0v5
+          - libc-ares2
+          - libbpf0
+          - ethtool
+        update_cache: yes
+      become: true
+
+    - name: Install list of Python packages
+      pip:
+        requirements: "{{ playbook_dir }}/requirements-run.txt"
+        state: present
+        executable: pip3
+        extra_args: --require-hashes
+      become: true
