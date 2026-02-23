@@ -254,7 +254,8 @@ CommandResponse flow_create_one(dpdk_port_t port_id,
   actions[0].conf = &action_rss;
   actions[1].type = RTE_FLOW_ACTION_TYPE_END;
 
-  int ret = rte_flow_validate(port_id, &attributes, items.data(), actions, &err);
+  int ret =
+      rte_flow_validate(port_id, &attributes, items.data(), actions, &err);
   if (ret)
     return CommandFailure(EINVAL,
                           "Port %u: Failed to validate flow profile %u %s",
