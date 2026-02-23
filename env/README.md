@@ -28,24 +28,6 @@ to launch a VM. The current BESS directory is mapped to `/opt/bess` in the VM.
 You can connect to the VM with `vagrant ssh`. All compilers and libraries are
 readily available.
 
-## Building BESS without installing dependencies
-
-If you want to do something more serious than playing within a sandbox VM, but
-still without getting your hands dirty, you can use our Docker container to
-build BESS. The container is, similarly to the Vagrant VM, configured with all
-software packages required by BESS. With Docker available, just run (in the top
-directory):
-
-```sh
-$ ./container_build.py
-```
-
-then the script will automatically fetch the container image
-(registry.aetherproject.org/sdcore/bess_build) and build BESS inside the
-container. Since the BESS binary is mostly static-linked to external libraries,
-the binary built in the container should be readily runnable in the host as
-well.
-
 ## Ansible scripts
 
 If you plan to build BESS from source and test it without using a VM or
