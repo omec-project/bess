@@ -19,7 +19,6 @@
     - name: Install additional compilers for the build container
       apt:
         name:
-          - g++
           - clang
           - ccache
         update_cache: yes
