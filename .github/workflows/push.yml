@@ -8,9 +8,15 @@ on:
     branches:
       - main
     paths:
+      - "core/**"
+      - "bessctl/**"
+      - "protobuf/**"
+      - "pybess/**"
+      - "deps/**"
       - "env/Dockerfile"
       - "env/*.yml"
       - "env/requirements*.txt"
+      - "build.py"
 
 permissions:
   contents: read

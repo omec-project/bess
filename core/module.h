@@ -267,22 +267,6 @@ class alignas(64) Module {
   // Process OGate hooks and forward packet batches into next modules.
   inline void ProcessOGates(Context *ctx);
 
-  /*
-   * Split a batch into several, one for each ogate
-   * NOTE:
-   *   1. Order is preserved for packets with the same gate.
-   *   2. No ordering guarantee for packets with different gates.
-   *
-   * Update on 11/27/2017, by Shinae Woo
-   * This interface will become DEPRECATED.
-   * Consider using new interfafces supporting faster data-plane support
-   * DropPacket()/EmitPacket()
-   * */
-  [[deprecated(
-      "use the new API EmitPacket()/DropPacket() instead")]] inline void
-  RunSplit(Context *ctx, const gate_idx_t *ogates,
-           bess::PacketBatch *mixed_batch);
-
   // Register a task.
   task_id_t RegisterTask(void *arg);
 
@@ -617,27 +601,6 @@ inline void Module::ProcessOGates(Context *ctx) {
 
   ctx->gate_with_hook_cnt = 0;
   ctx->gate_without_hook_cnt = 0;
-}
-
-inline void Module::RunSplit(Context *ctx, const gate_idx_t *out_gates,
-                             bess::PacketBatch *mixed_batch) {
-  int pkt_cnt = mixed_batch->cnt();
-  if (unlikely(pkt_cnt <= 0)) {
-    return;
-  }
-
-  int gate_cnt = ogates_.size();
-  if (unlikely(gate_cnt <= 0)) {
-    deadends_[ctx->wid] += mixed_batch->cnt();
-    deadend(ctx, mixed_batch);
-    return;
-  }
-
-  for (int i = 0; i < pkt_cnt; i++) {
-    EmitPacket(ctx, mixed_batch->pkts()[i], out_gates[i]);
-  }
-
-  mixed_batch->clear();
 }
 
 // run all per-thread initializers

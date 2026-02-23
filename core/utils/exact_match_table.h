@@ -293,10 +293,10 @@ class ExactMatchTable {
   uint64_t Find(ExactMatchKey *keys, T **vals, int n) {
     const auto &table = table_;
     uint64_t hit_mask = 0;
-    ExactMatchKey *key_ptr[n];
+    std::vector<ExactMatchKey *> key_ptr(n);
     for (int h = 0; h < n; h++)
       key_ptr[h] = &keys[h];
-    table->lookup_bulk_data((const void **)&key_ptr, n, &hit_mask,
+    table->lookup_bulk_data((const void **)key_ptr.data(), n, &hit_mask,
                             (void **)vals);
     return hit_mask;
   }

@@ -32,6 +32,8 @@
 
 #include "pmd.h"
 
+#include <vector>
+
 #include <bus_driver.h>
 #include <bus_pci_driver.h>
 #include <rte_bus.h>
@@ -222,8 +224,8 @@ CommandResponse flow_create_one(dpdk_port_t port_id,
                                 const uint32_t &flow_profile, int size,
                                 uint64_t rss_types,
                                 rte_flow_item_type *pattern) {
-  struct rte_flow_item items[size];
-  memset(items, 0, sizeof(items));
+  std::vector<struct rte_flow_item> items(size);
+  memset(items.data(), 0, items.size() * sizeof(items[0]));
 
   for (int i = 0; i < size; i++) {
     items[i].type = pattern[i];
@@ -252,13 +254,13 @@ CommandResponse flow_create_one(dpdk_port_t port_id,
   actions[0].conf = &action_rss;
   actions[1].type = RTE_FLOW_ACTION_TYPE_END;
 
-  int ret = rte_flow_validate(port_id, &attributes, items, actions, &err);
+  int ret = rte_flow_validate(port_id, &attributes, items.data(), actions, &err);
   if (ret)
     return CommandFailure(EINVAL,
                           "Port %u: Failed to validate flow profile %u %s",
                           port_id, flow_profile, err.message);
 
-  handle = rte_flow_create(port_id, &attributes, items, actions, &err);
+  handle = rte_flow_create(port_id, &attributes, items.data(), actions, &err);
   if (handle == nullptr)
     return CommandFailure(EINVAL, "Port %u: Failed to create flow %s", port_id,
                           err.message);

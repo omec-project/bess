@@ -41,12 +41,12 @@ struct value {
   struct rte_meter_trtcm_profile p;
   struct rte_meter_trtcm m;
   MeteringKey Data;
-} __attribute__((packed));
+};
 
 struct MKey {
   uint8_t key1;
   uint8_t key2;
-} __attribute__((packed));
+};
 
 class Qos final : public Module {
  public:

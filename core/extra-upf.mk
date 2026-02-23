@@ -6,8 +6,7 @@
 # 			-fno-strict-overflow -fno-delete-null-pointer-checks -fwrapv
 
 # Updated flags
-CXXFLAGS += -Wno-address-of-packed-member -Wno-deprecated-copy -Wno-cast-align \
-			-Wno-deprecated-declarations
+CXXFLAGS += -Wno-deprecated-copy -Wno-cast-align
 
 # Enable flag for clang++ / This flag is unknown by g++
 ifneq "$(shell expr $(CXXCOMPILER) = g++)" "1"

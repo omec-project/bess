@@ -49,7 +49,7 @@ using Error = std::pair<int, std::string>;
 
 struct MeteringKey {
   uint64_t u64_arr[MAX_FIELDS];
-} __attribute__((packed));
+};
 
 // Equality operator for two MeteringKeys
 class MeteringKeyEq {
@@ -153,10 +153,10 @@ class Metering {
     uint64_t hit_mask = 0;
 
     const auto &table = table_;
-    MeteringKey *key_ptr[n];
+    std::vector<MeteringKey *> key_ptr(n);
     for (int h = 0; h < n; h++)
       key_ptr[h] = &keys[h];
-    table->lookup_bulk_data((const void **)&key_ptr, n, &hit_mask,
+    table->lookup_bulk_data((const void **)key_ptr.data(), n, &hit_mask,
                             (void **)vals);
 
     return hit_mask;
