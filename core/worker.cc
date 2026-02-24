@@ -42,6 +42,7 @@
 
 #include <cassert>
 #include <climits>
+#include <cstring>
 #include <list>
 #include <string>
 #include <utility>
@@ -335,7 +336,9 @@ void *Worker::Run(void *_arg) {
 }
 
 void *run_worker(void *_arg) {
-  CHECK_EQ(memcmp(&current_worker, new Worker(), sizeof(Worker)), 0);
+  // Explicitly zero-initialize the thread-local Worker rather than asserting
+  // TLS zero-initialization, which is not guaranteed on all toolchains.
+  memset(&current_worker, 0, sizeof(Worker));
   return current_worker.Run(_arg);
 }
 

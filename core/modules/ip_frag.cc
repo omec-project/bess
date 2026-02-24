@@ -33,7 +33,7 @@ const Commands IPFrag::cmds = {{"get_eth_mtu", "EmptyArg",
  */
 bess::Packet *IPFrag::FragmentPkt(Context *ctx, bess::Packet *p) {
   struct rte_ether_hdr *ethh =
-      (struct rte_ether_hdr *)(p->head_data<Ethernet *>());
+      reinterpret_cast<struct rte_ether_hdr *>(p->head_data<char *>());
   struct rte_ipv4_hdr *iph =
       (struct rte_ipv4_hdr *)((unsigned char *)ethh +
                               sizeof(struct rte_ether_hdr));

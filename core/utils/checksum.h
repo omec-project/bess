@@ -209,6 +209,11 @@ static inline bool VerifyGenericChecksum(const void *buf, size_t len) {
   return VerifyGenericChecksum(buf, len, 0);
 }
 
+// Suppress warning for packed struct pointer casts; these are safe on x86
+// where unaligned access is supported and this inline assembly targets.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Waddress-of-packed-member"
+
 // Returns true if the IP checksum is correct
 static inline bool VerifyIpv4NoOptChecksum(const Ipv4 &iph) {
   const uint32_t *buf32 =
@@ -487,6 +492,8 @@ static inline uint16_t CalculateIpv4TcpChecksum(const Tcp &tcph, be32_t src,
 
   return FoldChecksum(sum);
 }
+
+#pragma GCC diagnostic pop
 
 // Returns TCP (on IPv4) checksum of the tcp header 'tcph' with ip header 'iph'
 // It skips the checksum field into the calculation
