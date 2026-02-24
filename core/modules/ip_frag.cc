@@ -32,8 +32,8 @@ const Commands IPFrag::cmds = {{"get_eth_mtu", "EmptyArg",
  * needs to be freed up. Returns Packet ptr if the packet size < MTU
  */
 bess::Packet *IPFrag::FragmentPkt(Context *ctx, bess::Packet *p) {
-  struct rte_ether_hdr *ethh =
-      reinterpret_cast<struct rte_ether_hdr *>(p->head_data<char *>());
+  struct rte_ether_hdr *ethh = static_cast<struct rte_ether_hdr *>(
+      static_cast<void *>(p->head_data<char *>()));
   struct rte_ipv4_hdr *iph =
       (struct rte_ipv4_hdr *)((unsigned char *)ethh +
                               sizeof(struct rte_ether_hdr));
