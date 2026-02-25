@@ -29,8 +29,8 @@ jobs:
               - 'protobuf/**'
               - 'build.py'
               - 'deps/**'
-              - 'env/**'
-              - '!env/Dockerfile'
+              - 'env/*.yml'
+              - 'env/*.txt'
               - 'sample_plugin/**'
 
   build:
