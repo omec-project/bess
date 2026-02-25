@@ -6,9 +6,9 @@
 # Go build stage: compile the CNDP Prometheus metrics exporter
 FROM golang:1.26.0-bookworm@sha256:eae3cdfa040d0786510a5959d36a836978724d03b34a166ba2e0e198baac9196 AS prometheus-build
 RUN git clone --depth 1 --branch v24.07.0 \
-      https://github.com/CloudNativeDataPlane/cndp.git /tmp/cndp && \
-    cd /tmp/cndp/lang/go/stats/prometheus && \
-    go build -o /prometheus prometheus.go
+      https://github.com/CloudNativeDataPlane/cndp.git /tmp/cndp
+WORKDIR /tmp/cndp/lang/go/stats/prometheus
+RUN go build -o /prometheus prometheus.go
 
 # Build stage: Install all build dependencies and compile from source
 FROM ubuntu:24.04@sha256:d1e2e92c075e5ca139d51a140fff46f84315c0fdce203eab2807c7e495eff4f9 AS builder
@@ -64,6 +64,7 @@ RUN PLUGINS=$(find "$PLUGINS_DIR" -mindepth 1 -maxdepth 1 -type d) && \
 # Collect only the shared libraries needed at runtime into a staging directory.
 # ldd finds direct/transitive deps of bessd; we also include DPDK PMD drivers
 # (loaded via dlopen at runtime, invisible to ldd) and DPDK bus/mempool drivers.
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN mkdir -p /staging/lib && \
     for lib in $(ldd /bin/bessd 2>/dev/null | grep '/usr/local/lib' | awk '{print $3}'); do \
       cp -a "${lib}"* /staging/lib/ 2>/dev/null || true; \
