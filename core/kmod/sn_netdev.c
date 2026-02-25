@@ -42,6 +42,19 @@
 #endif
 #endif
 
+/*
+ * The `fallthrough` macro was added in kernel 5.4 via
+ * <linux/compiler_attributes.h>.  Provide a fallback for older kernels so the
+ * code compiles cleanly with -Wimplicit-fallthrough on both old and new trees.
+ */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,4,0) && !defined(fallthrough)
+#if __has_attribute(__fallthrough__)
+#define fallthrough __attribute__((__fallthrough__))
+#else
+#define fallthrough do {} while (0)  /* fallback */
+#endif
+#endif
+
 /* disable for now, since it is not tested with new vport implementation */
 #undef CONFIG_NET_RX_BUSY_POLL
 

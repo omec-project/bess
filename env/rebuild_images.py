@@ -46,7 +46,7 @@ TARGET = "bess_build"
 FULL_TARGET = TARGET_REGISTRY + TARGET_REPOSITORY + TARGET
 
 imgs = {
-    'noble64': {'base': 'ubuntu:noble', 'tag_suffix': ''},
+    'noble64': {'tag_suffix': ''},
 }
 
 

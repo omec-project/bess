@@ -113,4 +113,7 @@ COPY --from=bess-build /staging/lib/ /usr/local/lib/x86_64-linux-gnu/
 # Copy protobuf include files needed by protoc (system package path)
 COPY --from=bess-build /usr/include/google/protobuf /usr/local/include/google/protobuf
 
-RUN ldconfig
+# Ensure the dynamic linker can find libraries in /usr/local/lib/x86_64-linux-gnu
+RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/usr-local.conf && \
+    echo "/usr/local/lib/x86_64-linux-gnu" >> /etc/ld.so.conf.d/usr-local.conf && \
+    ldconfig

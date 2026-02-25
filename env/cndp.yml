@@ -59,13 +59,19 @@
           args:
             creates: /usr/local/lib/x86_64-linux-gnu/libcndp.so
 
+        - name: Check if Go is installed
+          command: which go
+          register: go_installed
+          changed_when: false
+          failed_when: false
+
         - name: Build prometheus-metrics app (skipped when golang is not installed)
           shell: |
             cd /tmp/cndp/lang/go/stats/prometheus
             go build -o /usr/local/bin/prometheus prometheus.go
           args:
             creates: /usr/local/bin/prometheus
-          when: ansible_facts.packages is defined and 'golang' in ansible_facts.packages
+          when: go_installed.rc == 0
           ignore_errors: true
 
         - name: Run ldconfig after CNDP installation
