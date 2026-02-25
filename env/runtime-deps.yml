@@ -18,22 +18,27 @@
           - python3-pip
           - libgraph-easy-perl
           - tcpdump
-          - libelf1
+          - libatomic1
+          - libbpf1
           - libbsd0
+          - libc-ares2
+          - libelf1
+          - libfdt1
+          - libipsec-mb1
+          - libgflags2.2
+          - libgoogle-glog0v6
+          - libgrpc++1.51t64
           - libjson-c5
+          - libmlx5-1
           - libnl-3-200
           - libnl-cli-3-200
           - libnl-route-3-200
           - libnuma1
           - libpcap0.8
-          - libunwind8
-          - liblzma5
-          - zlib1g
+          - libprotobuf32t64
           - libssl3
-          - libgflags2.2
-          - libgoogle-glog0v5
-          - libc-ares2
-          - libbpf0
+          - libunwind8
+          - libxdp1
           - ethtool
         update_cache: yes
       become: true
@@ -43,5 +48,5 @@
         requirements: "{{ playbook_dir }}/requirements-run.txt"
         state: present
         executable: pip3
-        extra_args: --require-hashes
+        extra_args: --require-hashes --break-system-packages
       become: true

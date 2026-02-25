@@ -88,27 +88,27 @@ void GtpuEncap::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
     bess::Packet *p = batch->pkts()[i];
 
     /* check attributes' values now */
-    uint8_t at_pdu_type;
+    uint8_t at_pdu_type = 0;
     bess::metadata::mt_offset_t off = attr_offset(pdu_type_attr);
     at_pdu_type = get_attr_with_offset<uint8_t>(off, p);
 
-    uint8_t at_qfi;
+    uint8_t at_qfi = 0;
     off = attr_offset(qfi_attr);
     at_qfi = get_attr_with_offset<uint8_t>(off, p);
 
-    uint32_t at_tout_sip;
+    uint32_t at_tout_sip = 0;
     off = attr_offset(tout_sip_attr);
     at_tout_sip = get_attr_with_offset<uint32_t>(off, p);
 
-    uint32_t at_tout_dip;
+    uint32_t at_tout_dip = 0;
     off = attr_offset(tout_dip_attr);
     at_tout_dip = get_attr_with_offset<uint32_t>(off, p);
 
-    uint32_t at_tout_teid;
+    uint32_t at_tout_teid = 0;
     off = attr_offset(tout_teid);
     at_tout_teid = get_attr_with_offset<uint32_t>(off, p);
 
-    uint16_t at_tout_uport;
+    uint16_t at_tout_uport = 0;
     off = attr_offset(tout_uport);
     at_tout_uport = get_attr_with_offset<uint16_t>(off, p);
 

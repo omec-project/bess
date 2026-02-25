@@ -46,8 +46,7 @@ TARGET = "bess_build"
 FULL_TARGET = TARGET_REGISTRY + TARGET_REPOSITORY + TARGET
 
 imgs = {
-    'focal64': {'base': 'ubuntu:focal', 'tag_suffix': ''},
-    'jammy64': {'base': 'ubuntu:jammy', 'tag_suffix': ''},
+    'noble64': {'base': 'ubuntu:noble', 'tag_suffix': ''},
 }
 
 
@@ -63,16 +62,12 @@ def run_cmd(cmd, shell=False):
 
 
 def build(env):
-    base = imgs[env]['base']
     tag_suffix = imgs[env]['tag_suffix']
-    bess_dpdk_branch = os.getenv('BESS_DPDK_BRANCH', 'main')
     version = time.strftime('%y%m%d')
 
     run_cmd('docker build -f env/Dockerfile '
-            '--build-arg BASE_IMAGE={base} '
-            '--build-arg BESS_DPDK_BRANCH={branch} '
             '-t {target}:latest{suffix} -t {target}:{version}{suffix} '
-            '.'.format(base=base, branch=bess_dpdk_branch, target=FULL_TARGET,
+            '.'.format(target=FULL_TARGET,
                        version=version, suffix=tag_suffix))
 
     print('Build succeeded: {}:{}{}'.format(FULL_TARGET, version, tag_suffix))

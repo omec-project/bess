@@ -75,9 +75,7 @@ def main():
 
     any_failure = 0
 
-    # Use --dpdk=false to run without hugepages in CI environments
-    dpdk_flag = '--dpdk=false' if os.environ.get('BESS_DPDK_DISABLE') else ''
-    daemon_start_cmd = '%s daemon start -m 0 %s' % (bessctl, dpdk_flag)
+    daemon_start_cmd = '%s daemon start' % bessctl
 
     try:
         run_cmd(daemon_start_cmd)

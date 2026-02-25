@@ -52,13 +52,13 @@ class BessReplicateTest(BessModuleTestCase):
 
         pkt_outs = self.run_module(rep3, 0, [pkt_in], [0, 1, 2])
 
-        self.assertEquals(len(pkt_outs[0]), 1)
+        self.assertEqual(len(pkt_outs[0]), 1)
         self.assertSamePackets(pkt_outs[0][0], pkt_in)
 
-        self.assertEquals(len(pkt_outs[1]), 1)
+        self.assertEqual(len(pkt_outs[1]), 1)
         self.assertSamePackets(pkt_outs[1][0], pkt_in)
 
-        self.assertEquals(len(pkt_outs[2]), 1)
+        self.assertEqual(len(pkt_outs[2]), 1)
         self.assertSamePackets(pkt_outs[2][0], pkt_in)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(BessReplicateTest)

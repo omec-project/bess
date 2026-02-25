@@ -67,11 +67,11 @@ class BessBpfTest(BessModuleTestCase):
                               sport=92)
 
         pkt_outs = self.run_module(bpf, 0, [pkt1], [0])
-        self.assertEquals(len(pkt_outs[0]), 1)
+        self.assertEqual(len(pkt_outs[0]), 1)
         self.assertSamePackets(pkt_outs[0][0], pkt1)
 
         pkt_outs = self.run_module(bpf, 0, [pkt2], [1])
-        self.assertEquals(len(pkt_outs[1]), 1)
+        self.assertEqual(len(pkt_outs[1]), 1)
         self.assertSamePackets(pkt_outs[1][0], pkt2)
 
     # Test multiple rules with priorities
@@ -90,15 +90,15 @@ class BessBpfTest(BessModuleTestCase):
                               sport=700)
 
         pkt_outs = self.run_module(bpf, 0, [pkt3], [0])
-        self.assertEquals(len(pkt_outs[0]), 1)
+        self.assertEqual(len(pkt_outs[0]), 1)
         self.assertSamePackets(pkt_outs[0][0], pkt3)
 
         pkt_outs = self.run_module(bpf, 0, [pkt2], [1])
-        self.assertEquals(len(pkt_outs[1]), 1)
+        self.assertEqual(len(pkt_outs[1]), 1)
         self.assertSamePackets(pkt_outs[1][0], pkt2)
 
         pkt_outs = self.run_module(bpf, 0, [pkt1], [2])
-        self.assertEquals(len(pkt_outs[2]), 1)
+        self.assertEqual(len(pkt_outs[2]), 1)
         self.assertSamePackets(pkt_outs[2][0], pkt1)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(BessBpfTest)

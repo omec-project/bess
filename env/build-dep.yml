@@ -6,27 +6,42 @@
 - hosts: all
   tags: build-dep
   tasks:
-    - name: Install APT prerequisite packages
+    - name: Install APT build dependencies
       apt:
         name:
           - apt-transport-https
           - ca-certificates
+          - cmake
+          - curl
           - g++
-          - make
-          - libunwind8-dev
-          - liblzma-dev
-          - zlib1g-dev
-          - libpcap-dev
-          - libssl-dev
-          - libnuma-dev
+          - git
+          - libbenchmark-dev
+          - libbsd-dev
+          - libc-ares-dev
+          - libfdt-dev
           - libgflags-dev
           - libgoogle-glog-dev
+          - libgrpc++-dev
           - libgtest-dev
+          - libipsec-mb-dev
+          - liblzma-dev
+          - libnuma-dev
+          - libpcap-dev
+          - libprotobuf-dev
+          - libssl-dev
+          - libunwind-dev
+          - make
+          - meson
+          - ninja-build
+          - pkg-config
+          - protobuf-compiler
+          - protobuf-compiler-grpc
           - python3
           - python3-apt
           - python3-pip
-          - pkg-config
+          - python3-pyelftools
           - sudo
+          - zlib1g-dev
         update_cache: yes
       become: true
 
@@ -35,147 +50,14 @@
       pip:
         requirements: "{{ playbook_dir }}/requirements-dev.txt"
         executable: pip3
-        extra_args: --require-hashes
-
-    - name: Install gRPC and protobuf build dependencies (apt)
-      apt:
-        name:
-          - libc-ares-dev
-          - libbenchmark-dev
-          - unzip
-          - autoconf
-          - automake
-          - libtool
-          - curl
-          - cmake
-          - git
-      become: true
+        extra_args: --require-hashes --break-system-packages --ignore-installed
 
     - name: Configure dynamic linker for /usr/local/lib
       become: true
       shell: |
         echo "/usr/local/lib" > /etc/ld.so.conf.d/usr-local.conf
+        echo "/usr/local/lib/x86_64-linux-gnu" >> /etc/ld.so.conf.d/usr-local.conf
         ldconfig
-
-    - name: Install abseil-cpp (required for protobuf 28.3)
-      become: true
-      block:
-        - name: Clone abseil-cpp repository
-          git:
-            repo: https://github.com/abseil/abseil-cpp.git
-            dest: /tmp/abseil-cpp
-            version: '20240722.0'
-            depth: 1
-
-        - name: Build and install abseil-cpp
-          shell: |
-            cd /tmp/abseil-cpp
-            cmake -DCMAKE_CXX_STANDARD=17 \
-                  -DCMAKE_INSTALL_PREFIX=/usr/local \
-                  -DABSL_BUILD_TESTING=OFF \
-                  -DABSL_ENABLE_INSTALL=ON \
-                  -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-                  -B build
-            cmake --build build -j$(nproc)
-            cmake --install build
-          args:
-            creates: /usr/local/lib/libabsl_base.a
-
-        - name: Run ldconfig after abseil installation
-          shell: ldconfig
-
-        - name: Remove abseil-cpp source
-          file:
-            path: /tmp/abseil-cpp
-            state: absent
-
-    - name: Install protobuf 28.3 (compiler and libraries, compatible with Python 6.33.5)
-      become: true
-      block:
-        - name: Download protobuf 28.3 source
-          get_url:
-            url: https://github.com/protocolbuffers/protobuf/releases/download/v28.3/protobuf-28.3.tar.gz
-            dest: /tmp/protobuf-28.3.tar.gz
-            mode: '0644'
-
-        - name: Extract protobuf source
-          shell: |
-            cd /tmp
-            tar -xzf protobuf-28.3.tar.gz
-          args:
-            creates: /tmp/protobuf-28.3
-
-        - name: Build and install protobuf 28.3
-          shell: |
-            cd /tmp/protobuf-28.3
-            cmake -DCMAKE_CXX_STANDARD=17 \
-                  -DCMAKE_INSTALL_PREFIX=/usr/local \
-                  -Dprotobuf_BUILD_TESTS=OFF \
-                  -Dprotobuf_ABSL_PROVIDER=package \
-                  -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-                  -B build
-            cmake --build build -j$(nproc)
-            cmake --install build
-          args:
-            creates: /usr/local/lib/libprotobuf.so
-
-        - name: Run ldconfig after protobuf installation
-          shell: ldconfig
-
-        - name: Remove protobuf source files
-          file:
-            path: "{{ item }}"
-            state: absent
-          loop:
-            - /tmp/protobuf-28.3.tar.gz
-            - /tmp/protobuf-28.3
-
-    - name: Install gRPC from source (compatible with protobuf 28.x)
-      become: true
-      block:
-        - name: Clone gRPC repository
-          git:
-            repo: https://github.com/grpc/grpc.git
-            dest: /tmp/grpc
-            version: v1.68.1
-            depth: 1
-            recursive: yes
-
-        - name: Build and install gRPC
-          shell: |
-            cd /tmp/grpc
-            mkdir -p build && cd build
-            cmake -DCMAKE_BUILD_TYPE=Release \
-                  -DCMAKE_INSTALL_PREFIX=/usr/local \
-                  -DgRPC_INSTALL=ON \
-                  -DgRPC_BUILD_TESTS=OFF \
-                  -DgRPC_PROTOBUF_PROVIDER=package \
-                  -DgRPC_ABSL_PROVIDER=package \
-                  -DgRPC_CARES_PROVIDER=package \
-                  -DgRPC_SSL_PROVIDER=package \
-                  -DgRPC_RE2_PROVIDER=module \
-                  -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-                  -DBUILD_SHARED_LIBS=ON \
-                  ..
-            make -j$(nproc)
-            make install
-
-        - name: Run ldconfig after gRPC installation
-          shell: ldconfig
-
-        - name: Verify gRPC installation and pkg-config
-          shell: |
-            test -f /usr/local/lib/libgrpc.so || exit 1
-            test -f /usr/local/lib/libgrpc++.so || exit 1
-            test -f /usr/local/lib/libgpr.so || exit 1
-            export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
-            pkg-config --cflags --libs grpc++ || echo "Warning: grpc++ pkg-config not found"
-            ldconfig -p | grep grpc
-
-        - name: Remove gRPC source files
-          file:
-            path: /tmp/grpc
-            state: absent
 
     - name: Verify protoc installation
       command: protoc --version

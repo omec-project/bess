@@ -56,7 +56,7 @@ class BessArpTest(BessModuleTestCase):
         arp_reply[scapy.ARP].psrc = '1.2.3.4'
 
         pkt_outs = self.run_module(arp, 0, [arp_req], [0])
-        self.assertEquals(len(pkt_outs[0]), 1)
+        self.assertEqual(len(pkt_outs[0]), 1)
         self.assertSamePackets(pkt_outs[0][0], arp_reply)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(BessArpTest)

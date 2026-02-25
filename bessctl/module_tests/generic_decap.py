@@ -57,7 +57,7 @@ class BessDecapTest(BessModuleTestCase):
         pkt_expected_out = ip / udp / payload
 
         pkt_outs = self.run_module(gd, 0, [pkt_in], [0])
-        self.assertEquals(len(pkt_outs[0]), 1)
+        self.assertEqual(len(pkt_outs[0]), 1)
         self.assertSamePackets(pkt_outs[0][0], pkt_expected_out)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(BessDecapTest)

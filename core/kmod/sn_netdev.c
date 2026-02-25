@@ -279,7 +279,7 @@ static void sn_process_rx_metadata(struct sk_buff *skb,
 		/* without this the upper layer won't respect skb->ip_summed */
 		skb->encapsulation = 1;
 #endif
-		/* fall through */
+		fallthrough;
 	case SN_RX_CSUM_CORRECT:
 		skb->ip_summed = CHECKSUM_UNNECESSARY;
 		break;
@@ -558,7 +558,7 @@ skip_send:
 	switch (ret) {
 	case NET_XMIT_CN:
 		queue->tx.stats.throttled++;
-		/* fall through */
+		fallthrough;
 	case NET_XMIT_SUCCESS:
 		queue->tx.stats.packets++;
 		queue->tx.stats.bytes += skb->len;
@@ -713,7 +713,12 @@ static void sn_set_offloads(struct net_device *netdev)
 	/* We prevent this interface from moving around namespaces.
 	 * This is to work around race between device unregister and namespace
 	 * cleanup. Revise this after adopting rtnl link based design */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,12,0)
+	netdev->netns_local = true;
+	netdev->features = netdev->hw_features;
+#else
 	netdev->features = netdev->hw_features | NETIF_F_NETNS_LOCAL;
+#endif
 }
 
 static void sn_set_default_queue_mapping(struct sn_device *dev)
@@ -831,7 +836,11 @@ int sn_create_netdev(void *bar, struct sn_device **dev_ret)
 	netdev->netdev_ops = &sn_netdev_ops;
 	netdev->ethtool_ops = &sn_ethtool_ops;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,15,0)
+	dev_addr_set(netdev, (const u8 *)conf->mac_addr);
+#else
 	memcpy(netdev->dev_addr, (void *)conf->mac_addr, ETH_ALEN);
+#endif
 
 	ret = sn_alloc_queues(dev, conf + 1,
 			conf->bar_size - sizeof(struct sn_conf_space),

@@ -29,29 +29,20 @@ jobs:
       actions: read
       id-token: write
       attestations: write
-    uses: omec-project/.github/.github/workflows/bess-release-image.yml@40ff5b9cd1d59e64caae6f30ed9ccbece3951ea6 # v0.0.17
-    secrets: inherit
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'omec-project'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-  # sbom-source:
-  #   needs: tag-github
-  #   permissions:
-  #     contents: read
-  #     actions: read
-  #   uses: omec-project/.github/.github/workflows/sbom-source.yml@40ff5b9cd1d59e64caae6f30ed9ccbece3951ea6 # v0.0.17
-  #   with:
-  #     changed: ${{ needs.tag-github.outputs.changed }}
-  #     branch_name: ${{ github.ref }}
-  #     artifact_name: ${{ github.event.repository.name }}-${{ needs.tag-github.outputs.version }}.spdx.json
-  #     sbom_format: spdx-json
-  #     path: .
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: "ghcr.io"
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-  # grype-scan:
-  #   needs: [tag-github, sbom-source]
-  #   permissions:
-  #     contents: read
-  #     actions: read
-  #     security-events: write # Required for SARIF upload to Code Scanning
-  #   uses: omec-project/.github/.github/workflows/grype-scan.yml@40ff5b9cd1d59e64caae6f30ed9ccbece3951ea6 # v0.0.17
-  #   with:
-  #     changed: ${{ needs.tag-github.outputs.changed }}
-  #     artifact_name: ${{ github.event.repository.name }}-${{ needs.tag-github.outputs.version }}.spdx.json
+      - name: Build and Push to GitHub Container Registry
+        env:
+          DOCKER_REGISTRY: "ghcr.io/"
+          DOCKER_REPOSITORY: ${{ github.repository_owner }}/
+        run: yes y | ./env/rebuild_images.py noble64

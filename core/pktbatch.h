@@ -55,8 +55,10 @@ class PacketBatch {
   // we want maximum GOFAST.
   void add(Packet *pkt) { pkts_[cnt_++] = pkt; }
   void add(PacketBatch *batch) {
-    bess::utils::CopyInlined(pkts_ + cnt_, batch->pkts(),
-                             batch->cnt() * sizeof(Packet *));
+    if (batch->cnt() > 0) {
+      bess::utils::CopyInlined(pkts_ + cnt_, batch->pkts(),
+                               batch->cnt() * sizeof(Packet *));
+    }
     cnt_ += batch->cnt();
   }
 
@@ -66,7 +68,9 @@ class PacketBatch {
 
   void Copy(const PacketBatch *src) {
     cnt_ = src->cnt_;
-    bess::utils::CopyInlined(pkts_, src->pkts_, cnt_ * sizeof(Packet *));
+    if (cnt_ > 0) {
+      bess::utils::CopyInlined(pkts_, src->pkts_, cnt_ * sizeof(Packet *));
+    }
   }
 
   inline static const size_t kMaxBurst = 64;

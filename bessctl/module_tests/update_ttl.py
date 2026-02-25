@@ -47,7 +47,7 @@ class BessUpdateTTLTest(BessModuleTestCase):
         pkt_expected_out[scapy.IP].ttl = 1
 
         pkt_outs = self.run_module(uttl, 0, [pkt_in], [0])
-        self.assertEquals(len(pkt_outs[0]), 1)
+        self.assertEqual(len(pkt_outs[0]), 1)
         self.assertSamePackets(pkt_outs[0][0], pkt_expected_out)
 
     def test_drop(self):
@@ -65,14 +65,14 @@ class BessUpdateTTLTest(BessModuleTestCase):
         drop_pkt1[scapy.IP].ttl = 1
 
         pkt_outs = self.run_module(uttl, 0, [drop_pkt0], [0])
-        self.assertEquals(len(pkt_outs[0]), 0)
+        self.assertEqual(len(pkt_outs[0]), 0)
 
         pkt_outs = self.run_module(uttl, 0, [pkt_in], [0])
-        self.assertEquals(len(pkt_outs[0]), 1)
+        self.assertEqual(len(pkt_outs[0]), 1)
         self.assertSamePackets(pkt_outs[0][0], pkt_expected_out)
 
         pkt_outs = self.run_module(uttl, 0, [drop_pkt1], [0])
-        self.assertEquals(len(pkt_outs[0]), 0)
+        self.assertEqual(len(pkt_outs[0]), 0)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(BessUpdateTTLTest)
 results = unittest.TextTestRunner(verbosity=2).run(suite)

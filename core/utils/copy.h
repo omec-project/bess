@@ -66,6 +66,10 @@ static inline void CopySmall(void *__restrict__ dst,
                              const void *__restrict__ src, size_t bytes) {
   DCHECK_LE(bytes, 64);
 
+  if (bytes == 0) {
+    return;
+  }
+
   auto *d = reinterpret_cast<char *__restrict__>(dst);
   auto *s = reinterpret_cast<const char *__restrict__>(src);
 
@@ -144,6 +148,10 @@ static inline void CopySmall(void *__restrict__ dst,
 static inline void CopyInlined(void *__restrict__ dst,
                                const void *__restrict__ src, size_t bytes,
                                bool sloppy = false) {
+  if (bytes == 0) {
+    return;
+  }
+
 #if __AVX2__
   using block_t = __m256i;
   auto copy_block = [](void *__restrict__ d, const void *__restrict__ s) {

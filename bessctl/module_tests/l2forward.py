@@ -44,7 +44,7 @@ class BessL2ForwardTest(BessModuleTestCase):
             l2fib.add(entries=[{'addr': '00:01:02:03:04:05', 'gate': 0}])
 
         ret = l2fib.lookup(addrs=['aa:bb:cc:dd:ee:ff', '00:01:02:03:04:05'])
-        self.assertEquals(ret.gates, [1, 64])
+        self.assertEqual(ret.gates, [1, 64])
 
         l2fib.delete(addrs=['00:01:02:03:04:05'])
         with self.assertRaises(bess.Error):

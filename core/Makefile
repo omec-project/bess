@@ -70,7 +70,7 @@ HAS_PKG_CONFIG := $(shell command -v $(PKG_CONFIG) 2>&1 >/dev/null && echo yes |
 # user requests a static build.
 # Note: -lgrpc and -lgpr are listed explicitly in addition to -lgrpc++
 # because newer gRPC installations no longer pull them in transitively
-ALWAYS_DYN_LIBS := -lpcap -lpthread -ldl -lgrpc++ -lgrpc -lgpr
+ALWAYS_DYN_LIBS := -lpcap -lpthread -ldl -lgrpc++ -lgrpc -lgpr -labsl_synchronization -llzma
 # These libraries are not supported by pkg-config.
 ALWAYS_LIBS := -lgflags -lnuma
 # If pkg-config is available, we just need a list of the dependecies.
@@ -120,7 +120,10 @@ ifeq "$(shell expr $(CXXCOMPILER) = g++)" "1"
   CXXFLAGS += -fno-gnu-unique
 endif
 
-LDFLAGS += -rdynamic
+LDFLAGS += -rdynamic -no-pie
+# Shared-object link flags: exclude -no-pie (incompatible with -shared)
+# and add $(LIBS) so plugin .so files resolve symbols from shared libraries.
+MODULE_LDFLAGS = -rdynamic
 ifdef BESS_LINK_DYNAMIC
   LIBS_ALL_SHARED = -Wl,-call_shared
   LIBS_DL_SHARED =
@@ -153,11 +156,13 @@ LIBS += -Wl,-non_shared \
 ifdef SANITIZE
   CXXFLAGS += -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
   LDFLAGS += -fsanitize=address -fsanitize=undefined
+  MODULE_LDFLAGS += -fsanitize=address -fsanitize=undefined
 endif
 
 ifdef COVERAGE
   CXXFLAGS += --coverage -O0
   LDFLAGS += --coverage
+  MODULE_LDFLAGS += --coverage
 else ifdef DEBUG
   CXXFLAGS += -O0
 else
@@ -412,7 +417,7 @@ $(eval $(call BUILD, \
         MODULE_LD, \
         %.so, \
         %.o, \
-        $(CXX) -shared -o $$@ $$^ $(LDFLAGS)))
+        $(CXX) -shared -o $$@ $$^ $(MODULE_LDFLAGS) $(LIBS)))
 
 $(eval $(call BUILD, \
         MODULE_TEST_LD, \

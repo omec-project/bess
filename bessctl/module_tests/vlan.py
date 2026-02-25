@@ -69,17 +69,17 @@ class BessVlanTest(BessModuleTestCase):
             if vid >= 0:
                 if not double_tag:
                     pkt_outs = self.run_module(vlan, 0, [p], [vid])
-                    self.assertEquals(len(pkt_outs[vid]), 1)
+                    self.assertEqual(len(pkt_outs[vid]), 1)
                     self.assertSamePackets(pkt_outs[vid][0], q)
 
                 else:
                     pkt_outs = self.run_module(vlan, 0, [pp], [vid])
-                    self.assertEquals(len(pkt_outs[vid]), 1)
+                    self.assertEqual(len(pkt_outs[vid]), 1)
                     self.assertSamePackets(pkt_outs[vid][0], p)
 
             else:
                 pkt_outs = self.run_module(vlan, 0, [q], [default_gate])
-                self.assertEquals(len(pkt_outs[default_gate]), 1)
+                self.assertEqual(len(pkt_outs[default_gate]), 1)
                 self.assertSamePackets(pkt_outs[default_gate][0], q)
 
     @unittest.skipUnless(hasattr(scapy, 'Dot1AD'), "this scapy lacks Dot1AD")

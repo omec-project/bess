@@ -66,7 +66,7 @@ class BessAclTest(BessModuleTestCase):
 
         pkt_outs = self.run_module(fw, 0, [pkt_in], [0])
 
-        self.assertEquals(len(pkt_outs[0]), 1)
+        self.assertEqual(len(pkt_outs[0]), 1)
         self.assertSamePackets(pkt_outs[0][0], pkt_in)
 
     def tests_acl_back2back(self):
@@ -75,10 +75,10 @@ class BessAclTest(BessModuleTestCase):
         pkt_in2 = get_tcp_packet(sip='96.22.22.22', dip='22.22.22.22')
 
         pkt_outs = self.run_module(fw, 0, [pkt_in1], [0])
-        self.assertEquals(len(pkt_outs[0]), 0)
+        self.assertEqual(len(pkt_outs[0]), 0)
 
         pkt_outs = self.run_module(fw, 0, [pkt_in2], [0])
-        self.assertEquals(len(pkt_outs[0]), 1)
+        self.assertEqual(len(pkt_outs[0]), 1)
         self.assertSamePackets(pkt_outs[0][0], pkt_in2)
 
     def test_run_acl_custom(self):

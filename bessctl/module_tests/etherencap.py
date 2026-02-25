@@ -74,7 +74,7 @@ class BessEthernetcapTest(BessModuleTestCase):
         metadata -> encap2
 
         pkt_outs = self.run_pipeline(metadata, encap2, 0, [pkt_in], [0])
-        self.assertEquals(len(pkt_outs[0]), 1)
+        self.assertEqual(len(pkt_outs[0]), 1)
         self.assertSamePackets(pkt_outs[0][0], pkt_expected_out)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(BessEthernetcapTest)

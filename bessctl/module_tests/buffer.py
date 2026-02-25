@@ -60,10 +60,10 @@ class BessBufferTest(BessModuleTestCase):
 
         for i in range(BATCH_SIZE - 1):
             pkt_outs = self.run_module(buf, 0, [pkt1], [0])
-            self.assertEquals(len(pkt_outs[0]), 0)
+            self.assertEqual(len(pkt_outs[0]), 0)
 
         pkt_outs = self.run_module(buf, 0, [pkt2], [0])
-        self.assertEquals(len(pkt_outs[0]), BATCH_SIZE)
+        self.assertEqual(len(pkt_outs[0]), BATCH_SIZE)
         self.assertSamePackets(pkt_outs[0][0], pkt1)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(BessBufferTest)

@@ -13,6 +13,49 @@ permissions:
 
 jobs:
   build:
-    uses: omec-project/.github/.github/workflows/bess-build-test.yml@40ff5b9cd1d59e64caae6f30ed9ccbece3951ea6 # v0.0.17
-    with:
-      branch_name: ${{ github.ref }}
+    runs-on: ubuntu-24.04
+    env:
+      CXX: "ccache g++"
+      DEBIAN_FRONTEND: noninteractive
+      NEEDRESTART_MODE: a
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Restore ccache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ~/.cache/ccache
+          key: ccache-${{ runner.os }}-${{ github.sha }}
+          restore-keys: ccache-${{ runner.os }}-
+
+      - name: Setup environment (Hugepages)
+        run: |
+          sudo sysctl -w vm.nr_hugepages=1024
+          sudo mkdir -p /mnt/huge
+          sudo mount -t hugetlbfs nodev /mnt/huge
+
+      - name: Setup dependencies using Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+          sudo ansible-playbook env/cndp.yml -i "localhost," -c local
+          sudo ansible-playbook env/ci.yml -i "localhost," -c local
+          ccache -s
+
+      - name: Build BESS
+        env:
+          PKG_CONFIG_PATH: /usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/lib/x86_64-linux-gnu/pkgconfig
+          BESS_LINK_DYNAMIC: "1"
+        run: |
+          sudo --preserve-env=CXX,PKG_CONFIG_PATH,BESS_LINK_DYNAMIC ./build.py bess
+          sudo ./build.py kmod
+          sudo ldconfig
+
+      - name: Test BESS
+        run: |
+          (cd core && ./all_test)
+          coverage run -m unittest discover -v
+          python3 bessctl/run_module_tests.py
+          sudo python3 bessctl/run_module_tests.py --test_dir bessctl/module_tests/cndp
+          ccache -s
+          bessctl/bessctl daemon stop || true

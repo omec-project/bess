@@ -27,39 +27,15 @@
           - m4
           - meson
           - pkg-config
-          - golang
           - wget
           - git
           - ca-certificates
           - build-essential
           - curl
-          - linux-tools-common
+          - xdp-tools
+          - libxdp-dev
         update_cache: yes
       become: true
-
-    - name: Install libxdp
-      become: true
-      block:
-        - name: Clone libxdp repository
-          git:
-            repo: https://github.com/xdp-project/xdp-tools.git
-            dest: /tmp/xdp-tools
-            version: v1.2.2
-            depth: 1
-
-        - name: Build and install libxdp
-          shell: |
-            cd /tmp/xdp-tools
-            ./configure
-            make -j$(nproc)
-            PREFIX=/usr make install
-          args:
-            creates: /usr/lib/libxdp.so
-
-        - name: Remove libxdp source
-          file:
-            path: /tmp/xdp-tools
-            state: absent
 
     - name: Install CNDP
       become: true
@@ -68,35 +44,29 @@
           git:
             repo: https://github.com/CloudNativeDataPlane/cndp.git
             dest: /tmp/cndp
-            version: d5ce4b9edc2e7ddb46a61b395deffafaf11a0500
+            version: v24.07.0
+            depth: 1
 
-        - name: Build and install CNDP shared libraries
+        - name: Build and install CNDP with meson
           shell: |
             cd /tmp/cndp
-            make -j$(nproc)
-            make install
+            meson setup builddir \
+              --buildtype=release \
+              -Dmachine=haswell \
+              -Ddefault_library=both
+            meson compile -C builddir -j$(nproc)
+            meson install -C builddir
+          args:
+            creates: /usr/local/lib/x86_64-linux-gnu/libcndp.so
 
-        - name: Build and install CNDP static libraries
-          shell: |
-            cd /tmp/cndp
-            make static_build=1 rebuild
-            make install
-
-        - name: Copy CNDP files to system locations
-          shell: |
-            cp -r /tmp/cndp/usr/local/include/cndp /usr/local/include/
-            cp /tmp/cndp/usr/local/lib/x86_64-linux-gnu/*.so* /usr/lib/ 2>/dev/null || true
-            cp /tmp/cndp/usr/local/lib/x86_64-linux-gnu/*.a /usr/lib/ 2>/dev/null || true
-            cp /tmp/cndp/usr/local/lib/pkgconfig/libcndp.pc /usr/lib/pkgconfig/
-            cp /tmp/cndp/usr/local/bin/cndpfwd /usr/bin/ 2>/dev/null || true
-
-        - name: Build prometheus-metrics app
+        - name: Build prometheus-metrics app (skipped when golang is not installed)
           shell: |
             cd /tmp/cndp/lang/go/stats/prometheus
-            go build prometheus.go
-            cp prometheus /usr/bin/
+            go build -o /usr/local/bin/prometheus prometheus.go
           args:
-            creates: /usr/bin/prometheus
+            creates: /usr/local/bin/prometheus
+          when: ansible_facts.packages is defined and 'golang' in ansible_facts.packages
+          ignore_errors: true
 
         - name: Run ldconfig after CNDP installation
           shell: ldconfig

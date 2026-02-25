@@ -99,10 +99,15 @@ CommandResponse BPF::CommandAdd(const bess::pb::BPFArg &arg) {
     filter.exp = f.filter();
 
     struct bpf_program il;
-    if (pcap_compile_nopcap(SNAPLEN, DLT_EN10MB,  // Ethernet
-                            &il, filter.exp.c_str(),
-                            1,  // optimize (IL only)
-                            PCAP_NETMASK_UNKNOWN) == -1) {
+    pcap_t *pc = pcap_open_dead(DLT_EN10MB, SNAPLEN);
+    if (!pc) {
+      return CommandFailure(ENOMEM, "pcap_open_dead failed");
+    }
+    int ret = pcap_compile(pc, &il, filter.exp.c_str(),
+                           1,  // optimize (IL only)
+                           PCAP_NETMASK_UNKNOWN);
+    pcap_close(pc);
+    if (ret == -1) {
       return CommandFailure(EINVAL, "BPF compilation error");
     }
 

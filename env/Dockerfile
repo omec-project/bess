@@ -3,8 +3,15 @@
 # Copyright 2019-present Intel Corporation
 # vim: syntax=dockerfile
 
+# Go build stage: compile the CNDP Prometheus metrics exporter
+FROM golang:1.26.0-bookworm@sha256:eae3cdfa040d0786510a5959d36a836978724d03b34a166ba2e0e198baac9196 AS prometheus-build
+RUN git clone --depth 1 --branch v24.07.0 \
+      https://github.com/CloudNativeDataPlane/cndp.git /tmp/cndp && \
+    cd /tmp/cndp/lang/go/stats/prometheus && \
+    go build -o /prometheus prometheus.go
+
 # Build stage: Install all build dependencies and compile from source
-FROM ubuntu:22.04@sha256:104ae83764a5119017b8e8d6218fa0832b09df65aae7d5a6de29a85d813da2fb AS builder
+FROM ubuntu:24.04@sha256:d1e2e92c075e5ca139d51a140fff46f84315c0fdce203eab2807c7e495eff4f9 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -28,24 +35,15 @@ RUN apt-get update && \
 # BESS build stage: compile BESS and DPDK from source
 FROM builder AS bess-build
 
-# Symlink CNDP headers to make them accessible without cndp prefix
-# This allows #include <cne_common.h>, #include <jcfg.h> and others to work
-WORKDIR /usr/local/include
-RUN for dir in cndp/*/; do \
-      if [ -d "$dir" ]; then \
-        ln -sf "$dir"* . 2>/dev/null || true; \
-      fi; \
-    done && \
-    ln -sf cndp/*.h . 2>/dev/null || true
-
 ARG CPU=haswell
 ARG MAKEFLAGS
 ENV CPU=${CPU} MAKEFLAGS=${MAKEFLAGS} PLUGINS_DIR=plugins
+ENV PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/lib/x86_64-linux-gnu/pkgconfig
+ENV BESS_LINK_DYNAMIC=1
 
 WORKDIR /bess
 COPY . .
 RUN cp -a protobuf /protobuf && \
-    ./build.py dpdk && \
     mkdir -p plugins && \
     mv sample_plugin plugins
 
@@ -57,14 +55,27 @@ RUN PLUGINS=$(find "$PLUGINS_DIR" -mindepth 1 -maxdepth 1 -type d) && \
     done && \
     eval "$CMD" && \
     cp bin/bessd /bin && \
+    strip /bin/bessd && \
     mkdir -p /bin/modules && \
     cp core/modules/*.so /bin/modules && \
     mkdir -p /opt/bess && \
-    cp -r bessctl pybess /opt/bess && \
-    cp -r core/pb /pb
+    cp -r bessctl pybess /opt/bess
+
+# Collect only the shared libraries needed at runtime into a staging directory.
+# ldd finds direct/transitive deps of bessd; we also include DPDK PMD drivers
+# (loaded via dlopen at runtime, invisible to ldd) and DPDK bus/mempool drivers.
+RUN mkdir -p /staging/lib && \
+    for lib in $(ldd /bin/bessd 2>/dev/null | grep '/usr/local/lib' | awk '{print $3}'); do \
+      cp -a "${lib}"* /staging/lib/ 2>/dev/null || true; \
+    done && \
+    for pat in af_packet af_xdp vhost virtio mlx5 pcap net_ring net_tap bus mempool_ring common_mlx5; do \
+      cp -aL /usr/local/lib/x86_64-linux-gnu/librte_*${pat}*.so* /staging/lib/ 2>/dev/null || true; \
+    done && \
+    cp -aL /usr/local/lib/x86_64-linux-gnu/libcne_*.so* /staging/lib/ 2>/dev/null || true && \
+    cp -aL /usr/local/lib/x86_64-linux-gnu/libcndp.so* /staging/lib/ 2>/dev/null || true
 
 # Default target: pre-built BESS image with runtime deps and compiled artifacts.
-FROM ubuntu:22.04@sha256:104ae83764a5119017b8e8d6218fa0832b09df65aae7d5a6de29a85d813da2fb
+FROM ubuntu:24.04@sha256:d1e2e92c075e5ca139d51a140fff46f84315c0fdce203eab2807c7e495eff4f9
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -85,33 +96,20 @@ COPY --from=bess-build /bin/modules /bin/modules
 COPY --from=bess-build /opt/bess /opt/bess
 COPY --from=bess-build /protobuf /protobuf
 COPY --from=bess-build /bess/protobuf /bess/protobuf
-COPY --from=bess-build /pb /pb
 
-# Copy CNDP binary
-COPY --from=bess-build /usr/bin/cndpfwd /usr/bin/
+# Copy CNDP binary (meson installs to /usr/local/bin/)
+COPY --from=bess-build /usr/local/bin/cndpfwd /usr/bin/
+# Copy prometheus metrics exporter built in the dedicated Go stage
+COPY --from=prometheus-build /prometheus /usr/local/bin/prometheus
 
 # Copy protoc for downstream protobuf generation (go-pb, py-pb)
-COPY --from=bess-build /usr/local/bin/protoc /usr/local/bin/
+# System package installs to /usr/bin/
+COPY --from=bess-build /usr/bin/protoc /usr/local/bin/
 
-# Copy only shared libraries (no static .a files, no headers)
-COPY --from=bess-build /usr/local/lib/x86_64-linux-gnu/*.so* /usr/local/lib/x86_64-linux-gnu/
-COPY --from=bess-build /usr/local/lib/libproto*.so* /usr/local/lib/
-COPY --from=bess-build /usr/local/lib/libgrpc*.so* /usr/local/lib/
-COPY --from=bess-build /usr/local/lib/libgpr*.so* /usr/local/lib/
-COPY --from=bess-build /usr/local/lib/libabsl*.so* /usr/local/lib/
-COPY --from=bess-build /usr/local/lib/libutf8*.so* /usr/local/lib/
-COPY --from=bess-build /usr/local/lib/libupb*.so* /usr/local/lib/
-COPY --from=bess-build /usr/local/lib/libre2*.so* /usr/local/lib/
-COPY --from=bess-build /usr/local/lib/libaddress_sorting*.so* /usr/local/lib/
-COPY --from=bess-build /usr/local/lib/libz.so* /usr/local/lib/
-COPY --from=bess-build /usr/lib/libxdp* /usr/lib/
-COPY --from=bess-build /usr/lib/libcne* /usr/lib/
-COPY --from=bess-build /usr/lib/libcndp* /usr/lib/
-COPY --from=bess-build /usr/lib/libtun* /usr/lib/
-COPY --from=bess-build /usr/lib/libpmd* /usr/lib/
-COPY --from=bess-build /usr/lib/x86_64-linux-gnu/libjson-c.so* /usr/lib/x86_64-linux-gnu/
+# Copy only the runtime-needed shared libraries (CNDP + DPDK core + select PMDs)
+COPY --from=bess-build /staging/lib/ /usr/local/lib/x86_64-linux-gnu/
 
-# Copy protobuf include files needed by protoc
-COPY --from=bess-build /usr/local/include/google/protobuf /usr/local/include/google/protobuf
+# Copy protobuf include files needed by protoc (system package path)
+COPY --from=bess-build /usr/include/google/protobuf /usr/local/include/google/protobuf
 
 RUN ldconfig

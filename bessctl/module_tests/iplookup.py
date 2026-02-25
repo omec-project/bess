@@ -29,19 +29,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import errno
 from test_utils import *
 
 
 class BessIPLookupTest(BessModuleTestCase):
 
     def test_iplookup(self):
-        try:
-            ipl = IPLookup()
-        except bess.Error as e:
-            if e.code == errno.ENOMEM:
-                self.skipTest("Insufficient DPDK memory for IPLookup module")
-            raise
+        ipl = IPLookup()
 
         pkts = [get_tcp_packet(sip='12.22.22.22', dip='22.22.22.22'),
                 get_tcp_packet(sip='12.22.22.22', dip='32.22.22.22'),
@@ -56,18 +50,13 @@ class BessIPLookupTest(BessModuleTestCase):
             ipl.delete(prefix='52.22.22.0', prefix_len=24)
 
         pkt_outs = self.run_module(ipl, 0, pkts, [0, 1])
-        self.assertEquals(len(pkt_outs[0]), 1)
-        self.assertEquals(len(pkt_outs[1]), 1)
+        self.assertEqual(len(pkt_outs[0]), 1)
+        self.assertEqual(len(pkt_outs[1]), 1)
         self.assertSamePackets(pkt_outs[0][0], pkts[0])
         self.assertSamePackets(pkt_outs[1][0], pkts[1])
 
     def test_prefix(self):
-        try:
-            ipl = IPLookup()
-        except bess.Error as e:
-            if e.code == errno.ENOMEM:
-                self.skipTest("Insufficient DPDK memory for IPLookup module")
-            raise
+        ipl = IPLookup()
         with self.assertRaises(bess.Error):
             ipl.add(prefix='22.22.22.0', prefix_len=16, gate=0)
 

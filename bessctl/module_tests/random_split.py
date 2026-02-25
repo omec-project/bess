@@ -38,14 +38,14 @@ class BessRandomSplitTest(BessModuleTestCase):
         drop0 = RandomSplit(drop_rate=0, gates=[0])
         pkt_in = get_udp_packet()
         pkt_outs = self.run_module(drop0, 0, [pkt_in], [0])
-        self.assertEquals(len(pkt_outs[0]), 1)
+        self.assertEqual(len(pkt_outs[0]), 1)
         self.assertSamePackets(pkt_outs[0][0], pkt_in)
 
     def test_dropall(self):
         drop0 = RandomSplit(drop_rate=1, gates=[0])
         pkt_in = get_udp_packet()
         pkt_outs = self.run_module(drop0, 0, [pkt_in], [0])
-        self.assertEquals(len(pkt_outs[0]), 0)
+        self.assertEqual(len(pkt_outs[0]), 0)
 
     def _drop_with_rate(self, rate):
 

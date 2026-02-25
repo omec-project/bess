@@ -46,7 +46,7 @@ class BessDrrTest(BessModuleTestCase):
 
         pkt = get_tcp_packet(sip='22.22.22.22', dip='22.22.22.22')
         pkt_outs = self.run_module(single_basic, 0, [pkt], [0])
-        self.assertEquals(len(pkt_outs[0]), 1)
+        self.assertEqual(len(pkt_outs[0]), 1)
         self.assertSamePackets(pkt_outs[0][0], pkt)
 
     def test_drr_batch(self):
@@ -62,7 +62,7 @@ class BessDrrTest(BessModuleTestCase):
         for (src, dst) in pkt_lists:
             pkt = get_tcp_packet(sip=src, dip=dst)
             pkt_outs = self.run_module(batch_basic, 0, [pkt], [0])
-            self.assertEquals(len(pkt_outs[0]), 1)
+            self.assertEqual(len(pkt_outs[0]), 1)
             self.assertSamePackets(pkt_outs[0][0], pkt)
 
     # Takes the number of flows n, the quantum to give drr, the list packet rates for each flow

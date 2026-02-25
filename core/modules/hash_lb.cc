@@ -197,7 +197,7 @@ inline void HashLB::DoProcessBatch<HashLB::Mode::kL3>(
     bess::Packet *snb = batch->pkts()[i];
     char *head = snb->head_data<char *>();
 
-    uint32_t hash_val;
+    uint32_t hash_val = 0;
     uint32_t v0 =
         *(reinterpret_cast<uint32_t *>(head + ip_offset + 12));   /* src IP */
     v0 ^= *(reinterpret_cast<uint32_t *>(head + ip_offset + 16)); /* dst IP */
@@ -220,7 +220,7 @@ inline void HashLB::DoProcessBatch<HashLB::Mode::kL4>(
     uint32_t l4_offset =
         ip_offset + ((*(reinterpret_cast<uint8_t *>(head + ip_offset)) & 0x0F)
                      << 2); /* ip_offset + IHL */
-    uint32_t hash_val;
+    uint32_t hash_val = 0;
     uint32_t v0 =
         *(reinterpret_cast<uint32_t *>(head + ip_offset + 12));   /* src IP */
     v0 ^= *(reinterpret_cast<uint32_t *>(head + ip_offset + 16)); /* dst IP*/

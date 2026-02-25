@@ -38,11 +38,11 @@ class BessBypassTest(BessModuleTestCase):
         bp0 = Bypass()
         pkt_in = get_udp_packet()
         pkt_outs = self.run_module(bp0, 0, [pkt_in], [0])
-        self.assertEquals(len(pkt_outs[0]), 1)
+        self.assertEqual(len(pkt_outs[0]), 1)
         self.assertSamePackets(pkt_outs[0][0], pkt_in)
 
         pkt_outs = self.run_module(bp0, 0, [], [0])
-        self.assertEquals(len(pkt_outs[0]), 0)
+        self.assertEqual(len(pkt_outs[0]), 0)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(BessBypassTest)
 results = unittest.TextTestRunner(verbosity=2).run(suite)

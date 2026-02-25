@@ -102,7 +102,7 @@ void IPLookup::ProcessBatch(Context *ctx, bess::PacketBatch *batch) {
   gate_idx_t default_gate = default_gate_;
 
   int cnt = batch->cnt();
-  int i;
+  int i = 0;
 
 #if RTE_VERSION < RTE_VERSION_NUM(19, 11, 0, 0)
 #if VECTOR_OPTIMIZATION

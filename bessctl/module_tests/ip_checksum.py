@@ -56,11 +56,11 @@ class BessIpChecksumTest(BessModuleTestCase):
         self.assertNotSamePackets(vlan_in, vlan_out)
 
         pkt_outs = self.run_module(wmodule, 0, [eth_in], [0])
-        self.assertEquals(len(pkt_outs[0]), 1)
+        self.assertEqual(len(pkt_outs[0]), 1)
         self.assertSamePackets(pkt_outs[0][0], eth_out)
 
         pkt_outs = self.run_module(wmodule, 0, [vlan_in], [0])
-        self.assertEquals(len(pkt_outs[0]), 1)
+        self.assertEqual(len(pkt_outs[0]), 1)
         self.assertSamePackets(pkt_outs[0][0], vlan_out)
 
         # scapy-python3 doesn't have Dot1AD
@@ -72,7 +72,7 @@ class BessIpChecksumTest(BessModuleTestCase):
             self.assertNotSamePackets(qinq_in, qinq_out)
 
             pkt_outs = self.run_module(wmodule, 0, [qinq_in], [0])
-            self.assertEquals(len(pkt_outs[0]), 1)
+            self.assertEqual(len(pkt_outs[0]), 1)
             self.assertSamePackets(pkt_outs[0][0], qinq_out)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(BessIpChecksumTest)

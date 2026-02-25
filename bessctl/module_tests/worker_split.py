@@ -61,7 +61,7 @@ class BessWorkerSplitTest(BessModuleTestCase):
                 if ogate.ogate == wid:
                     self.assertGreater(ogate.pkts, 0)
                 else:
-                    self.assertEquals(ogate.pkts, 0)
+                    self.assertEqual(ogate.pkts, 0)
 
             bess.reset_all()
 
@@ -103,9 +103,9 @@ class BessWorkerSplitTest(BessModuleTestCase):
         ws_ogates = bess.get_module_info(ws.name).ogates
         for ogate in ws_ogates:
             if ogate.ogate == 0:
-                self.assertEquals(ogate.pkts, odd_pkts)
+                self.assertEqual(ogate.pkts, odd_pkts)
             elif ogate.ogate == 1:
-                self.assertEquals(ogate.pkts, odd_pkts)
+                self.assertEqual(ogate.pkts, odd_pkts)
 
         bess.reset_all()
 
