@@ -62,12 +62,18 @@ RUN PLUGINS=$(find "$PLUGINS_DIR" -mindepth 1 -maxdepth 1 -type d) && \
     cp -r bessctl pybess /opt/bess
 
 # Collect only the shared libraries needed at runtime into a staging directory.
-# ldd finds direct/transitive deps of bessd; we also include DPDK PMD drivers
-# (loaded via dlopen at runtime, invisible to ldd) and DPDK bus/mempool drivers.
+# First refresh the ldconfig cache so that ldd can resolve all libraries
+# (DPDK is installed via ninja earlier without a guaranteed ldconfig run).
+# ldd finds direct/transitive deps of bessd *and* module .so files; we also
+# include DPDK PMD drivers (loaded via dlopen at runtime, invisible to ldd)
+# and DPDK bus/mempool drivers.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN mkdir -p /staging/lib && \
-    for lib in $(ldd /bin/bessd 2>/dev/null | grep '/usr/local/lib' | awk '{print $3}'); do \
-      cp -a "${lib}"* /staging/lib/ 2>/dev/null || true; \
+RUN ldconfig && \
+    mkdir -p /staging/lib && \
+    for bin in /bin/bessd /bin/modules/*.so; do \
+      for lib in $(ldd "$bin" 2>/dev/null | grep '/usr/local/lib' | awk '{print $3}'); do \
+        cp -aL "${lib}"* /staging/lib/ 2>/dev/null || true; \
+      done; \
     done && \
     for pat in af_packet af_xdp vhost virtio mlx5 pcap net_ring net_tap bus mempool_ring common_mlx5; do \
       cp -aL /usr/local/lib/x86_64-linux-gnu/librte_*${pat}*.so* /staging/lib/ 2>/dev/null || true; \
