@@ -7,22 +7,35 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - 'core/**'
-      - 'bessctl/**'
-      - 'pybess/**'
-      - 'protobuf/**'
-      - 'build.py'
-      - 'deps/**'
-      - 'env/**'
-      - '!env/Dockerfile'
-      - 'sample_plugin/**'
 
 permissions:
   contents: read
 
 jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: filter
+        with:
+          filters: |
+            code:
+              - 'core/**'
+              - 'bessctl/**'
+              - 'pybess/**'
+              - 'protobuf/**'
+              - 'build.py'
+              - 'deps/**'
+              - 'env/**'
+              - '!env/Dockerfile'
+              - 'sample_plugin/**'
+
   build:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-24.04
     env:
       CXX: "ccache g++"
