@@ -22,6 +22,7 @@
           - libgflags-dev
           - libgoogle-glog-dev
           - libgrpc++-dev
+          - libdpdk-dev
           - libgtest-dev
           - libipsec-mb-dev
           - liblzma-dev

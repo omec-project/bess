@@ -123,9 +123,16 @@ void init_eal(int dpdk_mb_per_socket, std::string nonworker_corelist) {
       // Do not bother with /var/run/.rte_config and .rte_hugepage_info,
       // since we don't want to interfere with other DPDK applications.
       "--no-shconf",
-      // TODO(sangjin) switch to dynamic memory mode
-      "--legacy-mem",
   };
+
+  // When DPDK is compiled without a built-in plugin directory
+  // (RTE_EAL_PMD_PATH is empty), EAL won't auto-discover bus and net
+  // drivers.  Point it at our PMD directory so that librte_bus_vdev,
+  // librte_net_af_packet, etc. are loaded before any vdev is created.
+  const char *pmd_dir = "/opt/bess/lib/dpdk-pmds";
+  if (access(pmd_dir, R_OK) == 0) {
+    rte_args.Append({"-d", pmd_dir});
+  }
 
   if (FLAGS_iova != "")
     rte_args.Append({"--iova", FLAGS_iova});

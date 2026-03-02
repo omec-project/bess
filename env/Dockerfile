@@ -32,7 +32,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# BESS build stage: compile BESS and DPDK from source
+# BESS build stage: compile BESS against system DPDK packages
 FROM builder AS bess-build
 
 ARG CPU=haswell
@@ -61,25 +61,37 @@ RUN PLUGINS=$(find "$PLUGINS_DIR" -mindepth 1 -maxdepth 1 -type d) && \
     mkdir -p /opt/bess && \
     cp -r bessctl pybess /opt/bess
 
-# Collect only the shared libraries needed at runtime into a staging directory.
-# First refresh the ldconfig cache so that ldd can resolve all libraries
-# (DPDK is installed via ninja earlier without a guaranteed ldconfig run).
-# ldd finds direct/transitive deps of bessd *and* module .so files; we also
-# include DPDK PMD drivers (loaded via dlopen at runtime, invisible to ldd)
-# and DPDK bus/mempool drivers.
+# Collect the shared libraries needed at runtime into a staging directory.
+# ldd finds direct/transitive deps of bessd from both /usr/local/lib (CNDP)
+# and /usr/lib (DPDK from system packages).  We then copy ALL librte_*.so*
+# to cover DPDK plugins that EAL dlopen()s at init and their transitive deps
+# (e.g. librte_fib, librte_rib) which are invisible to ldd.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN ldconfig && \
-    mkdir -p /staging/lib && \
-    for bin in /bin/bessd /bin/modules/*.so; do \
-      for lib in $(ldd "$bin" 2>/dev/null | grep '/usr/local/lib' | awk '{print $3}'); do \
-        cp -aL "${lib}"* /staging/lib/ 2>/dev/null || true; \
+RUN mkdir -p /staging/lib && \
+    for lib in $(ldd /bin/bessd 2>/dev/null | grep -E '/usr/(local/)?lib' | awk '{print $3}'); do \
+      cp -aL "${lib}"* /staging/lib/ 2>/dev/null || true; \
+    done && \
+    # Copy ALL DPDK runtime libraries.  DPDK EAL scans and dlopen()s plugins
+    # at init time; those plugins may in turn depend on core DPDK libs such as
+    # librte_fib, librte_rib, etc. that are invisible to ldd on bessd.
+    # Selectively copying only pattern-matched PMDs is fragile and misses
+    # these transitive dlopen dependencies.
+    cp -aL /usr/lib/x86_64-linux-gnu/librte_*.so* /staging/lib/ 2>/dev/null || true && \
+    cp -aL /usr/local/lib/x86_64-linux-gnu/libcne_*.so* /staging/lib/ 2>/dev/null || true && \
+    cp -aL /usr/local/lib/x86_64-linux-gnu/libcndp.so* /staging/lib/ 2>/dev/null || true && \
+    # Create DPDK plugin directory inside staging so that EAL can dlopen
+    # mempool/bus/net drivers at runtime.  bessd passes -d /opt/bess/lib/dpdk-pmds
+    # to EAL when this directory exists (see dpdk.cc init_eal).
+    mkdir -p /staging/opt/bess/lib/dpdk-pmds && \
+    for pat in librte_mempool_ring librte_bus_vdev librte_bus_pci \
+               librte_net_af_packet librte_net_af_xdp; do \
+      for f in /staging/lib/"${pat}".so*; do \
+        [ -f "$f" ] && ln -sf "/usr/local/lib/x86_64-linux-gnu/$(basename "$f")" \
+          /staging/opt/bess/lib/dpdk-pmds/; \
       done; \
     done && \
-    for pat in af_packet af_xdp vhost virtio mlx5 pcap net_ring net_tap bus mempool_ring common_mlx5; do \
-      cp -aL /usr/local/lib/x86_64-linux-gnu/librte_*${pat}*.so* /staging/lib/ 2>/dev/null || true; \
-    done && \
-    cp -aL /usr/local/lib/x86_64-linux-gnu/libcne_*.so* /staging/lib/ 2>/dev/null || true && \
-    cp -aL /usr/local/lib/x86_64-linux-gnu/libcndp.so* /staging/lib/ 2>/dev/null || true
+    echo "DPDK PMD staging directory contents:" && \
+    ls -la /staging/opt/bess/lib/dpdk-pmds/
 
 # Default target: pre-built BESS image with runtime deps and compiled artifacts.
 FROM ubuntu:24.04@sha256:d1e2e92c075e5ca139d51a140fff46f84315c0fdce203eab2807c7e495eff4f9
@@ -113,11 +125,24 @@ COPY --from=prometheus-build /prometheus /usr/local/bin/prometheus
 # System package installs to /usr/bin/
 COPY --from=bess-build /usr/bin/protoc /usr/local/bin/
 
-# Copy only the runtime-needed shared libraries (CNDP + DPDK core + select PMDs)
+# Copy only the runtime-needed shared libraries (CNDP + DPDK + select PMDs)
 COPY --from=bess-build /staging/lib/ /usr/local/lib/x86_64-linux-gnu/
 
 # Copy protobuf include files needed by protoc (system package path)
 COPY --from=bess-build /usr/include/google/protobuf /usr/local/include/google/protobuf
+
+# Copy the DPDK PMD plugin directory from staging.  bessd passes
+# -d /opt/bess/lib/dpdk-pmds to EAL when this directory exists.
+COPY --from=bess-build /staging/opt/bess/lib/dpdk-pmds/ /opt/bess/lib/dpdk-pmds/
+# Re-create symlinks pointing to the final library location
+RUN for pat in librte_mempool_ring librte_bus_vdev librte_bus_pci \
+               librte_net_af_packet librte_net_af_xdp; do \
+      for f in /usr/local/lib/x86_64-linux-gnu/"${pat}".so*; do \
+        [ -f "$f" ] && ln -sf "$f" /opt/bess/lib/dpdk-pmds/; \
+      done; \
+    done && \
+    echo "DPDK PMD directory contents:" && \
+    ls -la /opt/bess/lib/dpdk-pmds/
 
 # Ensure the dynamic linker can find libraries in /usr/local/lib/x86_64-linux-gnu
 RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/usr-local.conf && \

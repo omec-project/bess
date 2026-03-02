@@ -91,14 +91,7 @@ BESS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 DEPS_DIR = '%s/deps' % BESS_DIR
 
-DPDK_URL = 'https://fast.dpdk.org/rel'
-DPDK_VER = 'dpdk-22.11.4'
-DPDK_TARGET = 'x86_64-native-linuxapp-gcc'
-
 kernel_release = cmd('uname -r', quiet=True).strip()
-
-DPDK_DIR = '%s/%s' % (DEPS_DIR, DPDK_VER)
-DPDK_BUILD = '%s/build' % DPDK_DIR
 
 extra_libs = set()
 cxx_flags = []
@@ -236,32 +229,20 @@ def generate_extra_mk():
             fp.write('PLUGINS += {}\n'.format(path))
 
 
-def download_dpdk(quiet=False):
-    if os.path.exists(DPDK_DIR):
-        if not quiet:
-            print('already downloaded to %s' % DPDK_DIR)
-        return
-    try:
-        cmd('mkdir -p %s' % DPDK_DIR)
-        url = '%s/%s.tar.gz' % (DPDK_URL, DPDK_VER)
-        print('Downloading %s ...  ' % url)
-        cmd('curl -s -L %s | tar zx -C %s --strip-components 1' %
-            (url, DPDK_DIR), shell=True)
-    except:
-        cmd('rm -rf %s' % (DPDK_DIR))
-        raise
-
-
-def configure_dpdk():
-    print('Configuring DPDK...')
-    meson_opts = '--buildtype=release -Denable_driver_sdk=true'
-
-    arch = os.getenv('CPU')
-    if arch:
-        print(' - Building DPDK with -march=%s' % arch)
-        meson_opts += ' -Dmachine=%s' % arch
-
-    cmd('meson setup %s %s %s' % (meson_opts, DPDK_BUILD, DPDK_DIR))
+def check_dpdk():
+    """Verify that DPDK is available via pkg-config (system packages)."""
+    if not cmd_success('which pkg-config'):
+        print('Error - pkg-config not found. '
+              'Install it with: sudo apt-get install pkg-config',
+              file=sys.stderr)
+        sys.exit(1)
+    if not cmd_success('pkg-config --exists libdpdk'):
+        print('Error - DPDK not found. '
+              'Install it with: sudo apt-get install libdpdk-dev',
+              file=sys.stderr)
+        sys.exit(1)
+    ver = cmd('pkg-config --modversion libdpdk', quiet=True).strip()
+    print('Using system DPDK %s' % ver)
 
 
 def makeflags():
@@ -288,20 +269,7 @@ def makeflags():
     return result
 
 
-def build_dpdk():
-    check_essential()
-    download_dpdk(quiet=True)
 
-    # not configured yet?
-    if not os.path.exists('%s/build' % DPDK_DIR):
-        configure_dpdk()
-
-    for f in glob.glob('%s/*.patch' % DEPS_DIR):
-        print('Applying patch %s' % f)
-        cmd('patch -d %s -N -p1 < %s || true' % (DPDK_DIR, f), shell=True)
-
-    print('Building DPDK...')
-    cmd('ninja -C %s install' % DPDK_BUILD)
 
 
 def generate_protobuf_files():
@@ -349,16 +317,14 @@ def generate_protobuf_files():
 
 def build_bess():
     check_essential()
-
-    if not os.path.exists('%s/build' % DPDK_DIR):
-        build_dpdk()
+    check_dpdk()
 
     generate_protobuf_files()
 
     print('Building BESS daemon...')
     sys.stdout.flush()
     cmd('bin/bessctl daemon stop 2> /dev/null || true', shell=True)
-    cmd('rm -f core/bessd')  # force relink as DPDK might have been rebuilt
+    cmd('rm -f core/bessd')  # force relink
     cmd('make -C core bessd modules all_test %s' % makeflags())
 
 
@@ -384,7 +350,6 @@ def build_kmod():
 
 
 def build_all():
-    build_dpdk()
     build_bess()
     build_kmod()
     print('Done.')
@@ -400,13 +365,10 @@ def do_clean():
             '{path}/__init__.pyc {path}/ports/__init__.pyc '
             '{path}/*_pb2_grpc.py* {path}/ports/*_pb2_grpc.py* '
             '{path}/__pycache__ {path}/ports/__pycache__'.format(path=path))
-    cmd('rm -rf %s/build' % DPDK_DIR)
 
 
 def do_dist_clean():
     do_clean()
-    print('Removing 3rd-party libraries...')
-    cmd('rm -rf %s' % (DPDK_DIR))
 
 
 def print_usage(parser):
@@ -442,8 +404,6 @@ def main():
     parser = argparse.ArgumentParser(description='Build BESS')
     cmds = {
         'all': build_all,
-        'download_dpdk': download_dpdk,
-        'dpdk': build_dpdk,
         'bess': build_bess,
         'kmod': build_kmod,
         'clean': do_clean,
