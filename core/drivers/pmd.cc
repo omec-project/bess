@@ -494,7 +494,7 @@ CommandResponse PMDPort::Init(const bess::pb::PMDPortArg &arg) {
   // ioctl can fail with EPERM in restricted environments (containers
   // without CAP_NET_ADMIN, etc.).  Pre-sync the interface flags here so
   // that DPDK's set-flags call becomes a harmless no-op.
-  const char *driver_name = dev_info.driver_name ?: "";
+  const char *driver_name = dev_info.driver_name ? dev_info.driver_name : "";
   if (strcmp(driver_name, "net_af_packet") == 0 &&
       arg.port_case() == bess::pb::PMDPortArg::kVdev) {
     const std::string &vdev = arg.vdev();
@@ -549,7 +549,7 @@ CommandResponse PMDPort::Init(const bess::pb::PMDPortArg &arg) {
   // Reset hardware stat counters, as they may still contain previous data
   CollectStats(true);
 
-  driver_ = dev_info.driver_name ?: "unknown";
+  driver_ = dev_info.driver_name ? dev_info.driver_name : "unknown";
 
   if (arg.flow_profiles_size() > 0) {
     for (int i = 0; i < arg.flow_profiles_size(); ++i) {

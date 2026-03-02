@@ -231,6 +231,11 @@ def generate_extra_mk():
 
 def check_dpdk():
     """Verify that DPDK is available via pkg-config (system packages)."""
+    if not cmd_success('which pkg-config'):
+        print('Error - pkg-config not found. '
+              'Install it with: sudo apt-get install pkg-config',
+              file=sys.stderr)
+        sys.exit(1)
     if not cmd_success('pkg-config --exists libdpdk'):
         print('Error - DPDK not found. '
               'Install it with: sudo apt-get install libdpdk-dev',
