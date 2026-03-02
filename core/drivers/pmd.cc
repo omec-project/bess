@@ -36,6 +36,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <vector>
 
 #include <rte_bus.h>
@@ -64,14 +65,21 @@ static const rte_eth_conf default_eth_conf(const rte_eth_dev_info &dev_info,
   ret.rxmode.mq_mode = (nb_rxq > 1) ? RTE_ETH_MQ_RX_RSS : RTE_ETH_MQ_RX_NONE;
   ret.rxmode.offloads = 0;
 
-  ret.rx_adv_conf.rss_conf = {
-      .rss_key = rss_key,
-      .rss_key_len = sizeof(rss_key),
-      .rss_hf = (RTE_ETH_RSS_IP | RTE_ETH_RSS_UDP | RTE_ETH_RSS_TCP |
-                 RTE_ETH_RSS_SCTP) &
-                dev_info.flow_type_rss_offloads,
-      .algorithm = RTE_ETH_HASH_FUNCTION_DEFAULT,
-  };
+  // Only configure RSS when the device supports it.  DPDK 23.11+ validates
+  // rss_key_len against dev_info.hash_key_size, and rss_algo_capa against
+  // the requested algorithm.  Devices like AF_PACKET report both as 0,
+  // so passing any RSS key or algorithm triggers EINVAL.
+  if (dev_info.hash_key_size > 0 && dev_info.flow_type_rss_offloads != 0) {
+    ret.rx_adv_conf.rss_conf = {
+        .rss_key = rss_key,
+        .rss_key_len = static_cast<uint8_t>(std::min(
+            sizeof(rss_key), static_cast<size_t>(dev_info.hash_key_size))),
+        .rss_hf = (RTE_ETH_RSS_IP | RTE_ETH_RSS_UDP | RTE_ETH_RSS_TCP |
+                   RTE_ETH_RSS_SCTP) &
+                  dev_info.flow_type_rss_offloads,
+        .algorithm = RTE_ETH_HASH_FUNCTION_DEFAULT,
+    };
+  }
 
   return ret;
 }
@@ -215,7 +223,7 @@ static CommandResponse find_dpdk_vdev(const std::string &vdev,
 
   rte_dev_iterator iterator;
   RTE_ETH_FOREACH_MATCHING_DEV(port_id, vdev.c_str(), &iterator) {
-    LOG(INFO) << "port id: " << port_id << "matches vdev: " << vdev;
+    LOG(INFO) << "port id: " << port_id << " matches vdev: " << vdev;
     rte_eth_iterator_cleanup(&iterator);
     break;
   }

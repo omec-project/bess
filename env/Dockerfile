@@ -78,7 +78,20 @@ RUN mkdir -p /staging/lib && \
     # these transitive dlopen dependencies.
     cp -aL /usr/lib/x86_64-linux-gnu/librte_*.so* /staging/lib/ 2>/dev/null || true && \
     cp -aL /usr/local/lib/x86_64-linux-gnu/libcne_*.so* /staging/lib/ 2>/dev/null || true && \
-    cp -aL /usr/local/lib/x86_64-linux-gnu/libcndp.so* /staging/lib/ 2>/dev/null || true
+    cp -aL /usr/local/lib/x86_64-linux-gnu/libcndp.so* /staging/lib/ 2>/dev/null || true && \
+    # Create DPDK plugin directory inside staging so that EAL can dlopen
+    # mempool/bus/net drivers at runtime.  bessd passes -d /opt/bess/lib/dpdk-pmds
+    # to EAL when this directory exists (see dpdk.cc init_eal).
+    mkdir -p /staging/opt/bess/lib/dpdk-pmds && \
+    for pat in librte_mempool_ring librte_bus_vdev librte_bus_pci \
+               librte_net_af_packet librte_net_af_xdp; do \
+      for f in /staging/lib/${pat}.so*; do \
+        [ -f "$f" ] && ln -sf "/usr/local/lib/x86_64-linux-gnu/$(basename "$f")" \
+          /staging/opt/bess/lib/dpdk-pmds/; \
+      done; \
+    done && \
+    echo "DPDK PMD staging directory contents:" && \
+    ls -la /staging/opt/bess/lib/dpdk-pmds/
 
 # Default target: pre-built BESS image with runtime deps and compiled artifacts.
 FROM ubuntu:24.04@sha256:d1e2e92c075e5ca139d51a140fff46f84315c0fdce203eab2807c7e495eff4f9
@@ -117,6 +130,19 @@ COPY --from=bess-build /staging/lib/ /usr/local/lib/x86_64-linux-gnu/
 
 # Copy protobuf include files needed by protoc (system package path)
 COPY --from=bess-build /usr/include/google/protobuf /usr/local/include/google/protobuf
+
+# Copy the DPDK PMD plugin directory from staging.  bessd passes
+# -d /opt/bess/lib/dpdk-pmds to EAL when this directory exists.
+COPY --from=bess-build /staging/opt/bess/lib/dpdk-pmds/ /opt/bess/lib/dpdk-pmds/
+# Re-create symlinks pointing to the final library location
+RUN for pat in librte_mempool_ring librte_bus_vdev librte_bus_pci \
+               librte_net_af_packet librte_net_af_xdp; do \
+      for f in /usr/local/lib/x86_64-linux-gnu/${pat}.so*; do \
+        [ -f "$f" ] && ln -sf "$f" /opt/bess/lib/dpdk-pmds/; \
+      done; \
+    done && \
+    echo "DPDK PMD directory contents:" && \
+    ls -la /opt/bess/lib/dpdk-pmds/
 
 # Ensure the dynamic linker can find libraries in /usr/local/lib/x86_64-linux-gnu
 RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/usr-local.conf && \
