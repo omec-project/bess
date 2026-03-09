@@ -4,7 +4,7 @@
 # vim: syntax=dockerfile
 
 # Go build stage: compile the CNDP Prometheus metrics exporter
-FROM golang:1.26.0-bookworm@sha256:2a0ba12e116687098780d3ce700f9ce3cb340783779646aafbabed748fa6677c AS prometheus-build
+FROM golang:1.26.1-bookworm@sha256:c7a82e9e2df2fea5d8cb62a16aa6f796d2b2ed81ccad4ddd2bc9f0d22936c3f2 AS prometheus-build
 RUN git clone --depth 1 --branch v24.07.0 \
       https://github.com/CloudNativeDataPlane/cndp.git /tmp/cndp
 WORKDIR /tmp/cndp/lang/go/stats/prometheus
