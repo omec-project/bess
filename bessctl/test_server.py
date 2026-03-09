@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2026 Intel Corporation
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BSD-3-Clause
 
 """
 Tests for MessageToJson compatibility with server.py.
@@ -21,18 +21,9 @@ import unittest
 this_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(1, os.path.join(this_dir, '..'))
 
-# Import the BESS API module to set up paths correctly
+# Import for side effects: pybess.bess configures protobuf import paths.
 try:
-    from pybess import bess
-    # Now we can import the protobuf modules
-    p = os.path.abspath(os.path.join(this_dir, '..', 'pybess'))
-    if p not in sys.path:
-        sys.path.append(p)
-    for extra in ('builtin_pb', 'plugin_pb'):
-        p = os.path.abspath(os.path.join(this_dir, '..', 'pybess', extra))
-        if p not in sys.path:
-            sys.path.append(p)
-
+    from pybess import bess as _bess
     from google.protobuf.json_format import MessageToJson
     from builtin_pb import bess_msg_pb2 as bess_msg
 except ImportError as e:
@@ -55,8 +46,20 @@ class TestMessageToJsonCompatibility(unittest.TestCase):
         sig = inspect.signature(MessageToJson)
         cls.supports_always_print = 'always_print_fields_with_no_presence' in sig.parameters
 
+    @classmethod
+    def _always_print_support_message(cls):
+        return (
+            f"Protobuf {cls.protobuf_version} does not support "
+            f"'always_print_fields_with_no_presence' required by server.py. "
+            f"Upgrade protobuf to the version in env/requirements.txt.")
+
+    def _require_always_print_support(self):
+        if not self.supports_always_print:
+            self.skipTest(self._always_print_support_message())
+
     def _message_to_json_with_defaults(self, msg):
         """Call MessageToJson with always_print_fields_with_no_presence, matching server.py."""
+        self._require_always_print_support()
         return MessageToJson(msg, always_print_fields_with_no_presence=True)
 
     def test_message_to_json_import(self):
@@ -68,9 +71,7 @@ class TestMessageToJsonCompatibility(unittest.TestCase):
         """Test that installed Protobuf supports the always_print_fields_with_no_presence parameter."""
         self.assertTrue(
             self.supports_always_print,
-            f"Protobuf {self.protobuf_version} does not support "
-            f"'always_print_fields_with_no_presence' required by server.py. "
-            f"Upgrade protobuf to the version in env/requirements.txt.")
+            self._always_print_support_message())
 
     def test_message_to_json_basic_conversion(self):
         """Test basic MessageToJson conversion with a simple message."""
@@ -90,11 +91,10 @@ class TestMessageToJsonCompatibility(unittest.TestCase):
         Test MessageToJson with parameter for printing default/unpopulated fields.
 
         This parameter is critical for server.py's functionality.
-        Uses the appropriate parameter name based on protobuf version.
+        Verify an unset scalar field is emitted with its default value.
         """
-        # Create a message with optional fields
+        # Leave a scalar field unset so the test exercises default-field output.
         msg = bess_msg.VersionResponse()
-        msg.version = "test_version"
 
         # Convert with the appropriate parameter for the installed version
         json_str = self._message_to_json_with_defaults(msg)
@@ -104,9 +104,9 @@ class TestMessageToJsonCompatibility(unittest.TestCase):
         parsed = json.loads(json_str)
         self.assertIsInstance(parsed, dict)
 
-        # Verify the version field is present
+        # Verify the unset scalar field is still present with its default value.
         self.assertIn('version', parsed)
-        self.assertEqual(parsed['version'], 'test_version')
+        self.assertEqual(parsed['version'], '')
 
     def test_message_to_json_with_nested_message(self):
         """Test MessageToJson with nested messages (Error field)."""
@@ -167,9 +167,13 @@ class TestMessageToJsonCompatibility(unittest.TestCase):
         parsed = json.loads(json_str)
         self.assertIsInstance(parsed, dict)
 
-        # Verify fields are present (may be strings or integers depending on version)
+        # Verify int64 fields are rendered as strings per protobuf JSON mapping.
         self.assertIn('wid', parsed)
         self.assertIn('silentDrops', parsed)
+        self.assertIsInstance(parsed['wid'], str)
+        self.assertEqual(parsed['wid'], '123456789')
+        self.assertIsInstance(parsed['silentDrops'], str)
+        self.assertEqual(parsed['silentDrops'], '987654321')
         self.assertEqual(parsed['running'], True)
 
     def test_message_to_json_empty_message(self):
@@ -190,8 +194,7 @@ class TestMessageToJsonCompatibility(unittest.TestCase):
         msg.error.errmsg = ""
 
         # Mirrors the actual call in server.py
-        json_dict = json.loads(
-            MessageToJson(msg, always_print_fields_with_no_presence=True))
+        json_dict = json.loads(self._message_to_json_with_defaults(msg))
 
         self.assertIsInstance(json_dict, dict)
         self.assertIn('error', json_dict)
