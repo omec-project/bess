@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <cctype>
 #include <fstream>
 #include <iostream>
 #include <set>
@@ -109,30 +110,75 @@ static void *DoAllocHugepage(HugepageSize page_size) {
   return ptr_remapped;
 }
 
+std::vector<int> ParseNumaNodeList(const std::string &line) {
+  std::vector<int> nodes;
+  size_t start = 0;
+
+  while (start < line.size()) {
+    size_t end = line.find(',', start);
+    std::string token = line.substr(start, end - start);
+    token.erase(std::remove_if(token.begin(), token.end(),
+                               [](unsigned char ch) { return std::isspace(ch); }),
+                token.end());
+
+    if (!token.empty()) {
+      size_t dash = token.find('-');
+      if (dash == std::string::npos) {
+        nodes.push_back(std::stoi(token));
+      } else {
+        int first = std::stoi(token.substr(0, dash));
+        int last = std::stoi(token.substr(dash + 1));
+        if (first > last) {
+          std::swap(first, last);
+        }
+        for (int node = first; node <= last; node++) {
+          nodes.push_back(node);
+        }
+      }
+    }
+
+    if (end == std::string::npos) {
+      break;
+    }
+    start = end + 1;
+  }
+
+  return nodes;
+}
+
 }  // namespace
 
-int NumNumaNodes() {
-  static int cached = 0;
-  if (cached > 0) {
+const std::vector<int> &NumaNodeIds() {
+  static std::vector<int> cached;
+  if (!cached.empty()) {
     return cached;
   }
 
-  std::ifstream fp("/sys/devices/system/node/possible");
+  std::ifstream fp("/sys/devices/system/node/online");
   if (fp.is_open()) {
     std::string line;
     if (std::getline(fp, line)) {
-      int cnt;
-      if (utils::Parse(line, "0-%d", &cnt) == 1) {
-        cached = cnt + 1;
+      cached = ParseNumaNodeList(line);
+      if (!cached.empty()) {
         return cached;
       }
     }
   }
 
-  LOG(INFO) << "/sys/devices/system/node/possible not available. "
+  LOG(INFO) << "/sys/devices/system/node/online not available. "
             << "Assuming a single-node system...";
-  cached = 1;
+  cached.push_back(0);
   return cached;
+}
+
+int MaxNumaNodeId() {
+  const auto &nodes = NumaNodeIds();
+  return nodes.empty() ? 0 : nodes.back();
+}
+
+bool IsNumaNodeOnline(int node) {
+  const auto &nodes = NumaNodeIds();
+  return std::find(nodes.begin(), nodes.end(), node) != nodes.end();
 }
 
 HugepageSize GetDefaultHugepageSize() {
@@ -238,10 +284,10 @@ void *AllocHugepageFromSocket(HugepageSize type, int socket_id) {
   }
 
   CHECK_GE(socket_id, 0);
-  CHECK_LT(socket_id, NumNumaNodes());
+  CHECK(IsNumaNodeOnline(socket_id));
 
   unsigned long mask = 1ul << socket_id;
-  unsigned long maxnode = NumNumaNodes() + 1;  // number of bits in mask
+  unsigned long maxnode = MaxNumaNodeId() + 1;  // number of bits in mask
   int ret;
 
   // Update mempolicy to allocate hugepage only from the specified node.

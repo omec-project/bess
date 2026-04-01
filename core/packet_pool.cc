@@ -44,7 +44,7 @@ void PacketPool::CreateDefaultPools(size_t capacity) {
 
   rte_dump_physmem_layout(stdout);
 
-  for (int sid = 0; sid < NumNumaNodes(); sid++) {
+  for (int sid : NumaNodeIds()) {
     if (FLAGS_m == 0) {
       LOG(WARNING) << "Hugepage is disabled! Creating PlainPacketPool for "
                    << capacity << " packets on node " << sid;

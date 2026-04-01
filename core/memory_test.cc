@@ -171,8 +171,8 @@ TEST(DmaMemoryPoolTest, PoolSetup) {
   delete pool;
 
   // Node-specific allocation
-  for (int i = 0; i < NumNumaNodes(); i++) {
-    pool = new DmaMemoryPool(128 * 1024 * 1024, i);
+  for (int node : NumaNodeIds()) {
+    pool = new DmaMemoryPool(128 * 1024 * 1024, node);
     ASSERT_TRUE(pool->Initialized());
     delete pool;
   }
