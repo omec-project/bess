@@ -15,6 +15,14 @@
 
 namespace bess {
 
+namespace internal {
+
+std::vector<int> ParseNumaNodeList(const std::string &line);
+int MaxNumaNodeId(const std::vector<int> &nodes);
+bool IsNumaNodeOnline(const std::vector<int> &nodes, int node);
+
+}  // namespace internal
+
 // For the physical/IO address space   0x 00000000000 - 0x fff00000000 (16TB),
 // we use the virtual address range    0x600000000000 - 0x6fffffffffff
 const uintptr_t kVirtualAddressStart = 0x6000'0000'0000ull;

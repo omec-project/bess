@@ -110,6 +110,10 @@ static void *DoAllocHugepage(HugepageSize page_size) {
   return ptr_remapped;
 }
 
+}  // namespace
+
+namespace internal {
+
 std::vector<int> ParseNumaNodeList(const std::string &line) {
   std::vector<int> nodes;
   size_t start = 0;
@@ -144,42 +148,49 @@ std::vector<int> ParseNumaNodeList(const std::string &line) {
     start = end + 1;
   }
 
+  std::sort(nodes.begin(), nodes.end());
+  nodes.erase(std::unique(nodes.begin(), nodes.end()), nodes.end());
+
   return nodes;
 }
 
-}  // namespace
+int MaxNumaNodeId(const std::vector<int> &nodes) {
+  return nodes.empty() ? 0 : *std::max_element(nodes.begin(), nodes.end());
+}
+
+bool IsNumaNodeOnline(const std::vector<int> &nodes, int node) {
+  return std::find(nodes.begin(), nodes.end(), node) != nodes.end();
+}
+
+}  // namespace internal
 
 const std::vector<int> &NumaNodeIds() {
-  static std::vector<int> cached;
-  if (!cached.empty()) {
-    return cached;
-  }
-
-  std::ifstream fp("/sys/devices/system/node/online");
-  if (fp.is_open()) {
-    std::string line;
-    if (std::getline(fp, line)) {
-      cached = ParseNumaNodeList(line);
-      if (!cached.empty()) {
-        return cached;
+  static const std::vector<int> cached = []() {
+    std::ifstream fp("/sys/devices/system/node/online");
+    if (fp.is_open()) {
+      std::string line;
+      if (std::getline(fp, line)) {
+        auto nodes = internal::ParseNumaNodeList(line);
+        if (!nodes.empty()) {
+          return nodes;
+        }
       }
     }
-  }
 
-  LOG(INFO) << "/sys/devices/system/node/online not available. "
-            << "Assuming a single-node system...";
-  cached.push_back(0);
+    LOG(INFO) << "/sys/devices/system/node/online not available. "
+              << "Assuming a single-node system...";
+    return std::vector<int>{0};
+  }();
+
   return cached;
 }
 
 int MaxNumaNodeId() {
-  const auto &nodes = NumaNodeIds();
-  return nodes.empty() ? 0 : nodes.back();
+  return internal::MaxNumaNodeId(NumaNodeIds());
 }
 
 bool IsNumaNodeOnline(int node) {
-  const auto &nodes = NumaNodeIds();
-  return std::find(nodes.begin(), nodes.end(), node) != nodes.end();
+  return internal::IsNumaNodeOnline(NumaNodeIds(), node);
 }
 
 HugepageSize GetDefaultHugepageSize() {
