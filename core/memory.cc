@@ -117,9 +117,10 @@ std::vector<int> ParseNumaNodeList(const std::string &line) {
   while (start < line.size()) {
     size_t end = line.find(',', start);
     std::string token = line.substr(start, end - start);
-    token.erase(std::remove_if(token.begin(), token.end(),
-                               [](unsigned char ch) { return std::isspace(ch); }),
-                token.end());
+    token.erase(
+        std::remove_if(token.begin(), token.end(),
+                       [](unsigned char ch) { return std::isspace(ch); }),
+        token.end());
 
     if (!token.empty()) {
       size_t dash = token.find('-');
