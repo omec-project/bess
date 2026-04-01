@@ -730,7 +730,10 @@ static void sn_set_offloads(struct net_device *netdev)
 	/* We prevent this interface from moving around namespaces.
 	 * This is to work around race between device unregister and namespace
 	 * cleanup. Revise this after adopting rtnl link based design */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,12,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,15,0)
+	netdev->netns_immutable = true;
+	netdev->features = netdev->hw_features;
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(6,12,0)
 	netdev->netns_local = true;
 	netdev->features = netdev->hw_features;
 #else
