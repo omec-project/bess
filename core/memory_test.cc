@@ -36,6 +36,41 @@ TEST(HugepageTest, BadSize) {
   ASSERT_DEATH(AllocHugepage(static_cast<HugepageSize>(1 << 23)), "");
 }
 
+TEST(NumaNodeTest, ParseSingleNode) {
+  EXPECT_EQ((std::vector<int>{0}), internal::ParseNumaNodeList("0"));
+}
+
+TEST(NumaNodeTest, ParseRange) {
+  EXPECT_EQ((std::vector<int>{0, 1, 2, 3}), internal::ParseNumaNodeList("0-3"));
+}
+
+TEST(NumaNodeTest, ParseMixedList) {
+  EXPECT_EQ((std::vector<int>{0, 2, 4, 5, 6}),
+            internal::ParseNumaNodeList("0,2,4-6"));
+}
+
+TEST(NumaNodeTest, ParseWhitespaceAndReversedRanges) {
+  EXPECT_EQ((std::vector<int>{0, 2, 3, 4}),
+            internal::ParseNumaNodeList(" 4-2, 0, 3 "));
+}
+
+TEST(NumaNodeTest, ParseSortsAndDeduplicates) {
+  EXPECT_EQ((std::vector<int>{0, 1, 2, 3}),
+            internal::ParseNumaNodeList("3,1,0-2,2"));
+}
+
+TEST(NumaNodeTest, MaxNodeIdUsesMaximumValue) {
+  EXPECT_EQ(9, internal::MaxNumaNodeId(std::vector<int>{5, 1, 9, 3}));
+  EXPECT_EQ(0, internal::MaxNumaNodeId(std::vector<int>{}));
+}
+
+TEST(NumaNodeTest, OnlineCheckFindsKnownNodes) {
+  const std::vector<int> nodes{1, 3, 7};
+
+  EXPECT_TRUE(internal::IsNumaNodeOnline(nodes, 3));
+  EXPECT_FALSE(internal::IsNumaNodeOnline(nodes, 2));
+}
+
 class HugepageTest : public ::testing::TestWithParam<HugepageSize> {
  public:
   virtual void SetUp() override {
@@ -171,8 +206,8 @@ TEST(DmaMemoryPoolTest, PoolSetup) {
   delete pool;
 
   // Node-specific allocation
-  for (int i = 0; i < NumNumaNodes(); i++) {
-    pool = new DmaMemoryPool(128 * 1024 * 1024, i);
+  for (int node : NumaNodeIds()) {
+    pool = new DmaMemoryPool(128 * 1024 * 1024, node);
     ASSERT_TRUE(pool->Initialized());
     delete pool;
   }

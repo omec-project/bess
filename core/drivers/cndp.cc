@@ -598,7 +598,7 @@ bool CndpSingleton::CreateCndpPacketPool(std::string umem_name,
     LOG(ERROR) << "Error creating Cndp Packet Pool";
     return false;
   }
-  for (int sid = 0; sid < bess::NumNumaNodes(); sid++) {
+  for (int sid : bess::NumaNodeIds()) {
     bess::PacketPool *pool = new bess::DpdkPacketPool(capacity, sid);
     if (pool == nullptr) {
       LOG(ERROR) << "Error creating Cndp Packet Pool from Dpdk Packet pool";

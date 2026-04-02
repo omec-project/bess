@@ -11,8 +11,17 @@
 #include <map>
 #include <set>
 #include <string>
+#include <vector>
 
 namespace bess {
+
+namespace internal {
+
+std::vector<int> ParseNumaNodeList(const std::string &line);
+int MaxNumaNodeId(const std::vector<int> &nodes);
+bool IsNumaNodeOnline(const std::vector<int> &nodes, int node);
+
+}  // namespace internal
 
 // For the physical/IO address space   0x 00000000000 - 0x fff00000000 (16TB),
 // we use the virtual address range    0x600000000000 - 0x6fffffffffff
@@ -25,8 +34,14 @@ enum class HugepageSize : size_t {
   k1GB = 1 << 30,
 };
 
-// Assumes a single node system if undetectable
-int NumNumaNodes();
+// Returns the online NUMA node IDs known to the kernel.
+const std::vector<int> &NumaNodeIds();
+
+// Returns the highest online NUMA node ID, or 0 on single-node systems.
+int MaxNumaNodeId();
+
+// Returns true if the given NUMA node ID is online.
+bool IsNumaNodeOnline(int node);
 
 HugepageSize GetDefaultHugepageSize();
 

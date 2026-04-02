@@ -41,6 +41,7 @@
 #include <rte_eal.h>
 #include <rte_ethdev.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
@@ -161,9 +162,25 @@ void init_eal(int dpdk_mb_per_socket, std::string nonworker_corelist) {
     // memory in advance. We allocate 512MB (this is shared among nodes).
     rte_args.Append({"-m", "512"});
   } else {
-    std::string opt_socket_mem = std::to_string(dpdk_mb_per_socket);
-    for (int i = 1; i < NumNumaNodes(); i++) {
-      opt_socket_mem += "," + std::to_string(dpdk_mb_per_socket);
+    const auto &numa_node_ids = NumaNodeIds();
+    const int max_online_node = MaxNumaNodeId();
+    const int max_representable_node = RTE_MAX_NUMA_NODES - 1;
+    const int last_socket_mem_node =
+        std::min(max_online_node, max_representable_node);
+
+    if (std::any_of(numa_node_ids.begin(), numa_node_ids.end(),
+                    [](int node) { return node >= RTE_MAX_NUMA_NODES; })) {
+      LOG(WARNING) << "Ignoring online NUMA node IDs above DPDK limit "
+                   << max_representable_node << " when building --socket-mem";
+    }
+
+    std::string opt_socket_mem;
+    for (int node = 0; node <= last_socket_mem_node; node++) {
+      if (!opt_socket_mem.empty()) {
+        opt_socket_mem += ",";
+      }
+      opt_socket_mem +=
+          std::to_string(IsNumaNodeOnline(node) ? dpdk_mb_per_socket : 0);
     }
 
     rte_args.Append({"--socket-mem", opt_socket_mem});
