@@ -61,7 +61,7 @@ static const rte_eth_conf default_eth_conf(const rte_eth_dev_info &dev_info,
                                            int nb_rxq) {
   rte_eth_conf ret = {};
   const bool can_use_custom_rss_key =
-    dev_info.hash_key_size > 0 && dev_info.hash_key_size <= sizeof(rss_key);
+      dev_info.hash_key_size > 0 && dev_info.hash_key_size <= sizeof(rss_key);
 
   ret.link_speeds = RTE_ETH_LINK_SPEED_AUTONEG;
   ret.rxmode.mq_mode = (nb_rxq > 1) ? RTE_ETH_MQ_RX_RSS : RTE_ETH_MQ_RX_NONE;
@@ -75,10 +75,10 @@ static const rte_eth_conf default_eth_conf(const rte_eth_dev_info &dev_info,
   // so the PMD can apply its own default key instead of rejecting the config.
   if (dev_info.hash_key_size > 0 && dev_info.flow_type_rss_offloads != 0) {
     ret.rx_adv_conf.rss_conf = {
-    .rss_key = can_use_custom_rss_key ? rss_key : nullptr,
-    .rss_key_len =
-      can_use_custom_rss_key ? static_cast<uint8_t>(sizeof(rss_key))
-                             : static_cast<uint8_t>(0),
+        .rss_key = can_use_custom_rss_key ? rss_key : nullptr,
+        .rss_key_len = can_use_custom_rss_key
+                           ? static_cast<uint8_t>(sizeof(rss_key))
+                           : static_cast<uint8_t>(0),
         .rss_hf = (RTE_ETH_RSS_IP | RTE_ETH_RSS_UDP | RTE_ETH_RSS_TCP |
                    RTE_ETH_RSS_SCTP) &
                   dev_info.flow_type_rss_offloads,
