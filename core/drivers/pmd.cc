@@ -77,7 +77,7 @@ static const rte_eth_conf default_eth_conf(const rte_eth_dev_info &dev_info,
     ret.rx_adv_conf.rss_conf = {
         .rss_key = can_use_custom_rss_key ? rss_key : nullptr,
         .rss_key_len = can_use_custom_rss_key
-                           ? static_cast<uint8_t>(sizeof(rss_key))
+                           ? static_cast<uint8_t>(dev_info.hash_key_size)
                            : static_cast<uint8_t>(0),
         .rss_hf = (RTE_ETH_RSS_IP | RTE_ETH_RSS_UDP | RTE_ETH_RSS_TCP |
                    RTE_ETH_RSS_SCTP) &

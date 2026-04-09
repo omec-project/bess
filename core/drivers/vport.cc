@@ -307,6 +307,8 @@ void VPort::InitDriver() {
   struct stat buf;
 
   int ret;
+  int exit_status;
+  pid_t child_pid;
 
   next_cpu = 0;
 
@@ -315,7 +317,6 @@ void VPort::InitDriver() {
     char exec_path[1024];
     char *exec_dir;
     char module_path_from_exec_dir[2048];
-    char cmd[2048];
     const char *insmod_path = nullptr;
     const char *module_path = nullptr;
 
@@ -363,10 +364,36 @@ void VPort::InitDriver() {
       return;
     }
 
-    snprintf(cmd, sizeof(cmd), "%s %s", insmod_path, module_path);
-    ret = system(cmd);
-    if (ret == -1 || WEXITSTATUS(ret) != 0) {
-      LOG(WARNING) << "Cannot load kernel module " << module_path;
+    child_pid = fork();
+    if (child_pid < 0) {
+      PLOG(WARNING) << "fork()";
+      return;
+    }
+
+    if (child_pid == 0) {
+      char *const argv[] = {const_cast<char *>(insmod_path),
+                            const_cast<char *>(module_path), nullptr};
+      execv(insmod_path, argv);
+      PLOG(ERROR) << "execv(" << insmod_path << ")";
+      _exit(errno <= 255 ? errno : ENOMSG);
+    }
+
+    ret = waitpid(child_pid, &exit_status, 0);
+    if (ret < 0) {
+      PLOG(WARNING) << "waitpid()";
+      return;
+    }
+
+    if (!WIFEXITED(exit_status)) {
+      LOG(WARNING) << "Cannot load kernel module " << module_path
+                   << "; insmod terminated by signal " << WTERMSIG(exit_status);
+      return;
+    }
+
+    if (WEXITSTATUS(exit_status) != 0) {
+      LOG(WARNING) << "Cannot load kernel module " << module_path
+                   << "; insmod exited with status "
+                   << WEXITSTATUS(exit_status);
     }
   }
 }
