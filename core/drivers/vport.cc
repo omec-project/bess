@@ -307,6 +307,8 @@ void VPort::InitDriver() {
   struct stat buf;
 
   int ret;
+  int exit_status;
+  pid_t child_pid;
 
   next_cpu = 0;
 
@@ -314,8 +316,16 @@ void VPort::InitDriver() {
   if (ret < 0) {
     char exec_path[1024];
     char *exec_dir;
+    char module_path_from_exec_dir[2048];
+    const char *insmod_path = nullptr;
+    const char *module_path = nullptr;
 
-    char cmd[2048];
+    const char *insmod_candidates[] = {
+        "/usr/sbin/insmod",
+        "/sbin/insmod",
+        "/usr/bin/insmod",
+        "/bin/insmod",
+    };
 
     LOG(INFO) << "vport: BESS kernel module is not loaded. Loading...";
 
@@ -326,11 +336,64 @@ void VPort::InitDriver() {
     exec_path[ret] = '\0';
     exec_dir = dirname(exec_path);
 
-    snprintf(cmd, sizeof(cmd), "insmod %s/kmod/bess.ko", exec_dir);
-    ret = system(cmd);
-    if (WEXITSTATUS(ret) != 0) {
-      LOG(WARNING) << "Cannot load kernel module " << exec_dir
-                   << "/kmod/bess.ko";
+    snprintf(module_path_from_exec_dir, sizeof(module_path_from_exec_dir),
+             "%s/kmod/bess.ko", exec_dir);
+
+    if (stat(module_path_from_exec_dir, &buf) == 0) {
+      module_path = module_path_from_exec_dir;
+    } else if (stat("/opt/bess/kmod/bess.ko", &buf) == 0) {
+      module_path = "/opt/bess/kmod/bess.ko";
+    }
+
+    if (module_path == nullptr) {
+      LOG(INFO) << "vport: No bess.ko found for autoload; continuing without "
+                   "kernel module support";
+      return;
+    }
+
+    for (const char *candidate : insmod_candidates) {
+      if (access(candidate, X_OK) == 0) {
+        insmod_path = candidate;
+        break;
+      }
+    }
+
+    if (insmod_path == nullptr) {
+      LOG(INFO) << "vport: insmod is unavailable; skipping autoload of "
+                << module_path;
+      return;
+    }
+
+    child_pid = fork();
+    if (child_pid < 0) {
+      PLOG(WARNING) << "fork()";
+      return;
+    }
+
+    if (child_pid == 0) {
+      char *const argv[] = {const_cast<char *>(insmod_path),
+                            const_cast<char *>(module_path), nullptr};
+      execv(insmod_path, argv);
+      PLOG(ERROR) << "execv(" << insmod_path << ")";
+      _exit(errno <= 255 ? errno : ENOMSG);
+    }
+
+    ret = waitpid(child_pid, &exit_status, 0);
+    if (ret < 0) {
+      PLOG(WARNING) << "waitpid()";
+      return;
+    }
+
+    if (!WIFEXITED(exit_status)) {
+      LOG(WARNING) << "Cannot load kernel module " << module_path
+                   << "; insmod terminated by signal " << WTERMSIG(exit_status);
+      return;
+    }
+
+    if (WEXITSTATUS(exit_status) != 0) {
+      LOG(WARNING) << "Cannot load kernel module " << module_path
+                   << "; insmod exited with status "
+                   << WEXITSTATUS(exit_status);
     }
   }
 }

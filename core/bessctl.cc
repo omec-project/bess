@@ -343,7 +343,10 @@ static ::Port* create_port(const std::string& name, const PortBuilder& driver,
 
   if (name.length() > 0) {
     if (PortBuilder::all_ports().count(name)) {
-      p.reset(PortBuilder::all_ports().at(name));
+      perr->set_code(EEXIST);
+      perr->set_errmsg(
+          bess::utils::Format("Port '%s' already exists", name.c_str()));
+      return nullptr;
     }
     port_name = name;
   } else {
