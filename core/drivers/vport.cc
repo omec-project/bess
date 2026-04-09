@@ -314,8 +314,17 @@ void VPort::InitDriver() {
   if (ret < 0) {
     char exec_path[1024];
     char *exec_dir;
-
+    char module_path_from_exec_dir[2048];
     char cmd[2048];
+    const char *insmod_path = nullptr;
+    const char *module_path = nullptr;
+
+    const char *insmod_candidates[] = {
+        "/usr/sbin/insmod",
+        "/sbin/insmod",
+        "/usr/bin/insmod",
+        "/bin/insmod",
+    };
 
     LOG(INFO) << "vport: BESS kernel module is not loaded. Loading...";
 
@@ -326,11 +335,38 @@ void VPort::InitDriver() {
     exec_path[ret] = '\0';
     exec_dir = dirname(exec_path);
 
-    snprintf(cmd, sizeof(cmd), "insmod %s/kmod/bess.ko", exec_dir);
+    snprintf(module_path_from_exec_dir, sizeof(module_path_from_exec_dir),
+             "%s/kmod/bess.ko", exec_dir);
+
+    if (stat(module_path_from_exec_dir, &buf) == 0) {
+      module_path = module_path_from_exec_dir;
+    } else if (stat("/opt/bess/kmod/bess.ko", &buf) == 0) {
+      module_path = "/opt/bess/kmod/bess.ko";
+    }
+
+    if (module_path == nullptr) {
+      LOG(INFO) << "vport: No bess.ko found for autoload; continuing without "
+                   "kernel module support";
+      return;
+    }
+
+    for (const char *candidate : insmod_candidates) {
+      if (access(candidate, X_OK) == 0) {
+        insmod_path = candidate;
+        break;
+      }
+    }
+
+    if (insmod_path == nullptr) {
+      LOG(INFO) << "vport: insmod is unavailable; skipping autoload of "
+                << module_path;
+      return;
+    }
+
+    snprintf(cmd, sizeof(cmd), "%s %s", insmod_path, module_path);
     ret = system(cmd);
-    if (WEXITSTATUS(ret) != 0) {
-      LOG(WARNING) << "Cannot load kernel module " << exec_dir
-                   << "/kmod/bess.ko";
+    if (ret == -1 || WEXITSTATUS(ret) != 0) {
+      LOG(WARNING) << "Cannot load kernel module " << module_path;
     }
   }
 }
