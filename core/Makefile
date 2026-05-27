@@ -74,7 +74,7 @@ ALWAYS_DYN_LIBS := -lpcap -lpthread -ldl -lgrpc++ -lgrpc -lgpr -labsl_synchroniz
 # These libraries are not supported by pkg-config.
 ALWAYS_LIBS := -lgflags -lnuma
 # If pkg-config is available, we just need a list of the dependecies.
-PKG_CONFIG_DEPS := libdpdk libglog protobuf libcndp
+PKG_CONFIG_DEPS := libdpdk libglog protobuf
 # If pkg-config is not available, we need to list the libs we depend on.
 NO_PKG_CONFIG_LIBS := -lglog -lgflags -lprotobuf
 # If pkg-config is not available and we're static linking, we also need

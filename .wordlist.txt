@@ -76,10 +76,7 @@ LaTeX
 doxygen
 sdcore
 sudo
-CNDP
 bessctl
-cndp
-cndpfwd
 conf
 coreid
 ethtool
@@ -98,7 +95,6 @@ customizability
 XDP
 https
 cd
-besscndp
 runtime
 epc
 ghcr
