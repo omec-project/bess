@@ -11,7 +11,7 @@ WORKDIR /tmp/cndp/lang/go/stats/prometheus
 RUN go build -o /prometheus prometheus.go
 
 # Build stage: Install all build dependencies and compile from source
-FROM ubuntu:24.04@sha256:d1e2e92c075e5ca139d51a140fff46f84315c0fdce203eab2807c7e495eff4f9 AS builder
+FROM ubuntu:24.04@sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -94,7 +94,7 @@ RUN mkdir -p /staging/lib && \
     ls -la /staging/opt/bess/lib/dpdk-pmds/
 
 # Default target: pre-built BESS image with runtime deps and compiled artifacts.
-FROM ubuntu:24.04@sha256:d1e2e92c075e5ca139d51a140fff46f84315c0fdce203eab2807c7e495eff4f9
+FROM ubuntu:24.04@sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b
 
 ENV DEBIAN_FRONTEND=noninteractive
 
