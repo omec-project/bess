@@ -3,13 +3,6 @@
 # Copyright 2019-present Intel Corporation
 # vim: syntax=dockerfile
 
-# Go build stage: compile the CNDP Prometheus metrics exporter
-FROM golang:1.26.3-bookworm@sha256:386d475a660466863d9f8c766fec64d7fdad3edac2c6a05020c09534d71edb4b AS prometheus-build
-RUN git clone --depth 1 --branch v24.07.0 \
-      https://github.com/CloudNativeDataPlane/cndp.git /tmp/cndp
-WORKDIR /tmp/cndp/lang/go/stats/prometheus
-RUN go build -o /prometheus prometheus.go
-
 # Build stage: Install all build dependencies and compile from source
 FROM ubuntu:24.04@sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b AS builder
 
@@ -18,7 +11,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 COPY env/build-dep.yml /tmp/
 COPY env/kmod.yml /tmp/
 COPY env/ci.yml /tmp/
-COPY env/cndp.yml /tmp/
 COPY env/requirements-dev.txt /tmp/
 
 # Install build dependencies and compile everything
@@ -27,7 +19,6 @@ RUN apt-get update && \
     --no-install-recommends \
     ansible \
     curl && \
-    ansible-playbook /tmp/cndp.yml -i "localhost," -c local && \
     ansible-playbook /tmp/ci.yml -i "localhost," -c local && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -62,8 +53,8 @@ RUN PLUGINS=$(find "$PLUGINS_DIR" -mindepth 1 -maxdepth 1 -type d) && \
     cp -r bessctl pybess /opt/bess
 
 # Collect the shared libraries needed at runtime into a staging directory.
-# ldd finds direct/transitive deps of bessd from both /usr/local/lib (CNDP)
-# and /usr/lib (DPDK from system packages).  We then copy ALL librte_*.so*
+# ldd finds direct/transitive deps of bessd from /usr/lib (DPDK from system
+# packages). We then copy ALL librte_*.so*
 # to cover DPDK plugins that EAL dlopen()s at init and their transitive deps
 # (e.g. librte_fib, librte_rib) which are invisible to ldd.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -77,8 +68,6 @@ RUN mkdir -p /staging/lib && \
     # Selectively copying only pattern-matched PMDs is fragile and misses
     # these transitive dlopen dependencies.
     cp -aL /usr/lib/x86_64-linux-gnu/librte_*.so* /staging/lib/ 2>/dev/null || true && \
-    cp -aL /usr/local/lib/x86_64-linux-gnu/libcne_*.so* /staging/lib/ 2>/dev/null || true && \
-    cp -aL /usr/local/lib/x86_64-linux-gnu/libcndp.so* /staging/lib/ 2>/dev/null || true && \
     # Create DPDK plugin directory inside staging so that EAL can dlopen
     # mempool/bus/net drivers at runtime.  bessd passes -d /opt/bess/lib/dpdk-pmds
     # to EAL when this directory exists (see dpdk.cc init_eal).
@@ -116,16 +105,11 @@ COPY --from=bess-build /opt/bess /opt/bess
 COPY --from=bess-build /protobuf /protobuf
 COPY --from=bess-build /bess/protobuf /bess/protobuf
 
-# Copy CNDP binary (meson installs to /usr/local/bin/)
-COPY --from=bess-build /usr/local/bin/cndpfwd /usr/bin/
-# Copy prometheus metrics exporter built in the dedicated Go stage
-COPY --from=prometheus-build /prometheus /usr/local/bin/prometheus
-
 # Copy protoc for downstream protobuf generation (go-pb, py-pb)
 # System package installs to /usr/bin/
 COPY --from=bess-build /usr/bin/protoc /usr/local/bin/
 
-# Copy only the runtime-needed shared libraries (CNDP + DPDK + select PMDs)
+# Copy only the runtime-needed shared libraries (DPDK + select PMDs)
 COPY --from=bess-build /staging/lib/ /usr/local/lib/x86_64-linux-gnu/
 
 # Copy protobuf include files needed by protoc (system package path)

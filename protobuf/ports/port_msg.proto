@@ -92,11 +92,3 @@ message VPortArg {
   bool loopback = 8;
   repeated string ip_addrs = 9;
 }
-
-message CndpPortArg {
-  /// CNDP JSONC configuration absolute file path.
-  string jsonc_file = 1;
-
-  /// lport index.
-  uint32 lport_index = 2;
-}
