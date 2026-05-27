@@ -4,14 +4,14 @@
 # vim: syntax=dockerfile
 
 # Go build stage: compile the CNDP Prometheus metrics exporter
-FROM golang:1.26.3-bookworm@sha256:252599aeb51ad60b83e4d8821802068127c528c707cb7dd7afd93be057c6011c AS prometheus-build
+FROM golang:1.26.3-bookworm@sha256:386d475a660466863d9f8c766fec64d7fdad3edac2c6a05020c09534d71edb4b AS prometheus-build
 RUN git clone --depth 1 --branch v24.07.0 \
       https://github.com/CloudNativeDataPlane/cndp.git /tmp/cndp
 WORKDIR /tmp/cndp/lang/go/stats/prometheus
 RUN go build -o /prometheus prometheus.go
 
 # Build stage: Install all build dependencies and compile from source
-FROM ubuntu:26.04@sha256:f3d28607ddd78734bb7f71f117f3c6706c666b8b76cbff7c9ff6e5718d46ff64 AS builder
+FROM ubuntu:24.04@sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -94,7 +94,7 @@ RUN mkdir -p /staging/lib && \
     ls -la /staging/opt/bess/lib/dpdk-pmds/
 
 # Default target: pre-built BESS image with runtime deps and compiled artifacts.
-FROM ubuntu:26.04@sha256:f3d28607ddd78734bb7f71f117f3c6706c666b8b76cbff7c9ff6e5718d46ff64
+FROM ubuntu:24.04@sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b
 
 ENV DEBIAN_FRONTEND=noninteractive
 

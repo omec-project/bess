@@ -31,6 +31,7 @@ jobs:
               - 'deps/**'
               - 'env/*.yml'
               - 'env/*.txt'
+              - 'env/Dockerfile'
               - 'sample_plugin/**'
 
   build:
