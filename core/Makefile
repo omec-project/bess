@@ -73,12 +73,12 @@ HAS_PKG_CONFIG := $(shell command -v $(PKG_CONFIG) 2>&1 >/dev/null && echo yes |
 ALWAYS_DYN_LIBS := -lpcap -lpthread -ldl -lgrpc++ -lgrpc -lgpr -labsl_synchronization -llzma
 # These libraries are not supported by pkg-config.
 ALWAYS_LIBS := -lgflags -lnuma
-# If pkg-config is available, we just need a list of the dependecies.
+# If pkg-config is available, we just need a list of the dependencies.
 PKG_CONFIG_DEPS := libdpdk libglog protobuf
 # If pkg-config is not available, we need to list the libs we depend on.
 NO_PKG_CONFIG_LIBS := -lglog -lgflags -lprotobuf
 # If pkg-config is not available and we're static linking, we also need
-# the indirect dependecies.  This is annoying, because they may change
+# the indirect dependencies.  This is annoying, because they may change
 # in future versions.
 NO_PKG_CONFIG_LIBS_INDIRECT := -lgrpc -lssl -lcrypto -llzma
 

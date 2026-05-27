@@ -68,7 +68,6 @@ RUN mkdir -p /staging/lib && \
     # Selectively copying only pattern-matched PMDs is fragile and misses
     # these transitive dlopen dependencies.
     cp -aL /usr/lib/x86_64-linux-gnu/librte_*.so* /staging/lib/ 2>/dev/null || true && \
-    cp -aL /usr/local/lib/x86_64-linux-gnu/libcne_*.so* /staging/lib/ 2>/dev/null || true && \
     # Create DPDK plugin directory inside staging so that EAL can dlopen
     # mempool/bus/net drivers at runtime.  bessd passes -d /opt/bess/lib/dpdk-pmds
     # to EAL when this directory exists (see dpdk.cc init_eal).
