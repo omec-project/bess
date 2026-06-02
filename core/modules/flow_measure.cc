@@ -204,6 +204,9 @@ CommandResponse FlowMeasure::CommandReadStats(
   int32_t ret = 0;
   while (ret = rte_hash_iterate(current_hash, &key, &data, &next), ret >= 0) {
     if (unlikely(key == nullptr)) {
+      LOG_EVERY_N(WARNING, 10000)
+          << name() << ": rte_hash_iterate returned null key (ret=" << ret
+          << ", next=" << next << ")";
       continue;
     }
     const TableKey *table_key = reinterpret_cast<const TableKey *>(key);
