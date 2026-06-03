@@ -45,13 +45,9 @@ TARGET_REPOSITORY = os.getenv("DOCKER_REPOSITORY", "omec-project/")
 TARGET = "bess_build"
 FULL_TARGET = TARGET_REGISTRY + TARGET_REPOSITORY + TARGET
 
-imgs = {
-    'noble64': {'tag_suffix': ''},
-}
-
 
 def print_usage(prog):
-    print('Usage - {} [{}]'.format(prog, '|'.join(imgs.keys())))
+    print('Usage - {}'.format(prog))
 
 
 def run_cmd(cmd, shell=False):
@@ -61,8 +57,8 @@ def run_cmd(cmd, shell=False):
         subprocess.check_call(shlex.split(cmd))
 
 
-def build(env):
-    tag_suffix = imgs[env]['tag_suffix']
+def build():
+    tag_suffix = ''
     version = time.strftime('%y%m%d')
 
     run_cmd('docker build -f env/Dockerfile '
@@ -82,11 +78,11 @@ def push(version, tag_suffix):
 
 
 def main(argv):
-    if len(argv) != 2 or argv[1] not in imgs.keys():
+    if len(argv) != 1:
         print_usage(argv[0])
         return 2
 
-    version, tag_suffix = build(argv[1])
+    version, tag_suffix = build()
 
     prompt = input  # Python 3
 

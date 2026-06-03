@@ -24,7 +24,7 @@
           - libc-ares2
           - libelf1
           - libfdt1
-          - libipsec-mb1
+          - libipsec-mb2
           - libgflags2.2
           - libgoogle-glog0v6
           - libgrpc++1.51t64
