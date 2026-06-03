@@ -89,6 +89,24 @@ static const rte_eth_conf default_eth_conf(const rte_eth_dev_info &dev_info,
   return ret;
 }
 
+static int get_eth_dev_info(dpdk_port_t port_id, rte_eth_dev_info *dev_info) {
+  int ret = rte_eth_dev_info_get(port_id, dev_info);
+  if (ret != 0) {
+    LOG(ERROR) << "rte_eth_dev_info_get(" << static_cast<int>(port_id)
+               << ") failed: " << rte_strerror(-ret);
+  }
+  return ret;
+}
+
+static int get_link_status_nowait(dpdk_port_t port_id, rte_eth_link *status) {
+  int ret = rte_eth_link_get_nowait(port_id, status);
+  if (ret != 0) {
+    LOG(ERROR) << "rte_eth_link_get_nowait(" << static_cast<int>(port_id)
+               << ") failed: " << rte_strerror(-ret);
+  }
+  return ret;
+}
+
 void PMDPort::InitDriver() {
   dpdk_port_t num_dpdk_ports = rte_eth_dev_count_avail();
 
@@ -97,7 +115,9 @@ void PMDPort::InitDriver() {
 
   for (dpdk_port_t i = 0; i < num_dpdk_ports; i++) {
     rte_eth_dev_info dev_info;
-    rte_eth_dev_info_get(i, &dev_info);
+    if (get_eth_dev_info(i, &dev_info) != 0) {
+      continue;
+    }
 
     bess::utils::Ethernet::Address lladdr;
     rte_eth_macaddr_get(i, reinterpret_cast<rte_ether_addr *>(lladdr.bytes));
@@ -169,7 +189,9 @@ static CommandResponse find_dpdk_port_by_pci_addr(const std::string &pci,
   dpdk_port_t num_dpdk_ports = rte_eth_dev_count_avail();
   for (dpdk_port_t i = 0; i < num_dpdk_ports; i++) {
     rte_eth_dev_info dev_info;
-    rte_eth_dev_info_get(i, &dev_info);
+    if (get_eth_dev_info(i, &dev_info) != 0) {
+      continue;
+    }
 
     if (dev_info.device) {
       bus = rte_bus_find_by_device(dev_info.device);
@@ -392,7 +414,10 @@ CommandResponse PMDPort::Init(const bess::pb::PMDPortArg &arg) {
 
   /* Use defaut rx/tx configuration as provided by PMD drivers,
    * with minor tweaks */
-  rte_eth_dev_info_get(ret_port_id, &dev_info);
+  ret = get_eth_dev_info(ret_port_id, &dev_info);
+  if (ret != 0) {
+    return CommandFailure(-ret, "rte_eth_dev_info_get() failed");
+  }
 
   eth_conf = default_eth_conf(dev_info, num_rxq);
   if (arg.loopback()) {
@@ -619,7 +644,10 @@ void PMDPort::DeInit() {
 
   if (hot_plugged_) {
     rte_eth_dev_info dev_info;
-    rte_eth_dev_info_get(dpdk_port_id_, &dev_info);
+    if (get_eth_dev_info(dpdk_port_id_, &dev_info) != 0) {
+      rte_eth_dev_close(dpdk_port_id_);
+      return;
+    }
 
     char name[RTE_ETH_NAME_MAX_LEN];
     int ret;
@@ -649,9 +677,6 @@ void PMDPort::DeInit() {
 }
 
 void PMDPort::CollectStats(bool reset) {
-  packet_dir_t dir;
-  queue_t qid;
-
   if (reset) {
     rte_eth_stats_reset(dpdk_port_id_);
     return;
@@ -674,32 +699,16 @@ void PMDPort::CollectStats(bool reset) {
 
   port_stats_.inc.dropped = stats.imissed;
 
-  // ice/i40e/net_e1000_igb PMD drivers, ixgbevf and net_bonding vdevs don't
-  // support per-queue stats
-  if (driver_ == "net_ice" || driver_ == "net_iavf" || driver_ == "net_i40e" ||
-      driver_ == "net_i40e_vf" || driver_ == "net_ixgbe_vf" ||
-      driver_ == "net_bonding" || driver_ == "net_e1000_igb") {
-    // NOTE:
-    // - if link is down, tx bytes won't increase
-    // - if destination MAC address is incorrect, rx pkts won't increase
-    port_stats_.inc.packets = stats.ipackets;
-    port_stats_.inc.bytes = stats.ibytes;
-    port_stats_.out.packets = stats.opackets;
-    port_stats_.out.bytes = stats.obytes;
-  } else {
-    dir = PACKET_DIR_INC;
-    for (qid = 0; qid < num_queues[dir]; qid++) {
-      queue_stats[dir][qid].packets = stats.q_ipackets[qid];
-      queue_stats[dir][qid].bytes = stats.q_ibytes[qid];
-      queue_stats[dir][qid].dropped = stats.q_errors[qid];
-    }
-
-    dir = PACKET_DIR_OUT;
-    for (qid = 0; qid < num_queues[dir]; qid++) {
-      queue_stats[dir][qid].packets = stats.q_opackets[qid];
-      queue_stats[dir][qid].bytes = stats.q_obytes[qid];
-    }
-  }
+  // DPDK 25.11 removed per-queue members (q_ipackets, q_opackets, etc.) from
+  // rte_eth_stats, so aggregate stats are always used.  Per-queue software
+  // histograms and drop accounting are maintained elsewhere in BESS.
+  // NOTE:
+  // - if link is down, tx bytes won't increase
+  // - if destination MAC address is incorrect, rx pkts won't increase
+  port_stats_.inc.packets = stats.ipackets;
+  port_stats_.inc.bytes = stats.ibytes;
+  port_stats_.out.packets = stats.opackets;
+  port_stats_.out.bytes = stats.obytes;
 }
 
 int PMDPort::RecvPackets(queue_t qid, bess::Packet **pkts, int cnt) {
@@ -720,9 +729,9 @@ int PMDPort::SendPackets(queue_t qid, bess::Packet **pkts, int cnt) {
 }
 
 Port::LinkStatus PMDPort::GetLinkStatus() {
-  rte_eth_link status;
+  rte_eth_link status = {};
   // rte_eth_link_get() may block up to 9 seconds, so use _nowait() variant.
-  rte_eth_link_get_nowait(dpdk_port_id_, &status);
+  get_link_status_nowait(dpdk_port_id_, &status);
 
   return LinkStatus{.speed = status.link_speed,
                     .full_duplex = static_cast<bool>(status.link_duplex),

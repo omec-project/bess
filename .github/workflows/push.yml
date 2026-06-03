@@ -45,4 +45,4 @@ jobs:
         env:
           DOCKER_REGISTRY: "ghcr.io/"
           DOCKER_REPOSITORY: ${{ github.repository_owner }}/
-        run: yes y | ./env/rebuild_images.py noble64
+        run: yes y | ./env/rebuild_images.py

@@ -4,10 +4,11 @@
 # vim: syntax=dockerfile
 
 # Build stage: Install all build dependencies and compile from source
-FROM ubuntu:24.04@sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b AS builder
+FROM ubuntu:26.04@sha256:f3d28607ddd78734bb7f71f117f3c6706c666b8b76cbff7c9ff6e5718d46ff64 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+COPY env/ansible.cfg /tmp/
 COPY env/build-dep.yml /tmp/
 COPY env/kmod.yml /tmp/
 COPY env/ci.yml /tmp/
@@ -19,7 +20,7 @@ RUN apt-get update && \
     --no-install-recommends \
     ansible \
     curl && \
-    ansible-playbook /tmp/ci.yml -i "localhost," -c local && \
+    ANSIBLE_CONFIG=/tmp/ansible.cfg ansible-playbook /tmp/ci.yml -i "localhost," -c local && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -83,20 +84,21 @@ RUN mkdir -p /staging/lib && \
     ls -la /staging/opt/bess/lib/dpdk-pmds/
 
 # Default target: pre-built BESS image with runtime deps and compiled artifacts.
-FROM ubuntu:24.04@sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b
+FROM ubuntu:26.04@sha256:f3d28607ddd78734bb7f71f117f3c6706c666b8b76cbff7c9ff6e5718d46ff64
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install runtime dependencies via Ansible (shared definition with host installs)
+COPY env/ansible.cfg /tmp/
 COPY env/runtime-deps.yml /tmp/
 COPY env/requirements-run.txt /tmp/
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ansible && \
-    ansible-playbook /tmp/runtime-deps.yml -i "localhost," -c local && \
+    ANSIBLE_CONFIG=/tmp/ansible.cfg ansible-playbook /tmp/runtime-deps.yml -i "localhost," -c local && \
     apt-get purge -y ansible && \
     apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/runtime-deps.yml /tmp/requirements-run.txt
+    rm -rf /var/lib/apt/lists/* /tmp/ansible.cfg /tmp/runtime-deps.yml /tmp/requirements-run.txt
 
 # Copy compiled BESS artifacts
 COPY --from=bess-build /bin/bessd /bin/bessd
