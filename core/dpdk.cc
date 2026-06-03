@@ -120,7 +120,7 @@ void init_eal(int dpdk_mb_per_socket, std::string nonworker_corelist) {
       "--main-lcore",
       std::to_string(RTE_MAX_LCORE - 1),
       "--lcores",
-      std::to_string(RTE_MAX_LCORE - 1) + "@" + nonworker_corelist,
+      std::to_string(RTE_MAX_LCORE - 1) + "@(" + nonworker_corelist + ")",
       // Do not bother with /var/run/.rte_config and .rte_hugepage_info,
       // since we don't want to interfere with other DPDK applications.
       "--no-shconf",
