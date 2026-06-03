@@ -119,8 +119,8 @@ void init_eal(int dpdk_mb_per_socket, std::string nonworker_corelist) {
       "bessd",
       "--main-lcore",
       std::to_string(RTE_MAX_LCORE - 1),
-      "--lcore",
-      std::to_string(RTE_MAX_LCORE - 1) + "@" + nonworker_corelist,
+      "--lcores",
+      std::to_string(RTE_MAX_LCORE - 1) + "@(" + nonworker_corelist + ")",
       // Do not bother with /var/run/.rte_config and .rte_hugepage_info,
       // since we don't want to interfere with other DPDK applications.
       "--no-shconf",
@@ -136,7 +136,7 @@ void init_eal(int dpdk_mb_per_socket, std::string nonworker_corelist) {
   }
 
   if (FLAGS_iova != "")
-    rte_args.Append({"--iova", FLAGS_iova});
+    rte_args.Append({"--iova-mode", FLAGS_iova});
 
   if (FLAGS_allow != "") {
     LOG(INFO) << "FLAGS_allow value(s): " << FLAGS_allow;
