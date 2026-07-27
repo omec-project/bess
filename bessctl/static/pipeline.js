@@ -12,7 +12,6 @@
 // (node name, gate type, gate ID) -> [(timestamp, pkts, bits, cnt), ...]
 const stats = {};
 
-
 function gates_to_str(gates, gate_type) {
     let ret = '';
 
@@ -118,7 +117,7 @@ function format_label_text(label, options) {
         return format_rate_number(label, options.field);  
     }  
       
-    return label.toLocaleString('en-US', {maximumFractionDigits: 2});  
+    return label.toLocaleString('en-US', {maximumFractionDigits: 2}) + ' ';  
 }  
   
 function format_rate_number(label, field) {  
@@ -188,7 +187,7 @@ function generate_nodes(modules, options) {
 }  
   
 function set_gate_visibility(module) {  
-    const check = (gates, type) => gates.length > 1 || (gates.length === 1 && gates[0][type] !== 0);
+    const check = (gates, type) => gates.length > 1 || (gates.length === 1 && gates[0][type] != 0);
     module.show_igates = check(module.igates, 'igate');  
     module.show_ogates = check(module.ogates, 'ogate');  
 }  
