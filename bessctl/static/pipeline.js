@@ -12,9 +12,6 @@
 // (node name, gate type, gate ID) -> [(timestamp, pkts, bits, cnt), ...]
 const stats = {};
 
-let opt_field;  
-let opt_mode;  
-let opt_humanreadable;
 
 function gates_to_str(gates, gate_type) {
     let ret = '';
