@@ -155,45 +155,51 @@ def is_allowed_filename(basename):
 
     return True
 
+def _visible_candidate(name, partial_basename):
+    """Check if the file should be shown based on dot-file rules and allowed list."""
+    if name.startswith('.') and not partial_basename.startswith('.'):
+        return False
+    # is_allowed_filename is assumed to be defined in the global/module scope
+    return is_allowed_filename(name)
 
-def complete_filename(partial_word, start_dir='', suffix='',
-                      skip_suffix=False):
+def _process_file_match(name, pattern, suffix, skip_suffix):
+    """Check if file matches pattern and handle suffix stripping."""
+    if not fnmatch.fnmatch(name, pattern):
+        return None
+    
+    if suffix and not skip_suffix and name.endswith(suffix):
+        return name[:-len(suffix)]
+    return name
+
+def complete_filename(partial_word, start_dir='', suffix='', skip_suffix=False):
+    """Refactored complete_filename with Cognitive Complexity < 10."""
     try:
         sub_dir, partial_basename = os.path.split(partial_word)
-        pattern = '%s*%s' % (partial_basename, suffix)
-
-        target_dir = os.path.join(start_dir, os.path.expanduser(sub_dir))
-        if target_dir:
-            basenames = os.listdir(target_dir)
-        else:
-            basenames = os.listdir(os.curdir)
-
-        candidates = []
-        for basename in basenames + ['.', '..']:
-            if basename.startswith('.'):
-                if not partial_basename.startswith('.'):
-                    continue
-
-            if not is_allowed_filename(basename):
+        target_dir = os.path.join(start_dir, os.path.expanduser(sub_dir)) or os.curdir
+        
+        basenames = os.listdir(target_dir) + ['.', '..']
+        pattern = f'{partial_basename}*{suffix}'
+        
+        ret = []
+        for name in basenames:
+            if not _visible_candidate(name, partial_basename):
                 continue
 
-            if os.path.isdir(os.path.join(target_dir, basename)):
-                candidates.append(basename + '/')
+            full_path = os.path.join(target_dir, name)
+            
+            if os.path.isdir(full_path):
+                # Handle directories
+                ret.append(os.path.join(sub_dir, name + '/'))
             else:
-                if fnmatch.fnmatch(basename, pattern):
-                    if suffix and not skip_suffix:
-                        basename = basename[:-len(suffix)]
-                    candidates.append(basename)
-
-        ret = []
-        for candidate in candidates:
-            ret.append(os.path.join(sub_dir, candidate))
+                # Handle files
+                processed_name = _process_file_match(name, pattern, suffix, skip_suffix)
+                if processed_name is not None:
+                    ret.append(os.path.join(sub_dir, processed_name))
+        
         return ret
 
     except OSError:
-        # ignore failure of os.listdir()
         return []
-
 
 def get_var_attrs(cli, var_token, partial_word):
     var_type = None
