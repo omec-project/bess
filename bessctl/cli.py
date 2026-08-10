@@ -626,12 +626,15 @@ class CLI(object):
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, new_flags)
         except ImportError:
             pass
-        except Exception as e:
-            print(f"Unexpected terminal error: {e}")
+        except Exception:
+            pass
 
     def restore_echoctl(self):
         try:
             import termios
+
+            if not hasattr(self, 'old_flags'):
+                 return
 
             cur_flags = termios.tcgetattr(sys.stdin)
             new_flags = cur_flags
@@ -642,8 +645,8 @@ class CLI(object):
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, new_flags)
         except ImportError:
             pass
-        except Exception as e:
-            print(f"Unexpected terminal error: {e}")
+        except Exception:
+            pass
 
     def go_interactive(self):
         try:
