@@ -199,12 +199,12 @@ def _fetch_candidates(cli, func, processor):
     """Generic wrapper to handle BESS RPC errors during auto-completion."""
     try:
         return processor(func())
-    except (AttributeError, Exception):
+    except Exception:
         # We ignore errors here as this is only for CLI auto-completion
         return []
 
 def _get_workers(cli):
-    return _fetch_candidates(cli, cli.bess.list_workers, 
+    return _fetch_candidates(cli, cli.bess.list_workers,
                              lambda r: [str(m.wid) for m in r.workers_status])
 
 def _get_drivers(cli):
@@ -214,16 +214,16 @@ def _get_mclasses(cli):
     return _fetch_candidates(cli, cli.bess.list_mclasses, lambda r: r.names)
 
 def _get_modules(cli, include_star=False):
-    names = _fetch_candidates(cli, cli.bess.list_modules, 
+    names = _fetch_candidates(cli, cli.bess.list_modules,
                               lambda r: [m.name for m in r.modules])
     return (['*'] + names) if include_star else names
 
 def _get_ports(cli):
-    return _fetch_candidates(cli, cli.bess.list_ports, 
+    return _fetch_candidates(cli, cli.bess.list_ports,
                              lambda r: [p.name for p in r.ports])
 
 def _get_tcs(cli):
-    return _fetch_candidates(cli, cli.bess.list_tcs, 
+    return _fetch_candidates(cli, cli.bess.list_tcs,
                              lambda r: [getattr(c, 'class').name for c in r.classes_status])
 
 def _get_gatehook_classes(cli):
@@ -243,22 +243,22 @@ TOKEN_REGISTRY = {
     'MCLASS...': ('name+', 'one or more module class names', _get_mclasses),
     '[NEW_MODULE]': ('name', 'specify a name of the new module instance', []),
     'MODULE': ('name', 'name of an existing module instance', _get_modules),
-    '[MODULE]': ('name', 'name of an existing module instance (* means all)', 
+    '[MODULE]': ('name', 'name of an existing module instance (* means all)',
                  lambda cli: _get_modules(cli, True)),
     'MODULE...': ('name+', 'one or more module names', _get_modules),
     'MODULE_CMD': ('name', 'module command to run (see "show mclass")', []),
     'ARG_TYPE': ('name', 'type of argument (see "show mclass")', []),
     '[NEW_PORT]': ('name', 'specify a name of the new port', []),
-    '[SCHEDULER]': ('name', 'specify the type of scheduler (none for default)', 
+    '[SCHEDULER]': ('name', 'specify the type of scheduler (none for default)',
                     ['', 'experimental']),
     'PORT': ('name', 'name of a port', _get_ports),
     'PORT...': ('name+', 'one or more port names', _get_ports),
     'TC...': ('name+', 'one or more traffic class names', _get_tcs),
-    'PLUGIN_FILE': ('filename', 'plugin filename (*.so)', 
+    'PLUGIN_FILE': ('filename', 'plugin filename (*.so)',
                     lambda cli, word: complete_filename(word, suffix='.so', skip_suffix=True)),
-    'CONF': ('confname', 'configuration name in "conf/" directory', 
+    'CONF': ('confname', 'configuration name in "conf/" directory',
              lambda cli, word: complete_filename(word, '%s/conf' % cli.this_dir, '.' + CONF_EXT)),
-    'CONF_FILE': ('filename', 'configuration filename', 
+    'CONF_FILE': ('filename', 'configuration filename',
                   lambda cli, word: complete_filename(word)),
     '[DIRECTION]': ('dir', 'gate direction discriminator (default "out")', ['in', 'out']),
     'DIRECTION': ('dir', 'gate direction discriminator (default "out")', ['in', 'out']),
@@ -274,13 +274,12 @@ TOKEN_REGISTRY = {
     '[PORT_ARGS...]': ('map', 'initial configuration for port', []),
     '[MODULE_ARGS...]': ('pyobj', 'initial configuration for module', []),
     '[CMD_ARGS...]': ('pyobj', 'arguments for module/gatehook command', []),
-    '[TCPDUMP_OPTS...]': ('opts', 'tcpdump(1) command-line options', []),
-    '[TSHARK_OPTS...]': ('opts', 'tshark(1) command-line options', []),
-    '[GRAPHEASY_OPTS...]': ('opts', 'graph-easy(1p) command-line options', []),
-    '[BESSD_OPTS...]': ('opts', 'bess daemon command-line options', []),
+    '[TCPDUMP_OPTS...]': ('opts', 'tcpdump(1) command-line options (e.g., "-ne tcp port 22")', []),
+    '[TSHARK_OPTS...]': ('opts', 'tshark(1) command-line options (default "-z proto,colinfo,frame.comment,frame.comment")', []),
+    '[GRAPHEASY_OPTS...]': ('opts', 'graph-easy(1p) command-line options (e.g. --as dot | dot -Tsvg -o graph.svg)', []),
+    '[BESSD_OPTS...]': ('opts', 'bess daemon command-line options (see "bessd -h")', []),
     '[GRPC_URL]': ('filename', 'gRPC url', []),
-    '[PAUSE_WORKERS]': ('pause_workers', 'determines whether to pause workers', 
-                        ['pause', 'no_pause']),
+    '[PAUSE_WORKERS]': ('pause_workers', 'determines whether to pause workers', ['pause', 'no_pause']),
     '[HOST]': ('host', 'HTTP server address to listen on (default: "localhost")', []),
     '[PORT_NUMBER]': ('int', 'HTTP server address to listen on (default: 5000)', []),
 }
@@ -297,7 +296,6 @@ def get_var_attrs(cli, var_token, partial_word):
     try:
         if callable(provider):
             # Check if provider needs partial_word (for filenames) or just cli
-            import inspect
             sig = inspect.signature(provider)
             if len(sig.parameters) == 2:
                 var_candidates = provider(cli, partial_word)
