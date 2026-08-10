@@ -45,7 +45,7 @@ import subprocess
 import textwrap
 import argparse
 
-# constants for duplicate literals 
+# constants for duplicate literals
 BUILTIN_PB_DIR = 'pybess/builtin_pb'
 
 def cmd(cmd, quiet=False, shell=False):
