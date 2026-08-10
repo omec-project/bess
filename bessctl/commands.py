@@ -166,27 +166,27 @@ def _process_file_match(name, pattern, suffix, skip_suffix):
     """Check if file matches pattern and handle suffix stripping."""
     if not fnmatch.fnmatch(name, pattern):
         return None
-    
+
     if suffix and not skip_suffix and name.endswith(suffix):
         return name[:-len(suffix)]
     return name
 
 def complete_filename(partial_word, start_dir='', suffix='', skip_suffix=False):
-    """Refactored complete_filename with Cognitive Complexity < 10."""
+    """Return filesystem completion candidates for partial_word under start_dir."""
     try:
         sub_dir, partial_basename = os.path.split(partial_word)
         target_dir = os.path.join(start_dir, os.path.expanduser(sub_dir)) or os.curdir
-        
+
         basenames = os.listdir(target_dir) + ['.', '..']
         pattern = f'{partial_basename}*{suffix}'
-        
+
         ret = []
         for name in basenames:
             if not _visible_candidate(name, partial_basename):
                 continue
 
             full_path = os.path.join(target_dir, name)
-            
+
             if os.path.isdir(full_path):
                 # Handle directories
                 ret.append(os.path.join(sub_dir, name + '/'))
@@ -195,7 +195,7 @@ def complete_filename(partial_word, start_dir='', suffix='', skip_suffix=False):
                 processed_name = _process_file_match(name, pattern, suffix, skip_suffix)
                 if processed_name is not None:
                     ret.append(os.path.join(sub_dir, processed_name))
-        
+
         return ret
 
     except OSError:
