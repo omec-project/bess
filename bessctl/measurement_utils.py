@@ -141,7 +141,7 @@ class PortStatsGenerator(object):
         will have RTT stats reported as the average of those seen between
         subsequent calls to `next()`.
         """
-        if rtt_percentiles is None:  
+        if rtt_percentiles is None:
             rtt_percentiles = []
 
         self.bess = bess
