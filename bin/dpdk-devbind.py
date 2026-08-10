@@ -516,8 +516,7 @@ def bind_one(dev_id, driver, force):
             f.write("\00")
             f.close()
         except:
-            print(UNBIND_OPEN_ERROR
-                  % (dev_id, filename))
+            print(UNBIND_OPEN_ERROR % (dev_id, filename))
             sys.exit(1)
 
 
