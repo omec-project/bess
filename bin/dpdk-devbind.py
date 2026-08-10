@@ -404,8 +404,7 @@ def unbind_one(dev_id, force):
     try:
         f = open(filename, "a")
     except:
-        print(UNBIND_OPEN_ERROR
-              % (dev_id, filename))
+        print(UNBIND_OPEN_ERROR % (dev_id, filename))
         sys.exit(1)
     f.write(dev_id)
     f.close()
