@@ -41,7 +41,7 @@ import subprocess
 from os.path import exists, abspath, dirname, basename
 
 # constants for duplicate literals
-UNBIND_OPEN_ERROR = "Error: unbind failed for %s - Cannot open %s"  
+UNBIND_OPEN_ERROR = "Error: unbind failed for %s - Cannot open %s"
 USAGE_INFO = "Run '%s --usage' for further information"
 
 # The PCI base class for all devices
