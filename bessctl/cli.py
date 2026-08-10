@@ -89,10 +89,10 @@ class CLI(object):
         if history_file is not None:  
             return history_file  
         
-        try:  
-            return os.path.expanduser('~/.bess_history')  
-        except:  
-            return None  
+        try:
+            return os.path.expanduser('~/.bess_history')
+        except Exception:
+            return None
     
     def _setup_error_output(self, ferr):  
         """Setup error output with colorization support."""  
