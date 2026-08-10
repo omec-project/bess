@@ -1316,7 +1316,7 @@ def show_status(cli):
         cli.fout.write(NONE_MESSAGE)
 
     cli.fout.write('  Available plugins: ')
-    if drivers:
+    if plugins:
         cli.fout.write('%s\n' % ', '.join(plugins))
     else:
         cli.fout.write(NONE_MESSAGE)
