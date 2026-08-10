@@ -40,6 +40,12 @@ import getopt
 import subprocess
 from os.path import exists, abspath, dirname, basename
 
+# constants for duplicate literals
+UNBIND_OPEN_ERROR = "Error: unbind failed for %s - Cannot open %s"  
+BIND_OPEN_ERROR = "Error: bind failed for %s - Cannot open %s"  
+DRIVER_OVERRIDE_PATH = "/sys/bus/pci/devices/%s/driver_override" 
+USAGE_INFO = "Run '%s --usage' for further information"
+
 # The PCI base class for all devices
 network_class = {'Class': '02', 'Vendor': None, 'Device': None,
                     'SVendor': None, 'SDevice': None}
@@ -627,14 +633,23 @@ def show_status():
     if status_dev == "mempool" or status_dev == "all":
         show_device_status(mempool_devices, "Mempool")
 
+def _handle_bind_flag(opt, arg):
+    """Internal helper to handle bind/unbind flag logic and prevent duplicates."""
+    global b_flag
+    if b_flag is not None:
+        print("Error - Only one bind or unbind may be specified\n")
+        sys.exit(1)
+
+    if opt in ("-u", "--unbind"):
+        b_flag = "none"
+    else:
+        b_flag = arg
+
 def parse_args():
     '''Parses the command-line arguments given by the user and takes the
     appropriate action for each'''
-    global b_flag
-    global status_flag
-    global status_dev
-    global force_flag
-    global args
+    global b_flag, status_flag, status_dev, force_flag, args
+
     if len(sys.argv) <= 1:
         usage()
         sys.exit(0)
@@ -645,30 +660,21 @@ def parse_args():
                                     "force", "bind=", "unbind", ])
     except getopt.GetoptError as error:
         print(str(error))
-        print("Run '%s --usage' for further information" % sys.argv[0])
+        print(USAGE_INFO % sys.argv[0])
         sys.exit(1)
 
     for opt, arg in opts:
-        if opt == "--help" or opt == "--usage":
+        if opt in ("--help", "--usage"):
             usage()
             sys.exit(0)
         if opt == "--status-dev":
-            status_flag = True
-            status_dev = arg
-        if opt == "--status" or opt == "-s":
-            status_flag = True
-            status_dev = "all"
+            status_flag, status_dev = True, arg
+        if opt in ("--status", "-s"):
+            status_flag, status_dev = True, "all"
         if opt == "--force":
             force_flag = True
-        if opt == "-b" or opt == "-u" or opt == "--bind" or opt == "--unbind":
-            if b_flag is not None:
-                print("Error - Only one bind or unbind may be specified\n")
-                sys.exit(1)
-            if opt == "-u" or opt == "--unbind":
-                b_flag = "none"
-            else:
-                b_flag = arg
-
+        if opt in ("-b", "-u", "--bind", "--unbind"):
+            _handle_bind_flag(opt, arg)
 
 def do_arg_actions():
     '''do the actual action requested by the user'''
