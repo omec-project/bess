@@ -45,7 +45,7 @@ this_dir = os.path.dirname(os.path.realpath(__file__))
 bessctl = os.path.join(this_dir, 'bessctl')
 sample_dir = os.path.join(this_dir, 'conf/samples')
 
-# constants for duplicate lliterals
+# constants for duplicate literals
 DAEMON_START_CMD = '%s daemon start'
 
 class CommandError(subprocess.CalledProcessError):
