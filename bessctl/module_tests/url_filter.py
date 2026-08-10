@@ -35,7 +35,7 @@ from test_utils import *
 from pybess import protobuf_to_dict as pb_conv
 
 # constants for duplicate literals
-BLACKLISTED_HOST = 'www.blacklisted.com'  
+BLACKLISTED_HOST = 'www.blacklisted.com'
 BLUELISTED_HOST = 'www.bluelisted.com'
 
 class BessUrlFilterTest(BessModuleTestCase):
