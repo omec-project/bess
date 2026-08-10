@@ -244,4 +244,3 @@ function create_single_edge(module, module_name, gate, dst_module, options) {
   
     return `  "${module_name}":${out_port} -> "${gate.name}":${in_port}${label}\n`;  
 }
-
