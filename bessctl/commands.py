@@ -66,6 +66,13 @@ except ImportError:
 # extention for configuration files.
 CONF_EXT = 'bess'
 
+# constants for duplicate literals
+DONE_MESSAGE = 'Done.\n'
+NONE_MESSAGE = '(none)\n'
+FORMAT_16S_S = '%-16s %s\n'
+COMMANDS_FORMAT = '\t\t commands: %s\n'
+NO_COMMANDS_FORMAT = '\t\t (no commands)\n'
+
 
 # errors in configuration file
 class ConfError(Exception):
@@ -155,43 +162,50 @@ def is_allowed_filename(basename):
 
     return True
 
+def _visible_candidate(name, partial_basename):
+    """Check if the file should be shown based on dot-file rules and allowed list."""
+    if name.startswith('.') and not partial_basename.startswith('.'):
+        return False
+    # is_allowed_filename is assumed to be defined in the global/module scope
+    return is_allowed_filename(name)
 
-def complete_filename(partial_word, start_dir='', suffix='',
-                      skip_suffix=False):
+def _process_file_match(name, pattern, suffix, skip_suffix):
+    """Check if file matches pattern and handle suffix stripping."""
+    if not fnmatch.fnmatch(name, pattern):
+        return None
+
+    if suffix and not skip_suffix and name.endswith(suffix):
+        return name[:-len(suffix)]
+    return name
+
+def complete_filename(partial_word, start_dir='', suffix='', skip_suffix=False):
+    """Return filesystem completion candidates for partial_word under start_dir."""
     try:
         sub_dir, partial_basename = os.path.split(partial_word)
-        pattern = '%s*%s' % (partial_basename, suffix)
+        target_dir = os.path.join(start_dir, os.path.expanduser(sub_dir)) or os.curdir
 
-        target_dir = os.path.join(start_dir, os.path.expanduser(sub_dir))
-        if target_dir:
-            basenames = os.listdir(target_dir)
-        else:
-            basenames = os.listdir(os.curdir)
-
-        candidates = []
-        for basename in basenames + ['.', '..']:
-            if basename.startswith('.'):
-                if not partial_basename.startswith('.'):
-                    continue
-
-            if not is_allowed_filename(basename):
-                continue
-
-            if os.path.isdir(os.path.join(target_dir, basename)):
-                candidates.append(basename + '/')
-            else:
-                if fnmatch.fnmatch(basename, pattern):
-                    if suffix and not skip_suffix:
-                        basename = basename[:-len(suffix)]
-                    candidates.append(basename)
+        basenames = os.listdir(target_dir) + ['.', '..']
+        pattern = f'{partial_basename}*{suffix}'
 
         ret = []
-        for candidate in candidates:
-            ret.append(os.path.join(sub_dir, candidate))
+        for name in basenames:
+            if not _visible_candidate(name, partial_basename):
+                continue
+
+            full_path = os.path.join(target_dir, name)
+
+            if os.path.isdir(full_path):
+                # Handle directories
+                ret.append(os.path.join(sub_dir, name + '/'))
+            else:
+                # Handle files
+                processed_name = _process_file_match(name, pattern, suffix, skip_suffix)
+                if processed_name is not None:
+                    ret.append(os.path.join(sub_dir, processed_name))
+
         return ret
 
     except OSError:
-        # ignore failure of os.listdir()
         return []
 
 # --- Helper Fetchers for Dynamic Data ---
@@ -546,7 +560,7 @@ def _do_start(cli, opts):
             cli.fout.write('You need root privilege to launch BESS daemon, '
                            'but "sudo" requires a password for this account.'
                            '\n')
-        subprocess.check_call(cmd, shell='True')
+        subprocess.check_call(cmd, shell=True)
     except subprocess.CalledProcessError:
         raise cli.CommandError('Cannot start BESS daemon')
     else:
@@ -562,7 +576,7 @@ def _do_start(cli, opts):
             raise cli.CommandError('Connection timed out')
 
     if cli.interactive:
-        cli.fout.write('Done.\n')
+        cli.fout.write(DONE_MESSAGE)
 
 
 @cmd('daemon start [BESSD_OPTS...]', 'Start BESS daemon in the local machine')
@@ -600,7 +614,7 @@ def _do_reset(cli):
     cli.bess.reset_all()
     cli.bess.resume_all()
     if cli.interactive:
-        cli.fout.write('Done.\n')
+        cli.fout.write(DONE_MESSAGE)
 
 
 @cmd('daemon reset', 'Remove all ports and modules in the pipeline')
@@ -615,7 +629,7 @@ def _do_stop(cli):
     cli.bess.pause_all()
     cli.bess.kill()
     if cli.interactive:
-        cli.fout.write('Done.\n')
+        cli.fout.write(DONE_MESSAGE)
 
 
 @cmd('daemon stop', 'Stop BESS daemon')
@@ -747,7 +761,7 @@ def _do_run_file(cli, conf_file):
     try:
         exec(code, new_globals)
         if cli.interactive:
-            cli.fout.write('Done.\n')
+            cli.fout.write(DONE_MESSAGE)
     except:
         cur_frame = inspect.currentframe()
         cur_func = inspect.getframeinfo(cur_frame).function
@@ -1152,32 +1166,32 @@ def show_status(cli):
                        (worker.wid, worker.core) for worker in workers]
         cli.fout.write('%s\n' % ', '.join(worker_list))
     else:
-        cli.fout.write('(none)\n')
+        cli.fout.write(NONE_MESSAGE)
 
     cli.fout.write('  Available drivers: ')
     if drivers:
         cli.fout.write('%s\n' % ', '.join(drivers))
     else:
-        cli.fout.write('(none)\n')
+        cli.fout.write(NONE_MESSAGE)
 
     cli.fout.write('  Available plugins: ')
-    if drivers:
+    if plugins:
         cli.fout.write('%s\n' % ', '.join(plugins))
     else:
-        cli.fout.write('(none)\n')
+        cli.fout.write(NONE_MESSAGE)
 
     cli.fout.write('  Available module classes: ')
     if mclasses:
         cli.fout.write('%s\n' % ', '.join(mclasses))
     else:
-        cli.fout.write('(none)\n')
+        cli.fout.write(NONE_MESSAGE)
 
     cli.fout.write('  Active ports: ')
     if ports:
         port_list = ['%s/%s' % (p.name, p.driver) for p in ports]
         cli.fout.write('%s\n' % ', '.join(port_list))
     else:
-        cli.fout.write('(none)\n')
+        cli.fout.write(NONE_MESSAGE)
 
     cli.fout.write('  Active modules: ')
     if modules:
@@ -1187,7 +1201,7 @@ def show_status(cli):
 
         cli.fout.write('%s\n' % ', '.join(module_list))
     else:
-        cli.fout.write('(none)\n')
+        cli.fout.write(NONE_MESSAGE)
 
 
 # last_stats: a map of (node name, gateid) -> (timestamp, counter value)
@@ -1422,17 +1436,17 @@ def show_module_list(cli, module_names):
 
 def _show_mclass(cli, cls_name, detail):
     info = cli.bess.get_mclass_info(cls_name)
-    cli.fout.write('%-16s %s\n' % (info.name, info.help))
+    cli.fout.write(FORMAT_16S_S % (info.name, info.help))
 
     if detail:
         if len(info.cmds) > 0:
-            cli.fout.write('\t\t commands: %s\n' %
+            cli.fout.write(COMMANDS_FORMAT %
                            (', '.join(map(lambda cmd, msg: "%s(%s)"
                                           % (cmd, msg),
                                           info.cmds,
                                           info.cmd_args))))
         else:
-            cli.fout.write('\t\t (no commands)\n')
+            cli.fout.write(NO_COMMANDS_FORMAT)
 
 
 @cmd('show mclass', 'Show all module classes')
@@ -1469,17 +1483,17 @@ def show_gatehook_all(cli):
 
 def _show_gatehook_class(cli, cls_name, detail):
     info = cli.bess.get_gatehook_class_info(cls_name)
-    cli.fout.write('%-16s %s\n' % (info.name, info.help))
+    cli.fout.write(FORMAT_16S_S % (info.name, info.help))
 
     if detail:
         if len(info.cmds) > 0:
-            cli.fout.write('\t\t commands: %s\n' %
+            cli.fout.write(COMMANDS_FORMAT %
                            (', '.join(map(lambda cmd, msg: "%s(%s)"
                                           % (cmd, msg),
                                           info.cmds,
                                           info.cmd_args))))
         else:
-            cli.fout.write('\t\t (no commands)\n')
+            cli.fout.write(NO_COMMANDS_FORMAT)
 
 
 @cmd('show gatehookclass', 'Show all gatehook classes')
@@ -1525,13 +1539,13 @@ def show_plugin_all(cli):
 
 def _show_driver(cli, drv_name, detail):
     info = cli.bess.get_driver_info(drv_name)
-    cli.fout.write('%-16s %s\n' % (info.name, info.help))
+    cli.fout.write(FORMAT_16S_S % (info.name, info.help))
 
     if detail:
         if info.commands:
-            cli.fout.write('\t\t commands: %s\n' % (', '.join(info.commands)))
+            cli.fout.write(COMMANDS_FORMAT % (', '.join(info.commands)))
         else:
-            cli.fout.write('\t\t (no commands)\n')
+            cli.fout.write(NO_COMMANDS_FORMAT)
 
 
 @cmd('show driver', 'Show all port drivers')
