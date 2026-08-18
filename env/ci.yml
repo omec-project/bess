@@ -2,7 +2,6 @@
 # SPDX-FileCopyrightText: 2017, The Regents of the University of California.
 # SPDX-FileCopyrightText: 2024, Intel Corporation
 # SPDX-License-Identifier: BSD-3-Clause
-
 # Container provisioning for building BESS on Travis CI,
 # with various compilers and configurations
 # all packages for build are also required here
