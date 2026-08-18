@@ -5,14 +5,11 @@
 
 # Container provisioning for building BESS on Travis CI,
 # with various compilers and configurations
-
 # all packages for build are also required here
 - name: Install basic build requirements first
   import_playbook: build-dep.yml
-
 - name: Vport kernel module dependencies
   import_playbook: kmod.yml
-
 - hosts: all
   tags: ci
   tasks:
