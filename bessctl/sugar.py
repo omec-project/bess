@@ -182,102 +182,102 @@ def is_gate_expr(exp, is_ogate):
         return True
 
 
-def replace_rarrows(s):
-    # if the gate expression is not trivial, add parenthesis
-    def parenthesize(exp):
-        for t in tokenize.generate_tokens(io.StringIO(exp).readline):
-            if t[0] == tokenize.OP:
-                l = len(exp) - len(exp.lstrip())
-                r = len(exp) - len(exp.rstrip())
-                return '%s(%s)%s' % (exp[:l], exp.strip(), exp[len(exp) - r:])
-        return exp
+def replace_rarrows(s):  
+    """Replace right arrows (->) with appropriate Python operators."""  
+    arrows = find_arrow_positions(s)  
+    segments = split_string_by_arrows(s, arrows)  
+    transform_gate_expressions(segments)  
+    return '+'.join(segments)  
 
-    # Phase 1: split the string with delimiter "->"
-    # (cannot simply use .split() as lexical analysis is required)
-    last_token = None
-    arrows = []
+def find_arrow_positions(s):  
+    """Find all arrow positions in the string using tokenization."""  
+    last_token = None  
+    arrows = []  
+    try:  
+        for t in tokenize.generate_tokens(io.StringIO(s).readline):  
+            token = t[1]  
+            row, col = t[2]  
+            # Handle Python 2.x (separate tokens) and Python 3 (single token)
+            if last_token == '-' and token == '>':  
+                arrows.append((row - 1, col - 1))  
+            elif token == '->':  
+                arrows.append((row - 1, col))  
+            last_token = token  
+    except (tokenize.TokenError, IndentationError):  
+        pass  
+    return arrows  
 
+def split_string_by_arrows(s, arrows):  
+    """Split string into segments at '->' positions."""  
+    segments = []  
+    curr_seg = []  
+    arrow_idx = 0  
+    lines = io.StringIO(s).readlines()  
+    line_idx = 0  
+    col_offset = 0  
+
+    while line_idx < len(lines):  
+        line = lines[line_idx]  
+        row, col = arrows[arrow_idx] if arrow_idx < len(arrows) else (None, None)  
+
+        if row is None or line_idx < row:  
+            curr_seg.append(line[col_offset:])  
+            line_idx += 1  
+            col_offset = 0  
+        elif line_idx == row:  
+            curr_seg.append(line[col_offset:col])  
+            segments.append(''.join(curr_seg))  
+            curr_seg = []  
+            col_offset = col + 2 # Skip the '->' characters
+            arrow_idx += 1  
+        else:  
+            # This should be unreachable given the logic above
+            raise RuntimeError("Splitting logic encountered an invalid state")
+      
+    segments.append(''.join(curr_seg))  
+    return segments  
+
+def transform_gate_expressions(segments):  
+    """Transform output and input gate expressions in segments."""  
+    for i in range(len(segments) - 1):  
+        process_output_gate(segments, i)  
+        process_input_gate(segments, i)  
+
+def process_output_gate(segments, i):  
+    seg = segments[i]  
+    colon_pos = seg.rfind(':')  
+    while colon_pos != -1:  
+        ogate = seg[colon_pos + 1:]  
+        if not ogate.strip():  # Break immediately if empty
+            break  
+        if is_gate_expr(ogate, True):  
+            segments[i] = seg[:colon_pos] + '*' + parenthesize(ogate)  
+            break  
+        colon_pos = seg.rfind(':', 0, colon_pos)  
+
+def process_input_gate(segments, i):  
+    seg = segments[i + 1]  
+    colon_pos = seg.find(':')  
+    while colon_pos != -1:  
+        igate = seg[:colon_pos]  
+        if not igate.strip():  # Break immediately if empty
+            break  
+        if is_gate_expr(igate, False):  
+            segments[i + 1] = parenthesize(igate) + '*' + seg[colon_pos + 1:]  
+            break  
+        colon_pos = seg.find(':', colon_pos + 1)
+
+def parenthesize(exp):  
+    """Add parentheses around expression if it contains operators."""  
     try:
-        for t in tokenize.generate_tokens(io.StringIO(s).readline):
-            token = t[1]
-            row, col = t[2]
-
-            if last_token == '-' and token == '>':  # Python 2.x
-                # line numbers returned by tokenizer are 1-indexed...
-                arrows.append((row - 1, col - 1))
-            elif token == '->':  # Python 3
-                arrows.append((row - 1, col))
-
-            last_token = token
-
-    except (tokenize.TokenError, IndentationError):
-        # Source code has syntax errors, but arrows has been set
-        # correctly up until now.
+        for t in tokenize.generate_tokens(io.StringIO(exp).readline):  
+            if t[0] == tokenize.OP:  
+                l = len(exp) - len(exp.lstrip())  
+                r = len(exp) - len(exp.rstrip())  
+                return '%s(%s)%s' % (exp[:l], exp.strip(), exp[len(exp) - r:])  
+    except Exception:
         pass
-
-    segments = []
-    curr_seg = []
-    arrow_idx = 0
-
-    lines = io.StringIO(s).readlines()
-    line_idx = 0
-    col_offset = 0
-
-    while line_idx < len(lines):
-        line = lines[line_idx]
-
-        if arrow_idx < len(arrows):
-            row, col = arrows[arrow_idx]
-        else:
-            row, col = None, None
-
-        if row is None or line_idx < row:
-            curr_seg.append(line[col_offset:])
-            line_idx += 1
-            col_offset = 0
-        elif line_idx == row:
-            curr_seg.append(line[col_offset:col])
-            segments.append(''.join(curr_seg))
-            curr_seg = []
-            col_offset = col + 2
-            arrow_idx += 1
-        else:
-            assert False
-    segments.append(''.join(curr_seg))
-
-    # Phase 2: transform output gate (:xx ->) and input gate (-> :yy) parts
-    for i in range(len(segments) - 1):
-        # process output gate
-        seg = segments[i]
-        colon_pos = seg.rfind(':')
-        while colon_pos != -1:
-            ogate = seg[colon_pos + 1:]
-
-            if ogate.strip() == '':
-                break
-
-            if is_gate_expr(ogate, True):
-                segments[i] = seg[:colon_pos] + '*' + parenthesize(ogate)
-                break
-
-            colon_pos = seg.rfind(':', 0, colon_pos)
-
-        # process input gate
-        seg = segments[i + 1]
-        colon_pos = seg.find(':')
-        while colon_pos != -1:
-            igate = seg[:colon_pos]
-            if igate.strip() == '':
-                break
-
-            if is_gate_expr(igate, False):
-                segments[
-                    i + 1] = parenthesize(igate) + '*' + seg[colon_pos + 1:]
-                break
-
-            colon_pos = seg.find(':', colon_pos + 1)
-
-    return '+'.join(segments)
+    return exp
 
 
 def create_module_string(s):
